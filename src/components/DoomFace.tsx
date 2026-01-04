@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useBoost } from '../contexts/BoostContext';
+import { faces, type FaceName } from '../assets/faces';
 
 interface DoomFaceProps {
   workoutCount: number;
@@ -38,11 +39,9 @@ const getFaceImage = (
   direction: FaceDirection,
   showGrin: boolean = false
 ): string => {
-  const basePath = '/doom-assets/faces';
-
   // Grin face pro boost motivation
   if (showGrin) {
-    return `${basePath}/face_grin.png`;
+    return faces.face_grin;
   }
 
   const level = getFaceLevel(workoutCount);
@@ -50,24 +49,28 @@ const getFaceImage = (
 
   // Speciální face pro 6 workoutů (ULTRA GOD) - žluté oči
   if (level === 6 && direction === 'center') {
-    return `${basePath}/face_godmode_eyes.png`;
+    return faces.face_godmode_eyes;
   }
 
   // Ouch face
   if (direction === 'ouch') {
-    return `${basePath}/face_${config.level}_ouch.png`;
+    const faceName = `face_${config.level}_ouch` as FaceName;
+    return faces[faceName];
   }
 
   // Pohled doleva/doprava
   if (direction === 'left') {
-    return `${basePath}/face_${config.level}_left.png`;
+    const faceName = `face_${config.level}_left` as FaceName;
+    return faces[faceName];
   }
   if (direction === 'right') {
-    return `${basePath}/face_${config.level}_right.png`;
+    const faceName = `face_${config.level}_right` as FaceName;
+    return faces[faceName];
   }
 
   // Pohled dopředu (center)
-  return `${basePath}/face_${config.level}_${config.baseName}.png`;
+  const faceName = `face_${config.level}_${config.baseName}` as FaceName;
+  return faces[faceName];
 };
 
 export default function DoomFace({ workoutCount, showOuch = false }: DoomFaceProps) {
