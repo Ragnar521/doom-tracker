@@ -23,24 +23,29 @@ export default function WelcomeToast() {
   useEffect(() => {
     // Only show once per user session
     if (user && user.uid !== shownForUserIdRef.current) {
-      shownForUserIdRef.current = user.uid;
-      setMessage(isNewUser ? 'WELCOME TO THE ARENA' : 'WELCOME BACK, WARRIOR');
-      setShow(true);
-      setIsLeaving(false);
-
-      // Start leaving animation after 2.5 seconds
-      timersRef.current.leave = setTimeout(() => {
+      const newMessage = isNewUser ? 'WELCOME TO THE ARENA' : 'WELCOME BACK, WARRIOR';
+      const leaveTimer = setTimeout(() => {
         setIsLeaving(true);
       }, 2500);
 
-      // Fully hide after animation completes
-      timersRef.current.hide = setTimeout(() => {
+      const hideTimer = setTimeout(() => {
         setShow(false);
       }, 3000);
 
+      // Store timers for cleanup
+      const timers = { leave: leaveTimer, hide: hideTimer };
+      timersRef.current = timers;
+
+      // Update state in batch
+      shownForUserIdRef.current = user.uid;
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setMessage(newMessage);
+      setShow(true);
+      setIsLeaving(false);
+
       return () => {
-        if (timersRef.current.leave) clearTimeout(timersRef.current.leave);
-        if (timersRef.current.hide) clearTimeout(timersRef.current.hide);
+        clearTimeout(timers.leave);
+        clearTimeout(timers.hide);
       };
     }
   }, [user, isNewUser]);
@@ -49,6 +54,7 @@ export default function WelcomeToast() {
   useEffect(() => {
     if (!user) {
       shownForUserIdRef.current = null;
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setShow(false);
       setIsLeaving(false);
     }

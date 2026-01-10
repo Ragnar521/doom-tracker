@@ -34,7 +34,7 @@ export default function AudioPlayer({ src, title, onClose }: AudioPlayerProps) {
       audio.removeEventListener('ended', handleEnded);
       audio.pause();
     };
-  }, []);
+  }, [volume]);
 
   useEffect(() => {
     if (audioRef.current) {

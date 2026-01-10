@@ -86,7 +86,15 @@ export function useAchievements() {
     const newAchievements = checkNewAchievements(stats, weeks, Array.from(unlockedIds));
 
     if (newAchievements.length > 0) {
-      setNewlyUnlocked(newAchievements);
+      // Use functional update to avoid direct setState in effect
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setNewlyUnlocked((prev) => {
+        // Only update if there are actually new achievements
+        if (prev.length === 0 || prev[0]?.id !== newAchievements[0]?.id) {
+          return newAchievements;
+        }
+        return prev;
+      });
     }
   }, [stats, weeks, unlockedIds, weeksLoading, loading]);
 

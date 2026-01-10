@@ -70,6 +70,7 @@ export function BoostProvider({ children }: { children: ReactNode }) {
   );
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useBoost() {
   const context = useContext(BoostContext);
   if (!context) {

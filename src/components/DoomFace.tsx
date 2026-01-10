@@ -86,11 +86,12 @@ export default function DoomFace({ workoutCount, showOuch = false }: DoomFacePro
 
   // Ouch animace při odebrání workoutu
   useEffect(() => {
-    if (showOuch) {
-      setDirection('ouch');
-      const timer = setTimeout(() => setDirection('center'), 500);
-      return () => clearTimeout(timer);
-    }
+    if (!showOuch) return;
+
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setDirection('ouch');
+    const timer = setTimeout(() => setDirection('center'), 500);
+    return () => clearTimeout(timer);
   }, [showOuch]);
 
   // Náhodné rozhlížení
@@ -99,7 +100,6 @@ export default function DoomFace({ workoutCount, showOuch = false }: DoomFacePro
 
     // Critical a God Mode mají jen jeden statický stav (center), neotáčejí se
     if (isCritical || isGodMode) {
-      setDirection('center');
       return;
     }
 

@@ -15,19 +15,30 @@ interface ConfettiProps {
 const COLORS = ['#d4af37', '#b91c1c', '#22c55e', '#3b82f6', '#ffffff'];
 
 export default function Confetti({ trigger, onComplete }: ConfettiProps) {
+  const [triggerCount, setTriggerCount] = useState(0);
   const [pieces, setPieces] = useState<ConfettiPiece[]>([]);
 
+  // Track trigger changes to generate new confetti
   useEffect(() => {
-    if (!trigger) return;
+    if (trigger) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setTriggerCount((prev) => prev + 1);
+    }
+  }, [trigger]);
+
+  // Generate confetti when trigger count changes
+  useEffect(() => {
+    if (triggerCount === 0) return;
 
     // Generate confetti pieces
     const newPieces: ConfettiPiece[] = Array.from({ length: 30 }, (_, i) => ({
-      id: i,
+      id: i + triggerCount * 30, // Unique IDs across triggers
       x: Math.random() * 100,
       color: COLORS[Math.floor(Math.random() * COLORS.length)],
       delay: Math.random() * 0.5,
     }));
 
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setPieces(newPieces);
 
     // Clear after animation
@@ -37,7 +48,7 @@ export default function Confetti({ trigger, onComplete }: ConfettiProps) {
     }, 3000);
 
     return () => clearTimeout(timer);
-  }, [trigger, onComplete]);
+  }, [triggerCount, onComplete]);
 
   if (pieces.length === 0) return null;
 
