@@ -97,9 +97,14 @@ export default function DoomFace({ workoutCount, showOuch = false }: DoomFacePro
   useEffect(() => {
     if (showOuch || showGrin) return;
 
+    // Critical a Ultra God mají jen jeden statický stav (center), neotáčejí se
+    if (isCritical || isUltraGod) {
+      setDirection('center');
+      return;
+    }
+
     const getInterval = () => {
       if (isGodMode || isBoostActive) return 1500; // Rychlé, agresivní
-      if (isCritical) return 4000; // Pomalé, unavené
       return 2500; // Normální
     };
 
@@ -116,7 +121,7 @@ export default function DoomFace({ workoutCount, showOuch = false }: DoomFacePro
 
     const interval = setInterval(randomLook, getInterval());
     return () => clearInterval(interval);
-  }, [showOuch, showGrin, isGodMode, isCritical, isBoostActive]);
+  }, [showOuch, showGrin, isGodMode, isCritical, isUltraGod, isBoostActive]);
 
   // Mrkání (občasné)
   useEffect(() => {
