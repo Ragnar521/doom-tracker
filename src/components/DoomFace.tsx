@@ -24,8 +24,8 @@ const FACE_CONFIG: Record<FaceLevel, FaceConfig> = {
   2: { level: '2', baseName: 'damaged', status: 'DAMAGED', color: 'text-[#ff8800]' },
   3: { level: '3', baseName: 'healthy', status: 'HEALTHY', color: 'text-[#d4af37]' },
   4: { level: '4', baseName: 'strong', status: 'STRONG', color: 'text-[#22c55e]' },
-  5: { level: '5_6', baseName: 'godmode', status: 'GOD MODE', color: 'text-[#ffd700]' },
-  6: { level: '5_6', baseName: 'godmode', status: 'ULTRA GOD', color: 'text-[#ffd700]' },
+  5: { level: '5_6', baseName: 'godmode', status: 'BERSERK', color: 'text-[#ff6600]' },
+  6: { level: '5_6', baseName: 'godmode', status: 'GOD MODE', color: 'text-[#ffd700]' },
 };
 
 const getFaceLevel = (count: number): FaceLevel => {
@@ -47,7 +47,7 @@ const getFaceImage = (
   const level = getFaceLevel(workoutCount);
   const config = FACE_CONFIG[level];
 
-  // Speciální face pro 6 workoutů (ULTRA GOD) - žluté oči
+  // Speciální face pro 6+ workoutů (GOD MODE) - žluté oči
   if (level === 6 && direction === 'center') {
     return faces.face_godmode_eyes;
   }
@@ -80,8 +80,8 @@ export default function DoomFace({ workoutCount, showOuch = false }: DoomFacePro
 
   const level = getFaceLevel(workoutCount);
   const config = FACE_CONFIG[level];
-  const isGodMode = level >= 5;
-  const isUltraGod = level === 6;
+  const isBerserkOrGod = level >= 5;
+  const isGodMode = level === 6;
   const isCritical = level === 0;
 
   // Ouch animace při odebrání workoutu
@@ -97,14 +97,14 @@ export default function DoomFace({ workoutCount, showOuch = false }: DoomFacePro
   useEffect(() => {
     if (showOuch || showGrin) return;
 
-    // Critical a Ultra God mají jen jeden statický stav (center), neotáčejí se
-    if (isCritical || isUltraGod) {
+    // Critical a God Mode mají jen jeden statický stav (center), neotáčejí se
+    if (isCritical || isGodMode) {
       setDirection('center');
       return;
     }
 
     const getInterval = () => {
-      if (isGodMode || isBoostActive) return 1500; // Rychlé, agresivní
+      if (isBerserkOrGod || isBoostActive) return 1500; // Rychlé, agresivní
       return 2500; // Normální
     };
 
@@ -121,7 +121,7 @@ export default function DoomFace({ workoutCount, showOuch = false }: DoomFacePro
 
     const interval = setInterval(randomLook, getInterval());
     return () => clearInterval(interval);
-  }, [showOuch, showGrin, isGodMode, isCritical, isUltraGod, isBoostActive]);
+  }, [showOuch, showGrin, isBerserkOrGod, isCritical, isGodMode, isBoostActive]);
 
   // Mrkání (občasné)
   useEffect(() => {
@@ -136,7 +136,7 @@ export default function DoomFace({ workoutCount, showOuch = false }: DoomFacePro
     return () => clearInterval(interval);
   }, []);
 
-  const frameClass = `doom-frame ${isGodMode ? 'god-mode-glow' : ''} ${isUltraGod ? 'ultra-god-glow' : ''} ${isBoostActive ? 'boost-pulse' : ''} p-1`;
+  const frameClass = `doom-frame ${isBerserkOrGod ? 'god-mode-glow' : ''} ${isGodMode ? 'ultra-god-glow' : ''} ${isBoostActive ? 'boost-pulse' : ''} p-1`;
 
   return (
     <div className="flex flex-col items-center gap-3">
