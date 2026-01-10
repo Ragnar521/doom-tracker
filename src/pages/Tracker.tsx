@@ -12,7 +12,7 @@ import { getCurrentWeekId } from '../lib/weekUtils';
 export default function Tracker() {
   const [selectedWeekId, setSelectedWeekId] = useState(getCurrentWeekId());
   const { data: weekData, loading: weekLoading, toggleDay, setStatus, workoutCount } = useWeek(selectedWeekId);
-  const { stats, loading: statsLoading, updateStats, recalculateStats } = useStats();
+  const { stats, loading: statsLoading, recalculateStats } = useStats();
 
   const [showOuch, setShowOuch] = useState(false);
 
