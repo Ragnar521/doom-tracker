@@ -50,10 +50,11 @@ Rep & Tear transforms the mundane task of workout tracking into an engaging, nos
 
 ## Roadmap
 
-### Now (Current State - v1.0) ✓
+### Now (Current State - v1.1) ✓
 
 **Status:** Shipped and deployed
 
+**v1.0 Features:**
 - ✓ Core workout tracking (7-day grid)
 - ✓ Dynamic DOOM face with 7 states
 - ✓ Firebase authentication (Google + Email)
@@ -65,17 +66,28 @@ Rep & Tear transforms the mundane task of workout tracking into an engaging, nos
 - ✓ Boost motivation feature
 - ✓ Achievement notifications with confetti
 
-### Next (Q1 2026 - v1.1-1.3)
+**v1.1 Features (Added January 10, 2026):**
+- ✓ Squad system (friend feature)
+- ✓ Unique friend codes for easy sharing
+- ✓ Add/remove friends instantly (bi-directional)
+- ✓ Real-time friend workout tracking
+- ✓ Friend status visualization with face states
+- ✓ Privacy controls (friends see exact workout days)
+- ✓ 5th navigation item (Squad)
+
+### Next (Q1 2026 - v1.2-1.3)
 
 **Priority: Engagement & Retention**
 
 #### High Priority
-1. **Social Features**
-   - Friend system (add/remove friends)
+1. **Social Features** (Partially Complete ✓)
+   - ✓ Friend system (add/remove friends) - DONE v1.1
    - Weekly leaderboard (friends only)
    - Share achievements to social media
    - Weekly challenge system (compete with friends)
    - Privacy settings (public/private profile)
+   - QR code friend adding
+   - Friend activity notifications
 
 2. **Enhanced Analytics**
    - Monthly and yearly reports

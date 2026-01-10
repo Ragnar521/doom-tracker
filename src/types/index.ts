@@ -18,3 +18,23 @@ export type FaceState =
   | 'godmode';    // 5-7 workouts
 
 export type FaceDirection = 'center' | 'left' | 'right' | 'ouch';
+
+export interface FriendProfile {
+  uid: string;
+  friendCode: string;
+  displayName: string;
+  photoURL: string | null;
+  addedAt: Date;
+}
+
+export interface FriendStats {
+  currentWeekWorkouts: number;
+  currentWeekWorkoutDays: boolean[]; // [Mon, Tue, Wed, Thu, Fri, Sat, Sun]
+  currentStreak: number;
+  totalWorkouts: number;
+  faceState: FaceState;
+}
+
+export interface Friend extends FriendProfile {
+  stats: FriendStats | null;
+}

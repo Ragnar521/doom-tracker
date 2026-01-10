@@ -9,6 +9,7 @@ import Login from './pages/Login';
 import Tracker from './pages/Tracker';
 import Dashboard from './pages/Dashboard';
 import Achievements from './pages/Achievements';
+import Squad from './pages/Squad';
 import Settings from './pages/Settings';
 
 function AppLayout({ children }: { children: React.ReactNode }) {
@@ -81,6 +82,16 @@ function App() {
                 <ProtectedRoute>
                   <AppLayout>
                     <Achievements />
+                  </AppLayout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/squad"
+              element={
+                <ProtectedRoute>
+                  <AppLayout>
+                    <Squad />
                   </AppLayout>
                 </ProtectedRoute>
               }

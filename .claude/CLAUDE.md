@@ -24,7 +24,7 @@ doom-tracker/
 │   │   │   ├── index.ts      # Face exports and type definitions
 │   │   │   └── face_*.png    # Organized by state and direction
 │   │   ├── achievements/     # 18+ achievement badge icons
-│   │   └── icons/            # Navigation icons (4 pages)
+│   │   └── icons/            # Navigation icons (5 pages)
 │   ├── components/            # React components
 │   │   ├── ui/               # Reusable UI primitives
 │   │   │   ├── Button.tsx
@@ -53,7 +53,8 @@ doom-tracker/
 │   │   ├── useWeek.ts        # Single week CRUD operations
 │   │   ├── useStats.ts       # Calculated statistics
 │   │   ├── useAllWeeks.ts    # Multi-week aggregation
-│   │   └── useAchievements.ts # Achievement unlock logic
+│   │   ├── useAchievements.ts # Achievement unlock logic
+│   │   └── useFriends.ts     # Friend system operations
 │   ├── lib/                  # Utilities and configuration
 │   │   ├── firebase.ts       # Firebase initialization
 │   │   ├── achievements.ts   # Achievement definitions (18+)
@@ -63,10 +64,13 @@ doom-tracker/
 │   │   ├── Tracker.tsx       # Main workout tracking view
 │   │   ├── Dashboard.tsx     # Analytics and statistics
 │   │   ├── Achievements.tsx  # Achievement showcase
+│   │   ├── Squad.tsx         # Friend system page (v1.1+)
 │   │   ├── Settings.tsx      # Account settings
 │   │   └── Login.tsx         # Authentication page
 │   ├── types/                # TypeScript type definitions
 │   │   └── index.ts
+│   ├── utils/                # Utility functions
+│   │   └── migrateFriendSystem.ts  # Friend system migration
 │   ├── App.tsx               # Root component + routing setup
 │   ├── main.tsx              # Entry point (React render)
 │   └── index.css             # Global styles + DOOM theme (629 lines)
@@ -437,6 +441,44 @@ Triggered by "BOOST MOTIVATION" button on Tracker page
 - Red pulsing frame animation
 - Faster face animation speed
 
+### Squad System (Friend Feature)
+
+Added in v1.1 (January 10, 2026)
+
+Implemented in `src/pages/Squad.tsx` and `src/hooks/useFriends.ts`
+
+**Friend Code System:**
+- Each user gets unique code on first sign-in (format: `ABCD1234#5678`)
+- Generated from user UID + random 4-digit suffix
+- Stored in `users/{uid}/profile/info` document
+
+**Data Structure:**
+```typescript
+users/{uid}/
+  profile/info: {
+    friendCode: string,
+    displayName: string,
+    photoURL: string | null,
+    createdAt: Timestamp
+  }
+  friends/{friendUid}: {
+    addedAt: Timestamp
+  }
+```
+
+**Key Features:**
+- Instant bi-directional friend adding (no approval needed)
+- Friends can see each other's exact workout days
+- Friend list sorted by status (struggling marines first)
+- Real-time workout progress tracking
+- Remove friends functionality
+
+**Important Notes:**
+- Parent `users/{uid}` document MUST exist for friend discovery
+- New users automatically get parent document created
+- Existing users may need migration via `window.migrateFriendSystem()`
+- Firestore rules allow authenticated users to read other users' profiles
+
 ### Color Scheme
 
 Defined in `tailwind.config.js`:
@@ -475,19 +517,35 @@ VITE_FIREBASE_APP_ID=...
 
 ### Firestore Security Rules
 
+**Updated for v1.1+ (Squad System)**
+
 ```javascript
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     match /users/{userId} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
+      // Allow authenticated users to read any user (for friend discovery)
+      allow read: if request.auth != null;
+      allow write: if request.auth != null && request.auth.uid == userId;
 
       match /weeks/{weekId} {
-        allow read, write: if request.auth != null && request.auth.uid == userId;
+        // Allow friends to read workout data
+        allow read: if request.auth != null;
+        allow write: if request.auth != null && request.auth.uid == userId;
       }
 
       match /achievements/{docId} {
         allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
+
+      match /profile/{docId} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+        allow read: if request.auth != null;  // Friend discovery
+      }
+
+      match /friends/{friendId} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+        allow write: if request.auth != null && request.auth.uid == friendId;  // Bi-directional adds
       }
     }
   }
@@ -713,6 +771,12 @@ setLogLevel('debug');
 **"Change streak logic"**
 → Edit `src/hooks/useStats.ts` and `src/hooks/useAllWeeks.ts`
 
+**"Add friend feature functionality"**
+→ Edit `src/hooks/useFriends.ts` for data operations, `src/pages/Squad.tsx` for UI
+
+**"Fix friend discovery issues"**
+→ Check Firestore security rules, verify parent user documents exist, run migration utility
+
 ### Files to Avoid Editing Without Good Reason
 
 - `package-lock.json` (only via npm commands)
@@ -738,6 +802,10 @@ git status       # Review changed files
 - [DOOM Wiki](https://doomwiki.org) - For lore/asset reference
 
 ---
+
+**Version History:**
+- v1.0 (Jan 4, 2026) - Initial release with core features
+- v1.1 (Jan 10, 2026) - Added Squad system (friend feature)
 
 **Last Updated:** January 10, 2026
 **Maintainer:** Development Team

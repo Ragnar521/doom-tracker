@@ -1,0 +1,44 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // User data rules
+    match /users/{userId} {
+      // Allow authenticated users to read any user document (for friend discovery)
+      // But only allow writing to own document
+      allow read: if request.auth != null;
+      allow write: if request.auth != null && request.auth.uid == userId;
+
+      // Weeks subcollection (workout data)
+      match /weeks/{weekId} {
+        // Allow authenticated users to read workout data (for friend system)
+        // But only allow writing to own data
+        allow read: if request.auth != null;
+        allow write: if request.auth != null && request.auth.uid == userId;
+      }
+
+      // Achievements subcollection
+      match /achievements/{docId} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
+
+      // Profile subcollection (includes friend code)
+      match /profile/{docId} {
+        // Users can read/write their own profile
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+
+        // Authenticated users can read other users' profiles (for friend system)
+        allow read: if request.auth != null;
+      }
+
+      // Friends subcollection
+      match /friends/{friendId} {
+        // Users can read/write their own friends list
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+
+        // Allow users to add themselves to other users' friend lists
+        // (for bi-directional friend adds)
+        allow write: if request.auth != null && request.auth.uid == friendId;
+      }
+    }
+  }
+}

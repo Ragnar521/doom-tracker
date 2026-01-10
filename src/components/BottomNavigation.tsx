@@ -3,12 +3,14 @@ import { NavLink } from 'react-router-dom';
 import iconTracker from '../assets/icons/icon_tracker.png';
 import iconDashboard from '../assets/icons/icon_dashboard.png';
 import iconAchievements from '../assets/icons/icon_achievements.png';
+import iconSquad from '../assets/icons/icon_squad.png';
 import iconSettings from '../assets/icons/icon_settings.png';
 
 const NAV_ITEMS = [
   { path: '/', label: 'TRACK', icon: iconTracker },
   { path: '/dashboard', label: 'STATS', icon: iconDashboard },
   { path: '/achievements', label: 'GLORY', icon: iconAchievements },
+  { path: '/squad', label: 'SQUAD', icon: iconSquad },
   { path: '/settings', label: 'CONFIG', icon: iconSettings },
 ];
 

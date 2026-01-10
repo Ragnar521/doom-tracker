@@ -70,13 +70,22 @@ Rep & Tear transforms gym tracking into an immersive DOOM experience. Watch the 
   - Boost mode effects and animations
   - Audio player integration
 
+- **Squad System (Friend Feature)** 🆕
+  - Unique friend codes for easy sharing
+  - Add/remove friends instantly (bi-directional)
+  - See friends' current week workout progress
+  - View exact workout days for each friend
+  - Friend status with face state colors
+  - Sorted by status (struggling marines first)
+  - Privacy: friends can see your workout days
+
 - **Retro UI/UX**
   - Authentic DOOM aesthetics
   - CRT scanlines effect
   - Pixelated fonts and graphics
   - Retro panels and borders
   - Mobile-first responsive design
-  - Bottom navigation (Tracker/Dashboard/Achievements/Settings)
+  - Bottom navigation (Tracker/Dashboard/Achievements/Squad/Settings)
 
 ## Tech Stack
 
@@ -122,7 +131,8 @@ doom-tracker/
 │   │   ├── useWeek.ts     # Week data management
 │   │   ├── useStats.ts    # Statistics calculations
 │   │   ├── useAllWeeks.ts # Multi-week aggregation
-│   │   └── useAchievements.ts
+│   │   ├── useAchievements.ts
+│   │   └── useFriends.ts  # Friend system operations
 │   ├── lib/               # Utilities and configs
 │   │   ├── firebase.ts    # Firebase setup
 │   │   ├── achievements.ts # Achievement definitions
@@ -132,9 +142,12 @@ doom-tracker/
 │   │   ├── Tracker.tsx    # Main tracking view
 │   │   ├── Dashboard.tsx  # Analytics view
 │   │   ├── Achievements.tsx
+│   │   ├── Squad.tsx      # Friend system page
 │   │   ├── Settings.tsx
 │   │   └── Login.tsx
 │   ├── types/             # TypeScript definitions
+│   ├── utils/             # Utility functions
+│   │   └── migrateFriendSystem.ts  # Friend system migration
 │   ├── App.tsx            # Root component with routing
 │   ├── main.tsx           # Entry point
 │   └── index.css          # Global styles + DOOM theme
@@ -157,6 +170,23 @@ doom-tracker/
   workouts: boolean[];         // [Mon, Tue, Wed, Thu, Fri, Sat, Sun]
   status: 'normal' | 'sick' | 'vacation';
   updatedAt: Timestamp;
+}
+```
+
+**User Profile** (`users/{uid}/profile/info`)
+```typescript
+{
+  friendCode: string;          // Unique code (e.g., "ABCD1234#5678")
+  displayName: string;
+  photoURL: string | null;
+  createdAt: Timestamp;
+}
+```
+
+**Friends** (`users/{uid}/friends/{friendUid}`)
+```typescript
+{
+  addedAt: Timestamp;
 }
 ```
 
@@ -211,10 +241,28 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     match /users/{userId} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
+      // Allow authenticated users to read any user (for friend discovery)
+      allow read: if request.auth != null;
+      allow write: if request.auth != null && request.auth.uid == userId;
 
       match /weeks/{weekId} {
+        // Allow friends to read workout data
+        allow read: if request.auth != null;
+        allow write: if request.auth != null && request.auth.uid == userId;
+      }
+
+      match /achievements/{docId} {
         allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
+
+      match /profile/{docId} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+        allow read: if request.auth != null;  // Friend discovery
+      }
+
+      match /friends/{friendId} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+        allow write: if request.auth != null && request.auth.uid == friendId;  // Bi-directional adds
       }
     }
   }
@@ -326,6 +374,20 @@ Click the "BOOST MOTIVATION" button on Tracker page to:
 - Trigger boost mode animations
 - See the grin face
 
+### Squad (Friends)
+
+1. Go to **Squad** page
+2. Copy your friend code and share it with friends
+3. Enter a friend's code in the "Add Marine" field
+4. Click "ADD" to instantly add them to your squad
+5. View your friends' current week progress:
+   - See their face state (CRITICAL to GOD MODE)
+   - View their exact workout days
+   - Check their weekly workout count
+6. Remove friends using the "REMOVE" button on their card
+
+**Note:** New users are automatically assigned a friend code. Existing users may need to run `window.migrateFriendSystem()` in the browser console once.
+
 ### Settings
 
 Access account info and sign out in the Settings page.
@@ -368,6 +430,13 @@ Access account info and sign out in the Settings page.
 - Run `npm run build` and check for build errors
 - Verify all image imports in `src/assets/faces/index.ts`
 - Clear browser cache
+
+### Issue: "MARINE NOT FOUND" when adding friends
+**Solution:**
+- Ensure both users have signed in at least once
+- Run `window.migrateFriendSystem()` in browser console for existing users
+- Verify Firestore security rules allow reading other users' profiles
+- Check that friend code is typed correctly (case-sensitive)
 
 ## Browser Compatibility
 
@@ -425,6 +494,15 @@ Access account info and sign out in the Settings page.
 - 18 achievements across 4 categories
 - Full responsive design
 - Week navigation and status management
+
+**Squad Feature Update** (2026-01-10)
+- ✨ Added friend system with unique friend codes
+- ✨ Real-time friend workout tracking
+- ✨ Instant bi-directional friend adding
+- ✨ Friend status visualization with face states
+- 🔧 Updated Firestore security rules for friend discovery
+- 🔧 Created migration utility for existing users
+- 📱 Added Squad navigation (5th nav item)
 
 **Recent Updates**
 - `452de06` - Status improvements
