@@ -65,7 +65,7 @@ export default function Settings() {
         <div className="space-y-2 text-[10px]">
           <div className="flex justify-between">
             <span className="text-gray-500">VERSION</span>
-            <span className="text-gray-400">1.1.1</span>
+            <span className="text-gray-400">1.2.1</span>
           </div>
           <div className="flex justify-between">
             <span className="text-gray-500">THEME</span>

@@ -479,6 +479,38 @@ users/{uid}/
 - Existing users may need migration via `window.migrateFriendSystem()`
 - Firestore rules allow authenticated users to read other users' profiles
 
+### Weekly Leaderboard (v1.2+)
+
+Added in January 14, 2026
+
+Implemented in `src/components/WeeklyLeaderboard.tsx`
+
+**Features:**
+- Shows ranking of user + all friends based on current week workouts
+- Top 3 positions have special badge styling (gold, silver, bronze)
+- Current user is highlighted with red border
+- Displays workout count (X/7) and face state for each entry
+- Sorted by workout count (descending), ties broken alphabetically
+- Limited to top 10 for display, shows "+X more marines" if more exist
+- Only visible when user has at least 1 friend
+
+**Rank Badges:**
+- 1st place: Gold badge (`bg-doom-gold`)
+- 2nd place: Silver badge (`bg-gray-400`)
+- 3rd place: Bronze badge (`bg-yellow-700`)
+- 4th+: Gray badge (`bg-gray-800`)
+
+**Integration:**
+- Appears on Squad page between "Add Marine" and "Friends List"
+- Uses existing friend data (no additional Firestore queries)
+- Combines current user's workout data with friends' data
+
+**Visual Design:**
+- DOOM-themed panel with gold title
+- Compact card layout for each entry
+- Face state color coding (critical→godmode)
+- Current user gets `bg-doom-red/20` highlight
+
 ### Color Scheme
 
 Defined in `tailwind.config.js`:

@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 import BottomNavigation from './components/BottomNavigation';
 import OfflineIndicator from './components/OfflineIndicator';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -13,21 +13,28 @@ import Squad from './pages/Squad';
 import Settings from './pages/Settings';
 
 function AppLayout({ children }: { children: React.ReactNode }) {
+  const location = useLocation();
+
+  // Show header only on Tracker (/) and Settings (/settings) pages
+  const showHeader = location.pathname === '/' || location.pathname === '/settings';
+
   return (
     <>
       <div className="scanlines min-h-screen flex flex-col items-center p-4 pb-24">
         <div className="max-w-xs w-full space-y-3">
-          {/* Header */}
-          <div className="doom-panel p-3">
-            <div className="text-center">
-              <h1 className="font-doom text-3xl text-doom-red tracking-wider">
-                REP & TEAR
-              </h1>
-              <p className="text-gray-600 text-[8px] mt-0.5 tracking-widest">
-                UNTIL IT IS DONE
-              </p>
+          {/* Header - Only on Tracker and Settings */}
+          {showHeader && (
+            <div className="doom-panel p-3">
+              <div className="text-center">
+                <h1 className="font-doom text-3xl text-doom-red tracking-wider">
+                  REP & TEAR
+                </h1>
+                <p className="text-gray-600 text-[8px] mt-0.5 tracking-widest">
+                  UNTIL IT IS DONE
+                </p>
+              </div>
             </div>
-          </div>
+          )}
 
           {/* Page Content */}
           {children}

@@ -82,7 +82,7 @@ Rep & Tear transforms the mundane task of workout tracking into an engaging, nos
 #### High Priority
 1. **Social Features** (Partially Complete ✓)
    - ✓ Friend system (add/remove friends) - DONE v1.1
-   - Weekly leaderboard (friends only)
+   - ✓ Weekly leaderboard (friends only) - DONE v1.2
    - Share achievements to social media
    - Weekly challenge system (compete with friends)
    - Privacy settings (public/private profile)

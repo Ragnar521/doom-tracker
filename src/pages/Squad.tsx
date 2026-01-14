@@ -2,9 +2,21 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useFriends } from '../hooks/useFriends';
+import { useWeek } from '../hooks/useWeek';
 import LoadingSpinner from '../components/LoadingSpinner';
 import Toast from '../components/Toast';
+import WeeklyLeaderboard from '../components/WeeklyLeaderboard';
+import { getCurrentWeekId } from '../lib/weekUtils';
 import type { Friend } from '../types';
+
+function getFaceState(workoutCount: number): string {
+  if (workoutCount === 0) return 'critical';
+  if (workoutCount === 1) return 'hurt';
+  if (workoutCount === 2) return 'damaged';
+  if (workoutCount === 3) return 'healthy';
+  if (workoutCount === 4) return 'strong';
+  return 'godmode';
+}
 
 const DAY_NAMES = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
 
@@ -133,6 +145,7 @@ export default function Squad() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const { friendCode, friends, loading, addFriend, removeFriend } = useFriends();
+  const { workoutCount } = useWeek(getCurrentWeekId());
   const [addFriendCode, setAddFriendCode] = useState('');
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
   const [isAdding, setIsAdding] = useState(false);
@@ -251,6 +264,18 @@ export default function Squad() {
           </button>
         </div>
       </div>
+
+      {/* Weekly Leaderboard - Only show if user has friends */}
+      {friends.length > 0 && (
+        <WeeklyLeaderboard
+          friends={friends}
+          currentUserId={user.uid}
+          currentUserName={user.displayName || user.email?.split('@')[0] || 'Marine'}
+          currentUserPhoto={user.photoURL}
+          currentUserWorkoutCount={workoutCount}
+          currentUserFaceState={getFaceState(workoutCount)}
+        />
+      )}
 
       {/* Friends List */}
       <div className="doom-panel p-3">
