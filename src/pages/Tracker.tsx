@@ -19,10 +19,11 @@ export default function Tracker() {
   // Recalculate stats on mount to ensure streak is up to date
   useEffect(() => {
     if (!statsLoading) {
+      // Always recalculate to ensure fresh data
       recalculateStats();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [statsLoading]);
 
   const handleToggleDay = async (dayIndex: number) => {
     const wasCompleted = weekData.workouts[dayIndex];
