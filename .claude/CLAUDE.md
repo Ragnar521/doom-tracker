@@ -546,10 +546,42 @@ users/{uid}/profile/info: {
 
 **UI Flow:**
 1. Settings page shows "EDIT" button next to "ACCOUNT" header
-2. Clicking "EDIT" expands inline editing form
+2. Clicking "EDIT" expands inline editing form (auto-opens input field)
 3. User can change display name
 4. "CANCEL" button collapses form back to view mode
 5. Successful save auto-collapses and shows toast notification
+
+### "How It Works" Section (v1.3+)
+
+Added in January 15, 2026
+
+Implemented in `src/pages/Settings.tsx` within the ABOUT panel
+
+**Features:**
+- Expandable section with detailed app explanation
+- Toggle button: "► HOW IT WORKS" / "▼ HIDE HOW IT WORKS"
+- Comprehensive guide covering:
+  - 🎯 Weekly Goals - Target requirements (3+ workouts)
+  - 💪 DoomGuy States - All face states from Critical to God Mode
+  - 🔥 Streaks - How streak counting works (current week logic)
+  - 🏆 Achievements - Badge system overview
+  - 👥 Squad - Friend features explained
+  - 💾 Data Sync - Cloud vs local storage info
+- DOOM-themed styling with gold headers
+- Collapsible to save space when not needed
+
+**UI Location:**
+- Settings page → ABOUT panel → "HOW IT WORKS" button
+- Expands in-place within the ABOUT panel
+- Stays expanded until user clicks to hide
+
+**Content Structure:**
+Each section has:
+- Gold colored emoji + header (e.g., "🎯 WEEKLY GOALS")
+- Clear explanation in gray text
+- Color-coded keywords (doom-green, doom-gold, doom-red)
+- Bulleted lists for DoomGuy states
+- Ending motto: "RIP & TEAR, UNTIL IT IS DONE! 💀"
 
 ### Color Scheme
 

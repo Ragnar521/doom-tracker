@@ -85,6 +85,9 @@ Rep & Tear transforms the mundane task of workout tracking into an engaging, nos
 - ✓ Display name editing (max 30 characters)
 - ✓ Inline editing interface (no modal)
 - ✓ Profile changes sync to Squad system
+- ✓ "How It Works" expandable guide (Settings ABOUT panel)
+- ✓ Comprehensive app explanation with 6 sections
+- ✓ Updated streak calculation logic (current week only counts when completed)
 - ⚠ Avatar upload NOT included (requires Firebase Storage paid plan)
 
 ### Next (Q1 2026 - v1.2-1.3)

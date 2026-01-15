@@ -400,7 +400,22 @@ Click the "BOOST MOTIVATION" button on Tracker page to:
 
 ### Settings
 
-Access account info and sign out in the Settings page.
+1. Go to **Settings** page
+2. **Account Section:**
+   - Edit display name by clicking "EDIT"
+   - View your email address
+   - Sign out when needed
+3. **About Section:**
+   - Click "HOW IT WORKS" to expand a detailed guide explaining:
+     - Weekly goals and workout targets
+     - DoomGuy face states and what they mean
+     - How streak calculations work
+     - Achievement system overview
+     - Squad features explained
+     - Data sync information
+   - View app version and credits
+4. **Data Section:**
+   - See your current data storage method (cloud or local)
 
 ## Troubleshooting
 
