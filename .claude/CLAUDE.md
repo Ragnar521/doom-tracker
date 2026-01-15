@@ -29,6 +29,7 @@ doom-tracker/
 │   │   ├── ui/               # Reusable UI primitives
 │   │   │   ├── Button.tsx
 │   │   │   ├── Input.tsx
+│   │   │   ├── Modal.tsx
 │   │   │   └── FormError.tsx
 │   │   ├── DoomFace.tsx      # Main character face component (complex)
 │   │   ├── WeekTracker.tsx   # 7-day workout grid
@@ -44,6 +45,7 @@ doom-tracker/
 │   │   ├── OfflineIndicator.tsx
 │   │   ├── ProtectedRoute.tsx
 │   │   ├── AuthButton.tsx
+│   │   ├── ProfileEditor.tsx # Profile editing component (v1.3+)
 │   │   └── WelcomeToast.tsx
 │   ├── contexts/             # React Context providers (global state)
 │   │   ├── AuthContext.tsx   # Firebase auth + user state
@@ -54,7 +56,8 @@ doom-tracker/
 │   │   ├── useStats.ts       # Calculated statistics
 │   │   ├── useAllWeeks.ts    # Multi-week aggregation
 │   │   ├── useAchievements.ts # Achievement unlock logic
-│   │   └── useFriends.ts     # Friend system operations
+│   │   ├── useFriends.ts     # Friend system operations
+│   │   └── useProfile.ts     # Profile management (v1.3+)
 │   ├── lib/                  # Utilities and configuration
 │   │   ├── firebase.ts       # Firebase initialization
 │   │   ├── achievements.ts   # Achievement definitions (18+)
@@ -511,6 +514,43 @@ Implemented in `src/components/WeeklyLeaderboard.tsx`
 - Face state color coding (critical→godmode)
 - Current user gets `bg-doom-red/20` highlight
 
+### Profile Editing System (v1.3+)
+
+Added in January 15, 2026
+
+Implemented in `src/pages/Settings.tsx`, `src/components/ProfileEditor.tsx`, and `src/hooks/useProfile.ts`
+
+**Features:**
+- Users can edit their display name (max 30 characters)
+- Display name updates in Firebase Auth and Firestore profile
+- Changes propagate to Squad system (friends see updated name)
+- Inline editing on Settings page (no modal popup)
+- Toast notifications for success/error states
+
+**Important Notes:**
+- **NO AVATAR UPLOAD** - Firebase Storage requires paid plan (Blaze)
+- Avatar displays as first letter of display name or email
+- OAuth users (Google) get photoURL from their Google account automatically
+- Custom avatars not supported to avoid Firebase Storage costs
+
+**Data Structure:**
+```typescript
+users/{uid}/profile/info: {
+  friendCode: string,
+  displayName: string,
+  photoURL: string | null,  // Only from OAuth, not uploadable
+  createdAt: Timestamp,
+  updatedAt: Timestamp
+}
+```
+
+**UI Flow:**
+1. Settings page shows "EDIT" button next to "ACCOUNT" header
+2. Clicking "EDIT" expands inline editing form
+3. User can change display name
+4. "CANCEL" button collapses form back to view mode
+5. Successful save auto-collapses and shows toast notification
+
 ### Color Scheme
 
 Defined in `tailwind.config.js`:
@@ -838,8 +878,10 @@ git status       # Review changed files
 **Version History:**
 - v1.0 (Jan 4, 2026) - Initial release with core features
 - v1.1 (Jan 10, 2026) - Added Squad system (friend feature)
+- v1.2 (Jan 14, 2026) - Added Weekly Leaderboard
+- v1.2.2 (Jan 15, 2026) - Added profile editing (display name only, no avatar upload due to Firebase Storage costs)
 
-**Last Updated:** January 10, 2026
+**Last Updated:** January 15, 2026
 **Maintainer:** Development Team
 **Claude Version:** Optimized for Claude Sonnet 4.5+
 

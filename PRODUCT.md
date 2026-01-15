@@ -50,7 +50,7 @@ Rep & Tear transforms the mundane task of workout tracking into an engaging, nos
 
 ## Roadmap
 
-### Now (Current State - v1.1) ✓
+### Now (Current State - v1.2.2) ✓
 
 **Status:** Shipped and deployed
 
@@ -75,6 +75,18 @@ Rep & Tear transforms the mundane task of workout tracking into an engaging, nos
 - ✓ Privacy controls (friends see exact workout days)
 - ✓ 5th navigation item (Squad)
 
+**v1.2 Features (Added January 14, 2026):**
+- ✓ Weekly leaderboard (friends + current user)
+- ✓ Top 3 podium visualization (gold/silver/bronze)
+- ✓ Leaderboard on Squad page
+
+**v1.2.2 Features (Added January 15, 2026):**
+- ✓ Profile editing system (Settings page)
+- ✓ Display name editing (max 30 characters)
+- ✓ Inline editing interface (no modal)
+- ✓ Profile changes sync to Squad system
+- ⚠ Avatar upload NOT included (requires Firebase Storage paid plan)
+
 ### Next (Q1 2026 - v1.2-1.3)
 
 **Priority: Engagement & Retention**
@@ -83,11 +95,13 @@ Rep & Tear transforms the mundane task of workout tracking into an engaging, nos
 1. **Social Features** (Partially Complete ✓)
    - ✓ Friend system (add/remove friends) - DONE v1.1
    - ✓ Weekly leaderboard (friends only) - DONE v1.2
+   - ✓ Profile editing (display name) - DONE v1.2.2
    - Share achievements to social media
    - Weekly challenge system (compete with friends)
    - Privacy settings (public/private profile)
    - QR code friend adding
    - Friend activity notifications
+   - Custom avatar upload (BLOCKED: requires Firebase Storage paid plan)
 
 2. **Enhanced Analytics**
    - Monthly and yearly reports

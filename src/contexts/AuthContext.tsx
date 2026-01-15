@@ -19,6 +19,7 @@ interface AuthContextType {
   signUpWithEmail: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
   clearError: () => void;
+  refreshUser: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -126,6 +127,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
+  const refreshUser = useCallback(() => {
+    // Force re-render by updating user object
+    if (auth.currentUser) {
+      setUser({ ...auth.currentUser });
+    }
+  }, []);
+
   return (
     <AuthContext.Provider
       value={{
@@ -138,6 +146,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         signUpWithEmail,
         signOut,
         clearError,
+        refreshUser,
       }}
     >
       {children}

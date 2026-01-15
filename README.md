@@ -78,6 +78,16 @@ Rep & Tear transforms gym tracking into an immersive DOOM experience. Watch the 
   - Friend status with face state colors
   - Sorted by status (struggling marines first)
   - Privacy: friends can see your workout days
+  - Weekly leaderboard (current week rankings)
+  - Top 3 podium visualization (gold/silver/bronze)
+
+- **Profile Management** 🆕
+  - Edit display name (max 30 characters)
+  - Inline editing on Settings page
+  - Changes sync to Squad system automatically
+  - Avatar displays as first letter of name/email
+  - OAuth users get avatar from Google account
+  - Note: Custom avatar upload not available (requires paid Firebase plan)
 
 - **Retro UI/UX**
   - Authentic DOOM aesthetics
