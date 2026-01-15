@@ -413,7 +413,12 @@ Click the "BOOST MOTIVATION" button on Tracker page to:
      - Achievement system overview
      - Squad features explained
      - Data sync information
-   - View app version and credits
+   - Click "CREDITS & LEGAL" to view:
+     - Legal disclaimer and fair use information
+     - DOOM asset credits (© id Software/Bethesda)
+     - Developer credits
+     - Open-source and educational purpose statement
+   - View app version and creator info
 4. **Data Section:**
    - See your current data storage method (cloud or local)
 
@@ -547,12 +552,21 @@ This project uses DOOM-inspired assets and themes. The original DOOM assets are 
 
 Code is provided as-is for portfolio and learning purposes.
 
-## Credits
+## Credits & Legal
 
-- **DOOM** franchise by id Software
+**Legal Disclaimer:**
+This is an unofficial fan project and is not affiliated with, endorsed by, or associated with id Software or Bethesda.
+
+**Graphics & Sound:**
+DOOM © 1993 id Software LLC, a ZeniMax Media company. All DOOM assets used under fair use for non-commercial purposes.
+
+**Development:**
+- Created by Ragnar521 as a tribute to the classic game
 - Achievement icons generated with AI assistance
 - Font: Press Start 2P (Google Fonts)
 - Font: AmazDooM (DOOM font)
+
+This application is free and open-source, created purely for educational and entertainment purposes.
 
 ## Support
 

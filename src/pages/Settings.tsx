@@ -10,6 +10,7 @@ export default function Settings() {
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [showHowItWorks, setShowHowItWorks] = useState(false);
+  const [showCredits, setShowCredits] = useState(false);
 
   const handleSignIn = () => {
     navigate('/login');
@@ -129,6 +130,14 @@ export default function Settings() {
             {showHowItWorks ? '▼ HIDE HOW IT WORKS' : '► HOW IT WORKS'}
           </button>
 
+          {/* Credits & Legal toggle */}
+          <button
+            onClick={() => setShowCredits(!showCredits)}
+            className="w-full mt-2 p-2 text-doom-gold hover:text-doom-gold/80 border border-doom-gold/30 hover:border-doom-gold/50 transition-colors text-[10px] tracking-widest"
+          >
+            {showCredits ? '▼ HIDE CREDITS & LEGAL' : '► CREDITS & LEGAL'}
+          </button>
+
           {/* Expandable How it works section */}
           {showHowItWorks && (
             <div className="mt-3 pt-3 border-t border-gray-800 space-y-3 text-[9px] text-gray-400 leading-relaxed">
@@ -195,6 +204,37 @@ export default function Settings() {
               <div className="pt-2 border-t border-gray-800">
                 <p className="text-doom-red text-center text-[10px] tracking-widest">
                   RIP & TEAR, UNTIL IT IS DONE!
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* Expandable Credits & Legal section */}
+          {showCredits && (
+            <div className="mt-3 pt-3 border-t border-gray-800 space-y-3 text-[9px] text-gray-400 leading-relaxed">
+              <div>
+                <p className="text-gray-400 text-[9px] mb-2">
+                  This is an unofficial fan project and is not affiliated with, endorsed by, or associated with id Software or Bethesda.
+                </p>
+              </div>
+
+              <div>
+                <h4 className="text-doom-gold text-[10px] mb-1 tracking-widest">GRAPHICS & SOUND</h4>
+                <p>
+                  DOOM © 1993 id Software LLC, a ZeniMax Media company. All DOOM assets used under fair use for non-commercial purposes.
+                </p>
+              </div>
+
+              <div>
+                <h4 className="text-doom-gold text-[10px] mb-1 tracking-widest">DEVELOPMENT</h4>
+                <p>
+                  Created by <span className="text-doom-gold">Ragnar521</span> as a tribute to the classic game.
+                </p>
+              </div>
+
+              <div className="pt-2 border-t border-gray-800">
+                <p className="text-gray-400 text-[9px]">
+                  This application is free and open-source, created purely for educational and entertainment purposes.
                 </p>
               </div>
             </div>

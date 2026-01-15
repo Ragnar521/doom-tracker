@@ -87,6 +87,8 @@ Rep & Tear transforms the mundane task of workout tracking into an engaging, nos
 - ✓ Profile changes sync to Squad system
 - ✓ "How It Works" expandable guide (Settings ABOUT panel)
 - ✓ Comprehensive app explanation with 6 sections
+- ✓ "Credits & Legal" expandable section (Settings ABOUT panel)
+- ✓ Legal disclaimer and fair use compliance information
 - ✓ Updated streak calculation logic (current week only counts when completed)
 - ⚠ Avatar upload NOT included (requires Firebase Storage paid plan)
 

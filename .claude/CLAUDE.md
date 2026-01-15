@@ -577,11 +577,42 @@ Implemented in `src/pages/Settings.tsx` within the ABOUT panel
 
 **Content Structure:**
 Each section has:
-- Gold colored emoji + header (e.g., "🎯 WEEKLY GOALS")
+- Gold colored header (e.g., "WEEKLY GOALS")
 - Clear explanation in gray text
 - Color-coded keywords (doom-green, doom-gold, doom-red)
 - Bulleted lists for DoomGuy states
-- Ending motto: "RIP & TEAR, UNTIL IT IS DONE! 💀"
+- Ending motto: "RIP & TEAR, UNTIL IT IS DONE!"
+
+### "Credits & Legal" Section (v1.3+)
+
+Added in January 15, 2026
+
+Implemented in `src/pages/Settings.tsx` within the ABOUT panel
+
+**Features:**
+- Expandable section with legal disclaimer and credits
+- Toggle button: "► CREDITS & LEGAL" / "▼ HIDE CREDITS & LEGAL"
+- Gray styling (less prominent than "How It Works")
+- Comprehensive information covering:
+  - Legal disclaimer (unofficial fan project)
+  - Graphics & Sound credits (© id Software/Bethesda)
+  - Development credits (created by Ragnar521)
+  - Open-source and educational purpose statement
+- Fair use compliance statement
+
+**UI Location:**
+- Settings page → ABOUT panel → "CREDITS & LEGAL" button
+- Located below "HOW IT WORKS" button
+- Expands in-place within the ABOUT panel
+- Stays expanded until user clicks to hide
+
+**Content Structure:**
+- Centered disclaimer text (small gray font)
+- Three sections with headers:
+  1. "GRAPHICS & SOUND" - Copyright notice
+  2. "DEVELOPMENT" - Creator credit (Ragnar521 in gold)
+  3. Educational purpose statement
+- Professional tone, legal compliance focused
 
 ### Color Scheme
 
