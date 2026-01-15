@@ -133,12 +133,18 @@ export function useAllWeeks() {
     });
 
     // Streaks
+    // Current week only counts if it has >= 3 workouts
+    const currentWeekId = getCurrentWeekId();
+    const currentWeekData = weekMap.get(currentWeekId);
+    const currentWeekComplete = currentWeekData && currentWeekData.workoutCount >= 3 && currentWeekData.status === 'normal';
+
     let currentStreak = 0;
     let longestStreak = 0;
     let tempStreak = 0;
     let isCurrentStreak = true;
 
-    let checkWeekId = getCurrentWeekId();
+    // Start checking from previous week
+    let checkWeekId = getPreviousWeekId(currentWeekId);
     const maxIterations = 200; // Prevent infinite loop
     let iterations = 0;
 
@@ -146,13 +152,6 @@ export function useAllWeeks() {
       const weekData = weekMap.get(checkWeekId);
 
       if (!weekData) {
-        // No data for this week - check if we should break
-        if (isCurrentStreak && tempStreak === 0) {
-          // Current week has no data yet, continue checking
-          checkWeekId = getPreviousWeekId(checkWeekId);
-          iterations++;
-          continue;
-        }
         break;
       }
 
@@ -182,6 +181,11 @@ export function useAllWeeks() {
 
     if (tempStreak > longestStreak) {
       longestStreak = tempStreak;
+    }
+
+    // Add current week to streak if it's complete
+    if (currentWeekComplete) {
+      currentStreak++;
     }
 
     // Recent weeks (last 12)

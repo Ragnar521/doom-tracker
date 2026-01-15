@@ -88,7 +88,14 @@ export function useStats() {
 
         // Calculate streak (consecutive weeks with >= 3 workouts)
         // SICK/VACATION weeks don't break the streak, they just don't count
-        let checkWeekId = getCurrentWeekId();
+        // Current week only counts if it has >= 3 workouts
+        const currentWeekId = getCurrentWeekId();
+        const currentWeekData = weeks.get(currentWeekId);
+        const currentWeekWorkouts = currentWeekData?.workouts.filter(Boolean).length || 0;
+        const currentWeekComplete = currentWeekWorkouts >= 3 && currentWeekData?.status === 'normal';
+
+        // Start checking from previous week
+        let checkWeekId = getPreviousWeekId(currentWeekId);
         let isCurrentStreak = true;
 
         while (true) {
@@ -116,6 +123,11 @@ export function useStats() {
           }
 
           checkWeekId = getPreviousWeekId(checkWeekId);
+        }
+
+        // Add current week to streak if it's complete
+        if (currentWeekComplete) {
+          currentStreak++;
         }
 
         // Final check for longest streak
