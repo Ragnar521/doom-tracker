@@ -5,11 +5,21 @@ import Input from '../components/ui/Input';
 import Button from '../components/ui/Button';
 import FormError from '../components/ui/FormError';
 import LoadingSpinner from '../components/LoadingSpinner';
+import Modal from '../components/ui/Modal';
 
 type AuthMode = 'login' | 'register';
 
 export default function Login() {
-  const { user, loading, error, signInWithGoogle, signInWithEmail, signUpWithEmail, clearError } = useAuth();
+  const {
+    user,
+    loading,
+    error,
+    signInWithGoogle,
+    signInWithEmail,
+    signUpWithEmail,
+    sendPasswordReset,
+    clearError,
+  } = useAuth();
 
   const [mode, setMode] = useState<AuthMode>('login');
   const [email, setEmail] = useState('');
@@ -17,6 +27,11 @@ export default function Login() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [formError, setFormError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isResetOpen, setIsResetOpen] = useState(false);
+  const [resetEmail, setResetEmail] = useState('');
+  const [resetError, setResetError] = useState<string | null>(null);
+  const [resetSuccess, setResetSuccess] = useState<string | null>(null);
+  const [isResetSubmitting, setIsResetSubmitting] = useState(false);
 
   // Redirect if already logged in
   if (user && !loading) {
@@ -99,6 +114,60 @@ export default function Login() {
     }
   };
 
+  const getResetErrorMessage = (code?: string): string => {
+    switch (code) {
+      case 'auth/invalid-email':
+        return 'INVALID EMAIL FORMAT';
+      case 'auth/user-not-found':
+        return 'NO WARRIOR FOUND WITH THAT EMAIL';
+      case 'auth/too-many-requests':
+        return 'TOO MANY ATTEMPTS. TRY LATER';
+      default:
+        return 'RESET FAILED. TRY AGAIN';
+    }
+  };
+
+  const openResetModal = () => {
+    setResetEmail(email);
+    setResetError(null);
+    setResetSuccess(null);
+    setIsResetOpen(true);
+  };
+
+  const closeResetModal = () => {
+    setIsResetOpen(false);
+    setResetError(null);
+    setResetSuccess(null);
+    setIsResetSubmitting(false);
+  };
+
+  const handleResetSubmit = async (e: FormEvent) => {
+    e.preventDefault();
+    setResetError(null);
+    setResetSuccess(null);
+
+    if (!resetEmail.trim()) {
+      setResetError('EMAIL IS REQUIRED');
+      return;
+    }
+
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(resetEmail)) {
+      setResetError('INVALID EMAIL FORMAT');
+      return;
+    }
+
+    setIsResetSubmitting(true);
+    try {
+      await sendPasswordReset(resetEmail.trim());
+      setResetSuccess('RESET ORDERS SENT. CHECK YOUR INBOX FOR THE RITUAL.');
+    } catch (err: unknown) {
+      const firebaseError = err as { code?: string };
+      setResetError(getResetErrorMessage(firebaseError.code));
+    } finally {
+      setIsResetSubmitting(false);
+    }
+  };
+
   const switchMode = () => {
     setMode(mode === 'login' ? 'register' : 'login');
     setFormError(null);
@@ -176,6 +245,18 @@ export default function Login() {
             autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
           />
 
+          {mode === 'login' && (
+            <div className="text-right">
+              <button
+                type="button"
+                onClick={openResetModal}
+                className="text-gray-500 text-[8px] tracking-wider hover:text-doom-gold transition-colors"
+              >
+                FORGOT PASSWORD?
+              </button>
+            </div>
+          )}
+
           {mode === 'register' && (
             <Input
               type="password"
@@ -239,6 +320,45 @@ export default function Login() {
               : 'ALREADY HAVE AN ACCOUNT? SIGN IN'}
           </button>
         </div>
+
+        <Modal
+          isOpen={isResetOpen}
+          onClose={closeResetModal}
+          title="RESET THE PASSWORD"
+        >
+          <form onSubmit={handleResetSubmit} className="space-y-4">
+            {resetError && (
+              <div className="doom-panel p-3 border-2 border-doom-red bg-gradient-to-b from-[#3a1a1a] to-[#2a0a0a]">
+                <div className="flex items-center gap-2">
+                  <span className="text-doom-red text-lg">⚠</span>
+                  <p className="text-doom-red text-[9px] tracking-wider font-bold">{resetError}</p>
+                </div>
+              </div>
+            )}
+
+            {resetSuccess && (
+              <div className="doom-panel p-3 border-2 border-doom-gold bg-gradient-to-b from-[#2f2a12] to-[#1f1a08]">
+                <div className="flex items-center gap-2">
+                  <span className="text-doom-gold text-lg">✦</span>
+                  <p className="text-doom-gold text-[9px] tracking-wider font-bold">{resetSuccess}</p>
+                </div>
+              </div>
+            )}
+
+            <Input
+              type="email"
+              label="EMAIL"
+              placeholder="warrior@doom.com"
+              value={resetEmail}
+              onChange={(e) => setResetEmail(e.target.value)}
+              autoComplete="email"
+            />
+
+            <Button type="submit" variant="primary" isLoading={isResetSubmitting}>
+              SEND RESET EMAIL
+            </Button>
+          </form>
+        </Modal>
 
         {/* Created By */}
         <div className="text-center pt-4">
