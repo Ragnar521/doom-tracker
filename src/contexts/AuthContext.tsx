@@ -120,15 +120,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const sendPasswordReset = useCallback(async (email: string) => {
     try {
-      setError(null);
-      setLoading(true);
       await sendPasswordResetEmail(auth, email);
     } catch (err: unknown) {
-      const firebaseError = err as { code?: string };
-      setError(getFirebaseErrorMessage(firebaseError.code || ''));
       throw err;
-    } finally {
-      setLoading(false);
     }
   }, []);
 

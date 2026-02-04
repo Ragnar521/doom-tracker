@@ -114,19 +114,6 @@ export default function Login() {
     }
   };
 
-  const getResetErrorMessage = (code?: string): string => {
-    switch (code) {
-      case 'auth/invalid-email':
-        return 'INVALID EMAIL FORMAT';
-      case 'auth/user-not-found':
-        return 'NO WARRIOR FOUND WITH THAT EMAIL';
-      case 'auth/too-many-requests':
-        return 'TOO MANY ATTEMPTS. TRY LATER';
-      default:
-        return 'RESET FAILED. TRY AGAIN';
-    }
-  };
-
   const openResetModal = () => {
     setResetEmail(email);
     setResetError(null);
@@ -162,7 +149,20 @@ export default function Login() {
       setResetSuccess('RESET ORDERS SENT. CHECK YOUR INBOX FOR THE RITUAL.');
     } catch (err: unknown) {
       const firebaseError = err as { code?: string };
-      setResetError(getResetErrorMessage(firebaseError.code));
+      if (firebaseError.code === 'auth/user-not-found') {
+        setResetSuccess('RESET ORDERS SENT. CHECK YOUR INBOX FOR THE RITUAL.');
+        setResetError(null);
+        return;
+      }
+      if (firebaseError.code === 'auth/invalid-email') {
+        setResetError('INVALID EMAIL FORMAT');
+        return;
+      }
+      if (firebaseError.code === 'auth/too-many-requests') {
+        setResetError('TOO MANY ATTEMPTS. TRY LATER');
+        return;
+      }
+      setResetError('RESET FAILED. TRY AGAIN');
     } finally {
       setIsResetSubmitting(false);
     }
@@ -327,14 +327,7 @@ export default function Login() {
           title="RESET THE PASSWORD"
         >
           <form onSubmit={handleResetSubmit} className="space-y-4">
-            {resetError && (
-              <div className="doom-panel p-3 border-2 border-doom-red bg-gradient-to-b from-[#3a1a1a] to-[#2a0a0a]">
-                <div className="flex items-center gap-2">
-                  <span className="text-doom-red text-lg">⚠</span>
-                  <p className="text-doom-red text-[9px] tracking-wider font-bold">{resetError}</p>
-                </div>
-              </div>
-            )}
+            <FormError message={resetError} />
 
             {resetSuccess && (
               <div className="doom-panel p-3 border-2 border-doom-gold bg-gradient-to-b from-[#2f2a12] to-[#1f1a08]">
