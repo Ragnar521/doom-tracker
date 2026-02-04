@@ -4,6 +4,12 @@
 
 Rep & Tear transforms the mundane task of workout tracking into an engaging, nostalgic gaming experience. By leveraging the iconic DOOM aesthetic and gamification mechanics, we help users build lasting fitness habits through visual feedback, achievement systems, and competitive streak tracking. Our vision is to become the go-to fitness tracker for gamers and retro enthusiasts who want their gym progress to feel as epic as their favorite video games.
 
+## Recent Updates (Local)
+
+**February 3, 2026**
+- Added a “Forgot Password” flow on the login screen with a modal and doom-themed success banner so users can recover access without leaving the app.
+- Implemented Firebase password reset support in the auth context to back the new UI.
+
 ## User Personas
 
 ### Primary Personas
