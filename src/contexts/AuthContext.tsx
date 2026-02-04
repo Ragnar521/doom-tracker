@@ -119,11 +119,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const sendPasswordReset = useCallback(async (email: string) => {
-    try {
-      await sendPasswordResetEmail(auth, email);
-    } catch (err: unknown) {
-      throw err;
-    }
+    await sendPasswordResetEmail(auth, email);
   }, []);
 
   const signOut = useCallback(async () => {

@@ -30,8 +30,9 @@ export default function Login() {
   const [isResetOpen, setIsResetOpen] = useState(false);
   const [resetEmail, setResetEmail] = useState('');
   const [resetError, setResetError] = useState<string | null>(null);
-  const [resetSuccess, setResetSuccess] = useState<string | null>(null);
+  const [isResetSuccess, setIsResetSuccess] = useState(false);
   const [isResetSubmitting, setIsResetSubmitting] = useState(false);
+  const resetSuccessMessage = 'RESET ORDERS SENT. CHECK YOUR INBOX FOR THE RITUAL.';
 
   // Redirect if already logged in
   if (user && !loading) {
@@ -43,17 +44,25 @@ export default function Login() {
     return <LoadingSpinner size="lg" text="CHECKING CREDENTIALS..." />;
   }
 
+  const validateEmail = (value: string): string | null => {
+    if (!value.trim()) {
+      return 'EMAIL IS REQUIRED';
+    }
+
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+      return 'INVALID EMAIL FORMAT';
+    }
+
+    return null;
+  };
+
   const validateForm = (): boolean => {
     setFormError(null);
     clearError();
 
-    if (!email.trim()) {
-      setFormError('EMAIL IS REQUIRED');
-      return false;
-    }
-
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      setFormError('INVALID EMAIL FORMAT');
+    const emailError = validateEmail(email);
+    if (emailError) {
+      setFormError(emailError);
       return false;
     }
 
@@ -117,41 +126,36 @@ export default function Login() {
   const openResetModal = () => {
     setResetEmail(email);
     setResetError(null);
-    setResetSuccess(null);
+    setIsResetSuccess(false);
     setIsResetOpen(true);
   };
 
   const closeResetModal = () => {
     setIsResetOpen(false);
     setResetError(null);
-    setResetSuccess(null);
+    setIsResetSuccess(false);
     setIsResetSubmitting(false);
   };
 
   const handleResetSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setResetError(null);
-    setResetSuccess(null);
+    setIsResetSuccess(false);
 
-    if (!resetEmail.trim()) {
-      setResetError('EMAIL IS REQUIRED');
-      return;
-    }
-
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(resetEmail)) {
-      setResetError('INVALID EMAIL FORMAT');
+    const emailError = validateEmail(resetEmail);
+    if (emailError) {
+      setResetError(emailError);
       return;
     }
 
     setIsResetSubmitting(true);
     try {
       await sendPasswordReset(resetEmail.trim());
-      setResetSuccess('RESET ORDERS SENT. CHECK YOUR INBOX FOR THE RITUAL.');
+      setIsResetSuccess(true);
     } catch (err: unknown) {
       const firebaseError = err as { code?: string };
       if (firebaseError.code === 'auth/user-not-found') {
-        setResetSuccess('RESET ORDERS SENT. CHECK YOUR INBOX FOR THE RITUAL.');
-        setResetError(null);
+        setIsResetSuccess(true);
         return;
       }
       if (firebaseError.code === 'auth/invalid-email') {
@@ -329,11 +333,11 @@ export default function Login() {
           <form onSubmit={handleResetSubmit} className="space-y-4">
             <FormError message={resetError} />
 
-            {resetSuccess && (
+            {isResetSuccess && (
               <div className="doom-panel p-3 border-2 border-doom-gold bg-gradient-to-b from-[#2f2a12] to-[#1f1a08]">
                 <div className="flex items-center gap-2">
                   <span className="text-doom-gold text-lg">✦</span>
-                  <p className="text-doom-gold text-[9px] tracking-wider font-bold">{resetSuccess}</p>
+                  <p className="text-doom-gold text-[9px] tracking-wider font-bold">{resetSuccessMessage}</p>
                 </div>
               </div>
             )}
@@ -345,9 +349,15 @@ export default function Login() {
               value={resetEmail}
               onChange={(e) => setResetEmail(e.target.value)}
               autoComplete="email"
+              disabled={isResetSuccess}
             />
 
-            <Button type="submit" variant="primary" isLoading={isResetSubmitting}>
+            <Button
+              type="submit"
+              variant="primary"
+              isLoading={isResetSubmitting}
+              disabled={isResetSuccess}
+            >
               SEND RESET EMAIL
             </Button>
           </form>
