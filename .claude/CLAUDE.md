@@ -420,12 +420,14 @@ Defined in `src/hooks/useStats.ts` and `src/hooks/useAllWeeks.ts`
 Implemented in `src/components/DoomFace.tsx`
 
 **Behaviors:**
-- **Random Looking:** Every 1.5-2.5s, face looks left/right/center
+- **Random Looking:** Every 900-1100ms (random variation for organic feel), face looks left/right/center
+  - Applies to: Hurt Bad (1), Damaged (2), Healthy (3), Strong (4), Berserk (5)
+  - Direction probabilities: 50% center, 25% left, 25% right
 - **Ouch Face:** Shows when workout is removed (500ms)
 - **Grin Face:** Shows during boost mode
-- **Blinking:** Random blinks every ~5s (100ms)
-- **God Mode:** Special golden glow effect, no left/right movement
-- **Critical:** No animations, static face
+- **God Mode:** Special golden glow effect + yellow eyes, no left/right movement (static)
+- **Critical:** No animations, static face (only 1 sprite available)
+- **Blinking:** Removed in v1.4 (caused unwanted face disappearing)
 
 ### Offline Behavior
 
@@ -943,8 +945,9 @@ git status       # Review changed files
 - v1.1 (Jan 10, 2026) - Added Squad system (friend feature)
 - v1.2 (Jan 14, 2026) - Added Weekly Leaderboard
 - v1.2.2 (Jan 15, 2026) - Added profile editing (display name only, no avatar upload due to Firebase Storage costs)
+- v1.4 (Feb 15, 2026) - Improved face animation system (faster, more organic timing, removed buggy blinking)
 
-**Last Updated:** January 15, 2026
+**Last Updated:** February 15, 2026
 **Maintainer:** Development Team
 **Claude Version:** Optimized for Claude Sonnet 4.5+
 
