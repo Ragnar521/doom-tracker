@@ -75,7 +75,6 @@ const getFaceImage = (
 
 export default function DoomFace({ workoutCount, showOuch = false }: DoomFaceProps) {
   const [direction, setDirection] = useState<FaceDirection>('center');
-  const [isBlinking, setIsBlinking] = useState(false);
   const { showGrin, isBoostActive } = useBoost();
 
   const level = getFaceLevel(workoutCount);
@@ -103,10 +102,7 @@ export default function DoomFace({ workoutCount, showOuch = false }: DoomFacePro
       return;
     }
 
-    const getInterval = () => {
-      if (isBerserkOrGod || isBoostActive) return 1500; // Rychlé, agresivní
-      return 2500; // Normální
-    };
+    let timeoutId: NodeJS.Timeout;
 
     const randomLook = () => {
       const rand = Math.random();
@@ -117,24 +113,19 @@ export default function DoomFace({ workoutCount, showOuch = false }: DoomFacePro
       } else {
         setDirection('right');
       }
+
+      // Naplánuj další pohled s náhodnou variací (900-1100ms)
+      const randomInterval = 900 + Math.random() * 200;
+      timeoutId = setTimeout(randomLook, randomInterval);
     };
 
-    const interval = setInterval(randomLook, getInterval());
-    return () => clearInterval(interval);
-  }, [showOuch, showGrin, isBerserkOrGod, isCritical, isGodMode, isBoostActive]);
+    // Spusť první pohled
+    randomLook();
 
-  // Mrkání (občasné)
-  useEffect(() => {
-    const blink = () => {
-      if (Math.random() < 0.3) {
-        setIsBlinking(true);
-        setTimeout(() => setIsBlinking(false), 100);
-      }
-    };
+    // Cleanup při unmount
+    return () => clearTimeout(timeoutId);
+  }, [showOuch, showGrin, isCritical, isGodMode]);
 
-    const interval = setInterval(blink, 5000);
-    return () => clearInterval(interval);
-  }, []);
 
   const frameClass = `doom-frame ${isBerserkOrGod ? 'god-mode-glow' : ''} ${isGodMode ? 'ultra-god-glow' : ''} ${isBoostActive ? 'boost-pulse' : ''} p-1`;
 
@@ -144,7 +135,7 @@ export default function DoomFace({ workoutCount, showOuch = false }: DoomFacePro
         <img
           src={getFaceImage(workoutCount, direction, showGrin)}
           alt="Doom Face"
-          className={`w-32 h-32 object-contain transition-opacity duration-75 ${isBlinking ? 'opacity-0' : 'opacity-100'}`}
+          className="w-32 h-32 object-contain"
           style={{ imageRendering: 'pixelated' }}
         />
       </div>
