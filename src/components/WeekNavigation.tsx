@@ -67,20 +67,20 @@ export default function WeekNavigation({
         </button>
 
         {/* Week info */}
-        <div className="flex-1 text-center">
-          <div className="flex items-center justify-center gap-2">
-            <h2 className="text-doom-red text-sm font-bold">
+        <div className="flex-1 text-center min-w-0">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-1.5 sm:gap-2">
+            <h2 className="text-doom-red text-sm sm:text-base font-bold whitespace-nowrap">
               WEEK {week} / {year}
             </h2>
             <button
               onClick={cycleStatus}
-              className={`status-badge ${statusConfig.class}`}
+              className={`status-badge ${statusConfig.class} shrink-0`}
               title="Click to change status"
             >
               {statusConfig.label}
             </button>
           </div>
-          <p className="text-gray-500 text-[8px] mt-1">{dateRange}</p>
+          <p className="text-gray-500 text-[8px] sm:text-[10px] mt-1">{dateRange}</p>
         </div>
 
         {/* Next button */}
