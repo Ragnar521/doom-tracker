@@ -35,6 +35,8 @@ Rep & Tear transforms gym tracking into an immersive DOOM experience. Watch the 
   - Click to toggle workout completion
   - Week navigation (previous/next/jump to current)
   - Week status markers (Normal/Sick/Vacation)
+  - Responsive mobile-friendly layout (vertical stack on mobile, horizontal on desktop)
+  - Improved touch targets for mobile devices
   - Target probability calculator
 
 - **Achievement System** (18+ achievements)

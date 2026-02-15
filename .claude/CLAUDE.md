@@ -397,6 +397,23 @@ firebase deploy --only hosting
 - **Navigation:** Weeks are navigated by incrementing/decrementing week numbers
 - **Status:** Weeks can be marked "sick" or "vacation" to exclude from streak calculations
 
+### Week Navigation Component
+
+Implemented in `src/components/WeekNavigation.tsx`
+
+**Responsive Design (v1.5+):**
+- **Mobile (default):** Vertical stack layout - week title above status badge
+  - Provides better readability on small screens
+  - Each element gets full width for clear visual hierarchy
+- **Desktop (640px+):** Horizontal layout - week title and status badge side-by-side
+  - Maintains compact, traditional layout on larger screens
+- **Status Badge:** Clickable to cycle through NORMAL → SICK → VACATION
+  - Larger touch targets on mobile (20px min-height)
+  - Responsive font sizing (9px mobile, 10px desktop)
+  - Color-coded: green (normal), gold (sick), blue (vacation)
+- **Navigation Arrows:** Previous/Next week buttons with disabled state for future weeks
+- **Today Button:** Appears when viewing past/future weeks, jumps to current week
+
 ### Streak Logic
 
 Defined in `src/hooks/useStats.ts` and `src/hooks/useAllWeeks.ts`
@@ -636,6 +653,8 @@ Key classes in `index.css`:
 - `.day-button` - Workout day button
 - `.achievement-card` - Achievement display card
 - `.confetti` - Particle animation
+- `.status-badge` - Week status indicator (NORMAL/SICK/VACATION) with responsive sizing
+- `.nav-button` - Navigation arrow buttons
 
 ## Firebase Configuration
 
@@ -946,6 +965,7 @@ git status       # Review changed files
 - v1.2 (Jan 14, 2026) - Added Weekly Leaderboard
 - v1.2.2 (Jan 15, 2026) - Added profile editing (display name only, no avatar upload due to Firebase Storage costs)
 - v1.4 (Feb 15, 2026) - Improved face animation system (faster, more organic timing, removed buggy blinking)
+- v1.5 (Feb 15, 2026) - Improved week navigation mobile UI (responsive layout, better touch targets, vertical stack on mobile)
 
 **Last Updated:** February 15, 2026
 **Maintainer:** Development Team
