@@ -102,7 +102,7 @@ export default function DoomFace({ workoutCount, showOuch = false }: DoomFacePro
       return;
     }
 
-    let timeoutId: NodeJS.Timeout;
+    let timeoutId: number;
 
     const randomLook = () => {
       const rand = Math.random();
