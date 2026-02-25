@@ -18,6 +18,17 @@ This document provides comprehensive context for Claude Code to effectively work
 doom-tracker/
 ├── .claude/                    # Claude context files
 │   └── CLAUDE.md              # This file
+├── .github/                   # GitHub configuration
+│   └── workflows/             # CI/CD workflows
+│       ├── playwright.yml     # E2E testing (runs on PR)
+│       ├── claude.yml         # Claude Code integration
+│       └── claude-code-review.yml  # Automated PR reviews
+├── tests/                     # E2E test suite (Playwright)
+│   ├── e2e/                  # Test spec files
+│   │   └── auth.spec.ts      # Authentication tests (9 tests)
+│   ├── utils/                # Test helper functions
+│   │   └── setup.ts          # Common utilities (clearStorage, getFaceState, etc.)
+│   └── README.md             # Testing documentation
 ├── src/
 │   ├── assets/                # Static image assets
 │   │   ├── faces/            # 80+ DoomGuy face sprites (PNG)
@@ -85,11 +96,16 @@ doom-tracker/
 │   └── hud/
 ├── public/                   # Static files served as-is
 ├── .env.local                # Firebase config (NOT in git)
+├── .env.test                 # Test environment config (NOT in git)
 ├── .gitignore
 ├── eslint.config.js          # ESLint 9 flat config
+├── firebase.json             # Firebase emulator configuration
+├── firestore.indexes.json    # Firestore indexes
+├── firestore.rules           # Firestore security rules
 ├── index.html                # HTML entry point
 ├── package.json
 ├── package-lock.json
+├── playwright.config.ts      # Playwright test configuration
 ├── postcss.config.js         # PostCSS with Tailwind
 ├── tailwind.config.js        # Tailwind theme extensions
 ├── tsconfig.json             # TypeScript config (main)
@@ -126,6 +142,11 @@ doom-tracker/
 - **TypeScript ESLint** - TS-specific rules
 - **React Hooks ESLint** - Hook rules enforcement
 - **React Refresh ESLint** - Fast refresh validation
+
+### Testing Tools
+- **Playwright 1.58+** - E2E testing framework
+- **Firebase Tools 15.7+** - Firebase emulators for local testing
+- **GitHub Actions** - CI/CD automation
 
 ### Deployment
 - **Vercel** - Hosting platform
@@ -381,12 +402,39 @@ firebase login
 firebase deploy --only hosting
 ```
 
-### Testing (Not Currently Implemented)
+### Testing
+
+**E2E Testing with Playwright**
 
 ```bash
-# No test suite configured yet
-# Future: npm test (Vitest recommended)
+# Run all tests (headless mode)
+npm run test:e2e
+
+# Interactive UI mode (recommended for development)
+npm run test:e2e:ui
+
+# Run tests with browser visible
+npm run test:e2e:headed
+
+# Debug specific test
+npm run test:e2e:debug
+
+# View HTML report
+npm run test:e2e:report
+
+# Start Firebase emulators (for testing authenticated features)
+npm run emulators
+
+# Run tests with emulators
+npm run test:with-emulators
 ```
+
+**Current Test Coverage:**
+- ✅ 45 tests passing (9 scenarios × 5 browsers)
+- ✅ Authentication page (login, register, password reset)
+- ✅ Form validation (empty fields, password requirements)
+- ✅ Mode switching and UI updates
+- 🔜 Future: Workout tracking, achievements, squad features (requires emulators)
 
 ## Project-Specific Context
 
@@ -943,18 +991,270 @@ setLogLevel('debug');
 ### Always Check Before Committing
 
 ```bash
-npm run lint     # Check for linting errors
-npm run build    # Ensure build succeeds
-git status       # Review changed files
+npm run lint       # Check for linting errors
+npm run test:e2e   # Run E2E tests
+npm run build      # Ensure build succeeds
+git status         # Review changed files
 ```
+
+**Note:** GitHub Actions will automatically run all checks on PR, but running locally first catches issues earlier.
+
+## Testing
+
+### E2E Testing with Playwright
+
+**Setup Date:** February 25, 2026
+**Framework:** Playwright 1.58+
+**Test Coverage:** 45 tests passing (9 scenarios × 5 browsers)
+
+#### Test Architecture
+
+**Directory Structure:**
+```
+tests/
+├── e2e/                    # Test spec files
+│   └── auth.spec.ts       # Authentication tests
+├── utils/                 # Helper functions
+│   └── setup.ts           # Common utilities
+└── README.md              # Testing documentation
+```
+
+**Configuration Files:**
+- `playwright.config.ts` - Main Playwright configuration
+- `firebase.json` - Firebase emulator configuration
+- `.env.test` - Test environment variables (not in git)
+- `.github/workflows/playwright.yml` - CI/CD workflow
+
+#### Current Test Coverage
+
+**Authentication Tests** (`tests/e2e/auth.spec.ts`) - 9 tests:
+1. Login page display (UI elements, buttons, inputs)
+2. Toggle to registration mode (UI updates, confirm password field)
+3. Toggle back to login mode (reverse transition)
+4. Password reset modal (modal opens, form visible)
+5. Empty email validation (error message appears)
+6. Empty password validation (error message appears)
+7. Short password validation (6+ character requirement)
+8. Matching passwords validation (register mode)
+9. Mode-specific text ("ENTER THE ARENA" vs "JOIN THE ARENA")
+
+**Browser Coverage:**
+- Desktop Chrome (Chromium)
+- Desktop Firefox
+- Desktop Safari (WebKit)
+- Mobile Chrome (Pixel 5 viewport)
+- Mobile Safari (iPhone 12 viewport)
+
+#### Test Helper Functions
+
+Available in `tests/utils/setup.ts`:
+
+```typescript
+// Clear browser storage
+await clearStorage(page);
+
+// Wait for app to load
+await waitForAppReady(page);
+
+// Navigate to login page
+await goToLogin(page);
+
+// Fill login form
+await fillLoginForm(page, 'email@example.com', 'password');
+
+// Get current face state
+const state = await getFaceState(page); // Returns: 'critical', 'hurt', etc.
+
+// Toggle workout day
+await toggleWorkoutDay(page, 0); // 0=Monday, 6=Sunday
+
+// Get workout count
+const count = await getWorkoutCount(page);
+```
+
+#### Running Tests
+
+**Locally:**
+```bash
+# Run all tests (headless)
+npm run test:e2e
+
+# Interactive UI (best for development)
+npm run test:e2e:ui
+
+# Watch mode with browser visible
+npm run test:e2e:headed
+
+# Debug specific test
+npx playwright test --debug tests/e2e/auth.spec.ts
+```
+
+**On CI (GitHub Actions):**
+- Automatically runs on pull requests to `main`
+- Automatically runs on pushes to `main`
+- Runs linting, build, and all E2E tests
+- Uploads HTML reports and videos as artifacts
+
+#### Writing New Tests
+
+**Basic Test Structure:**
+```typescript
+import { test, expect } from '@playwright/test';
+
+test.describe('Feature Name', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.goto('/page');
+    await page.waitForSelector('h1:has-text("REP & TEAR")');
+  });
+
+  test('should do something', async ({ page }) => {
+    // Arrange
+    const button = page.locator('button:has-text("Click Me")');
+
+    // Act
+    await button.click();
+
+    // Assert
+    await expect(page.locator('text="Success"')).toBeVisible();
+  });
+});
+```
+
+**Best Practices:**
+1. Always clear storage in `beforeEach` for test isolation
+2. Use semantic selectors (text, roles) over CSS selectors
+3. Wait for elements before interacting
+4. Use helper functions from `setup.ts` to reduce duplication
+5. Test user flows, not implementation details
+6. Keep tests independent (each should run in isolation)
+7. Use descriptive test names ("should X when Y happens")
+
+#### Firebase Emulators (For Authenticated Tests)
+
+**When to Use:**
+- Testing authenticated user flows
+- Testing Firestore read/write operations
+- Testing friend system, achievements, workout tracking
+
+**Setup:**
+```bash
+# Terminal 1: Start emulators
+npm run emulators
+
+# Terminal 2: Run tests
+npm run test:e2e
+```
+
+**Emulator Services:**
+- Auth Emulator: `localhost:9099`
+- Firestore Emulator: `localhost:8080`
+- Emulator UI: `localhost:4000`
+
+**Note:** Current tests work without emulators (login page is public). Future tests for authenticated features will require emulators.
+
+#### CI/CD Integration
+
+**GitHub Actions Workflow** (`.github/workflows/playwright.yml`):
+
+1. **Setup:** Node.js 20, install dependencies, install browsers
+2. **Lint:** Run ESLint to catch code quality issues
+3. **Build:** Verify project builds successfully
+4. **Test:** Run all Playwright tests across 3 browsers (Chromium, Firefox, WebKit)
+5. **Artifacts:** Upload HTML reports (30 days) and videos on failure (7 days)
+
+**Viewing CI Results:**
+1. Go to GitHub → Actions tab
+2. Click on the workflow run
+3. Download artifacts if tests failed
+4. View HTML report locally: `npx playwright show-report`
+
+#### Debugging Failed Tests
+
+**Locally:**
+```bash
+# Run with headed browsers (see what happens)
+npm run test:e2e:headed
+
+# Step-through debugging
+npm run test:e2e:debug
+
+# Run specific test file
+npx playwright test tests/e2e/auth.spec.ts
+
+# Run single test by name
+npx playwright test -g "should display login page"
+```
+
+**On CI:**
+- Download `playwright-report` artifact from GitHub Actions
+- Download `test-videos` artifact to see what went wrong
+- Open `index.html` from report to see detailed results
+
+#### Future Test Coverage (TODO)
+
+**High Priority:**
+- [ ] Workout tracking tests (toggle workouts, week navigation)
+- [ ] Face state transition tests (critical → godmode)
+- [ ] Stats calculation tests (streaks, totals)
+- [ ] Achievement unlocking tests
+
+**Medium Priority:**
+- [ ] Dashboard analytics tests
+- [ ] Week status tests (normal/sick/vacation)
+- [ ] Offline behavior tests
+
+**Low Priority (Requires Emulators):**
+- [ ] Squad system tests (add/remove friends)
+- [ ] Profile editing tests
+- [ ] Firebase sync tests
+
+#### Testing Documentation
+
+**Complete Guide:** `tests/README.md`
+
+Covers:
+- Quick start guide
+- Test structure and patterns
+- Helper function reference
+- Best practices
+- Debugging strategies
+- CI/CD integration details
+
+#### Test Maintenance
+
+**When Adding Features:**
+1. Write tests BEFORE or ALONGSIDE feature implementation
+2. Test happy path (success flow)
+3. Test error cases (validation, network errors)
+4. Test edge cases (empty states, boundaries)
+5. Update `tests/README.md` if adding new test utilities
+
+**When Changing UI:**
+1. Update selectors in affected tests
+2. Run tests locally to verify they still pass
+3. Consider if helper functions need updates
+4. CI will catch any missed changes
+
+**When Refactoring:**
+1. Tests should still pass without modification (if testing behavior, not implementation)
+2. If tests fail, it's a signal the refactor changed behavior
+3. Update tests only if behavior intentionally changed
 
 ## Resources
 
+### Development
 - [React 19 Docs](https://react.dev)
 - [Vite Docs](https://vitejs.dev)
 - [Firebase Docs](https://firebase.google.com/docs)
 - [Tailwind CSS Docs](https://tailwindcss.com)
 - [TypeScript Docs](https://www.typescriptlang.org/docs)
+
+### Testing
+- [Playwright Docs](https://playwright.dev)
+- [Playwright Best Practices](https://playwright.dev/docs/best-practices)
+- [Firebase Emulators](https://firebase.google.com/docs/emulator-suite)
+
+### Reference
 - [DOOM Wiki](https://doomwiki.org) - For lore/asset reference
 
 ---
@@ -966,8 +1266,9 @@ git status       # Review changed files
 - v1.2.2 (Jan 15, 2026) - Added profile editing (display name only, no avatar upload due to Firebase Storage costs)
 - v1.4 (Feb 15, 2026) - Improved face animation system (faster, more organic timing, removed buggy blinking)
 - v1.5 (Feb 15, 2026) - Improved week navigation mobile UI (responsive layout, better touch targets, vertical stack on mobile)
+- v1.6 (Feb 25, 2026) - Added Playwright E2E testing framework (45 tests passing, full CI/CD integration)
 
-**Last Updated:** February 15, 2026
+**Last Updated:** February 25, 2026
 **Maintainer:** Development Team
 **Claude Version:** Optimized for Claude Sonnet 4.5+
 

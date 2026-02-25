@@ -1,15 +1,34 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 
 export default function PixelatedTransition() {
   const location = useLocation();
   const [isTransitioning, setIsTransitioning] = useState(false);
+  const previousPathname = useRef(location.pathname);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  const rafRef = useRef<number | undefined>(undefined);
 
   useEffect(() => {
-    // Trigger pixelated dissolve on route change
-    setIsTransitioning(true);
-    const timer = setTimeout(() => setIsTransitioning(false), 180);
-    return () => clearTimeout(timer);
+    // Only trigger transition if pathname actually changed
+    if (previousPathname.current !== location.pathname) {
+      previousPathname.current = location.pathname;
+
+      // Use RAF to avoid synchronous setState in effect
+      rafRef.current = requestAnimationFrame(() => {
+        setIsTransitioning(true);
+        timerRef.current = setTimeout(() => setIsTransitioning(false), 180);
+      });
+
+      // Cleanup: cancel pending animations/timers if component unmounts
+      return () => {
+        if (rafRef.current !== undefined) {
+          cancelAnimationFrame(rafRef.current);
+        }
+        if (timerRef.current !== undefined) {
+          clearTimeout(timerRef.current);
+        }
+      };
+    }
   }, [location.pathname]);
 
   return (
