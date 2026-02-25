@@ -29,9 +29,9 @@ function getHeatmapColor(count: number, max: number): string {
 }
 
 export default function Dashboard() {
-  const { stats, loading } = useAllWeeks();
-  const { availableYears, getYearWeeks, yearMonthGroups } = useTimelineData();
-  const globalData = useTrendData();
+  const { weeks, stats, loading } = useAllWeeks();
+  const { availableYears, getYearWeeks, yearMonthGroups } = useTimelineData(weeks);
+  const globalData = useTrendData(weeks);
 
   if (loading) {
     return <LoadingSpinner size="lg" text="CALCULATING DAMAGE..." />;

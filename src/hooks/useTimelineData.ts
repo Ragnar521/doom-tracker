@@ -1,5 +1,5 @@
-import { useMemo } from 'react';
-import { useAllWeeks, type WeekRecord } from './useAllWeeks';
+import { useMemo, useCallback } from 'react';
+import { type WeekRecord } from './useAllWeeks';
 import { getCurrentWeekId } from '../lib/weekUtils';
 import { groupWeeksByYearAndMonth } from '../lib/timelineUtils';
 
@@ -30,7 +30,7 @@ export interface TimelineData {
  * Hook for lazy timeline data access with year/month grouping.
  *
  * Data flow:
- * 1. useAllWeeks() fetches all week records (already lazy loads from Firebase)
+ * 1. Receives weeks array as parameter (from useAllWeeks in parent)
  * 2. useMemo groups weeks client-side (instant for <1000 weeks)
  * 3. Provides getter functions for year/month filtered data
  * 4. Auto-recalculates when week data changes
@@ -40,10 +40,10 @@ export interface TimelineData {
  * - useMemo caches result until weeks array changes
  * - No additional Firebase queries needed
  *
+ * @param weeks - Array of all week records (from useAllWeeks)
  * @returns TimelineData with current week, available years, and getter functions
  */
-export function useTimelineData(): TimelineData {
-  const { weeks } = useAllWeeks();
+export function useTimelineData(weeks: WeekRecord[]): TimelineData {
   const currentWeekId = getCurrentWeekId();
 
   // Group weeks by year and month (cached until weeks changes)
@@ -59,8 +59,8 @@ export function useTimelineData(): TimelineData {
   );
 
   // Get all weeks for a specific year (flattens all months)
-  const getYearWeeks = useMemo(
-    () => (year: number): WeekRecord[] => {
+  const getYearWeeks = useCallback(
+    (year: number): WeekRecord[] => {
       const monthMap = yearMonthGroups.get(year);
       if (!monthMap) return [];
       return Array.from(monthMap.values()).flat();
@@ -69,8 +69,8 @@ export function useTimelineData(): TimelineData {
   );
 
   // Get all weeks for a specific month within a year
-  const getMonthWeeks = useMemo(
-    () => (year: number, month: number): WeekRecord[] => {
+  const getMonthWeeks = useCallback(
+    (year: number, month: number): WeekRecord[] => {
       return yearMonthGroups.get(year)?.get(month) || [];
     },
     [yearMonthGroups]

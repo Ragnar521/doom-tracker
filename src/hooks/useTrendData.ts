@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { useAllWeeks } from './useAllWeeks';
+import { type WeekRecord } from './useAllWeeks';
 import { getNormalWeeks } from '../lib/timelineUtils';
 
 export interface GlobalTrendData {
@@ -19,10 +19,10 @@ export interface GlobalTrendData {
  * Excludes sick/vacation weeks from all calculations to ensure fair comparisons.
  * Memoized to prevent recalculation on every render - only updates when weeks array changes.
  *
+ * @param weeks - Array of all week records (from useAllWeeks)
  * @returns GlobalTrendData with all-time benchmarks
  */
-export function useTrendData(): GlobalTrendData {
-  const { weeks } = useAllWeeks();
+export function useTrendData(weeks: WeekRecord[]): GlobalTrendData {
 
   return useMemo(() => {
     const normalWeeks = getNormalWeeks(weeks);
