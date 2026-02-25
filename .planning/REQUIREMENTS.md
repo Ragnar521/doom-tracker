@@ -31,7 +31,7 @@ Requirements for the enhanced analytics milestone. Each maps to roadmap phases.
 - [x] **TIMELINE-09**: Expanded sections display week grids with workout counts
 - [x] **TIMELINE-10**: Week grids use health bar color scheme
 - [x] **TIMELINE-11**: Mobile UI has 44px minimum touch targets for expand/collapse
-- [ ] **TIMELINE-12**: Timeline works smoothly on mobile with 100+ weeks of data
+- [x] **TIMELINE-12**: Timeline works smoothly on mobile with 100+ weeks of data
 
 ### Monthly Summaries
 
@@ -68,14 +68,14 @@ Requirements for the enhanced analytics milestone. Each maps to roadmap phases.
 
 ### Performance & Polish
 
-- [ ] **PERF-01**: Dashboard loads smoothly with 100+ weeks of historical data
+- [x] **PERF-01**: Dashboard loads smoothly with 100+ weeks of historical data
 - [x] **PERF-02**: Timeline rendering does not block main thread
 - [x] **PERF-03**: Lazy loading prevents Firebase read cost spikes
 - [ ] **PERF-04**: Color contrast meets WCAG AA standards (4.5:1 ratio)
 - [ ] **PERF-05**: Keyboard navigation works for collapsible sections
 - [ ] **PERF-06**: Empty state messaging appears for users with no historical data
-- [ ] **PERF-07**: Existing 12-week summary view remains unchanged at top of Dashboard
-- [ ] **PERF-08**: Existing day frequency heatmap remains unchanged
+- [x] **PERF-07**: Existing 12-week summary view remains unchanged at top of Dashboard
+- [x] **PERF-08**: Existing day frequency heatmap remains unchanged
 
 ## v2 Requirements
 
@@ -134,7 +134,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | TIMELINE-09 | Phase 2 | Complete |
 | TIMELINE-10 | Phase 2 | Complete |
 | TIMELINE-11 | Phase 2 | Complete |
-| TIMELINE-12 | Phase 2 | Pending |
+| TIMELINE-12 | Phase 2 | Complete |
 | MONTHLY-01 | Phase 2 | Complete |
 | MONTHLY-02 | Phase 2 | Complete |
 | MONTHLY-03 | Phase 2 | Complete |
@@ -159,14 +159,14 @@ Which phases cover which requirements. Updated during roadmap creation.
 | TREND-08 | Phase 3 | Pending |
 | TREND-09 | Phase 3 | Pending |
 | TREND-10 | Phase 3 | Pending |
-| PERF-01 | Phase 2 | Pending |
+| PERF-01 | Phase 2 | Complete |
 | PERF-02 | Phase 2 | Complete |
 | PERF-03 | Phase 2 | Complete |
 | PERF-04 | Phase 4 | Pending |
 | PERF-05 | Phase 4 | Pending |
 | PERF-06 | Phase 4 | Pending |
-| PERF-07 | Phase 2 | Pending |
-| PERF-08 | Phase 2 | Pending |
+| PERF-07 | Phase 2 | Complete |
+| PERF-08 | Phase 2 | Complete |
 
 **Coverage:**
 - v1 requirements: 48 total
