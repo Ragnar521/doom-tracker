@@ -42,15 +42,18 @@ Plans:
   1. User can expand year sections to view all weeks from any historical year
   2. User can expand month sections within years to view individual week grids
   3. Month section headers display summary statistics (total workouts, average per week, success rate, best week)
-  4. Year section headers display summary statistics (total workouts, average per week, success rate, longest streak, best week)
+  4. Year section headers display summary statistics (total workouts, average per week, success rate, longest streak, best week, God Mode count)
   5. Timeline sections are collapsed by default and only load data when user expands them
   6. Dashboard remains responsive and smooth when user has 100+ weeks of historical data
   7. Loading skeletons appear while data fetches so user knows something is happening
   8. Existing 12-week summary view remains unchanged at top of Dashboard
-**Plans**: TBD
+**Plans**: 4 plans
 
 Plans:
-- [ ] TBD
+- [ ] 02-01-PLAN.md — Timeline Data Infrastructure (grouping utilities + lazy data hook)
+- [ ] 02-02-PLAN.md — Period Statistics Calculations (month/year summary stats)
+- [ ] 02-03-PLAN.md — Timeline UI Components (YearSection, MonthSection, WeekGrid, StatChip)
+- [ ] 02-04-PLAN.md — Dashboard Integration & Polish (CSS transitions + integrate into Dashboard)
 
 ### Phase 3: Trend Indicators & Comparisons
 **Goal**: Provide performance context through trend arrows and comparative benchmarks against previous periods and personal averages

@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: unknown
-last_updated: "2026-02-25T18:16:47.015Z"
+last_updated: "2026-02-25T19:20:41.658Z"
 progress:
-  total_phases: 1
+  total_phases: 2
   completed_phases: 1
-  total_plans: 1
-  completed_plans: 1
+  total_plans: 6
+  completed_plans: 3
 ---
 
 # Project State
@@ -18,32 +18,34 @@ progress:
 See: .planning/PROJECT.md (updated 2026-02-25)
 
 **Core value:** Users can visualize and understand their complete workout history with clear, meaningful statistics that motivate continued consistency and highlight long-term progress patterns.
-**Current focus:** Phase 1 - Health Bar Color Foundation
+**Current focus:** Phase 2 - Expandable Timeline Summaries
 
 ## Current Position
 
-Phase: 1 of 4 (Health Bar Color Foundation)
-Plan: 1 of 1 completed
-Status: Phase complete
-Last activity: 2026-02-25 — Completed plan 01-01 (Health Bar Color Foundation)
+Phase: 2 of 4 (Expandable Timeline Summaries)
+Plan: 1 of 5 completed
+Status: In progress
+Last activity: 2026-02-25 — Completed plan 02-01 (Timeline Data Infrastructure)
 
-Progress: [██████████] 100%
+Progress: [██░░░░░░░░] 20%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 1
-- Average duration: 2 minutes
-- Total execution time: 0.03 hours
+- Total plans completed: 2
+- Average duration: 1 minute
+- Total execution time: 0.04 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 01 | 1 | 2 min | 2 min |
+| 02 | 1 | 1 min | 1 min |
 
 **Recent Trend:**
 - Phase 01 Plan 01: 2 minutes (2 tasks, 2 files)
+- Phase 02 Plan 01: 1 minute (2 tasks, 2 files)
 
 *Updated after each plan completion*
 
@@ -60,6 +62,10 @@ Recent decisions affecting current work:
 - Use yellow-600 instead of doom-gold for 3-4 workout range — WCAG AA compliance (4.5:1 contrast vs 3.79:1)
 - Dual visual encoding for sick/vacation weeks — Border shows status, background shows performance
 - 4-tier color system (1-2, 3-4, 5, 6-7) — Better granularity than 3-tier traffic light
+- ISO Thursday rule for month boundaries — Week 1 Dec-Jan edge case handled correctly
+- Client-side grouping over server-side — Instant performance for <1000 weeks, reduces Firebase read costs
+- Nested Map structure for year/month hierarchy — Efficient O(1) lookups, natural hierarchical structure
+- getNormalWeeks shared utility — Ensures consistency across all stat calculations
 
 ### Pending Todos
 
@@ -84,10 +90,10 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-02-25 — Phase 1 Plan 1 execution
-Stopped at: Completed 01-01-PLAN.md (Health Bar Color Foundation)
+Last session: 2026-02-25 — Phase 2 Plan 1 execution
+Stopped at: Completed 02-01-PLAN.md (Timeline Data Infrastructure)
 Resume file: None
 
 ---
 
-**Next step:** Phase 1 complete. Ready to proceed to Phase 2 planning when required.
+**Next step:** Ready to proceed to Phase 2 Plan 2 (Period Statistics) when required.

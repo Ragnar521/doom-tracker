@@ -20,13 +20,13 @@ Requirements for the enhanced analytics milestone. Each maps to roadmap phases.
 
 ### Timeline View
 
-- [ ] **TIMELINE-01**: User can view complete workout history beyond 12-week limit
-- [ ] **TIMELINE-02**: Timeline organizes weeks into expandable year sections
-- [ ] **TIMELINE-03**: Year sections contain expandable month subsections
-- [ ] **TIMELINE-04**: Sections are collapsed by default to prevent performance issues
+- [x] **TIMELINE-01**: User can view complete workout history beyond 12-week limit
+- [x] **TIMELINE-02**: Timeline organizes weeks into expandable year sections
+- [x] **TIMELINE-03**: Year sections contain expandable month subsections
+- [x] **TIMELINE-04**: Sections are collapsed by default to prevent performance issues
 - [ ] **TIMELINE-05**: User can expand/collapse year sections with click/tap
 - [ ] **TIMELINE-06**: User can expand/collapse month sections with click/tap
-- [ ] **TIMELINE-07**: Expanded sections lazy load data (not loaded upfront)
+- [x] **TIMELINE-07**: Expanded sections lazy load data (not loaded upfront)
 - [ ] **TIMELINE-08**: Loading skeletons appear while data fetches
 - [ ] **TIMELINE-09**: Expanded sections display week grids with workout counts
 - [ ] **TIMELINE-10**: Week grids use health bar color scheme
@@ -39,9 +39,9 @@ Requirements for the enhanced analytics milestone. Each maps to roadmap phases.
 - [ ] **MONTHLY-02**: Each month section header displays average workouts per week
 - [ ] **MONTHLY-03**: Each month section header displays success rate (% weeks with 3+ workouts)
 - [ ] **MONTHLY-04**: Each month section header displays best week in that month
-- [ ] **MONTHLY-05**: Month summaries exclude sick/vacation weeks from calculations
-- [ ] **MONTHLY-06**: Month boundaries determined by ISO week Thursday rule
-- [ ] **MONTHLY-07**: Monthly totals sum correctly to yearly totals
+- [x] **MONTHLY-05**: Month summaries exclude sick/vacation weeks from calculations
+- [x] **MONTHLY-06**: Month boundaries determined by ISO week Thursday rule
+- [x] **MONTHLY-07**: Monthly totals sum correctly to yearly totals
 
 ### Yearly Summaries
 
@@ -50,8 +50,8 @@ Requirements for the enhanced analytics milestone. Each maps to roadmap phases.
 - [ ] **YEARLY-03**: Each year section header displays success rate (% weeks with 3+ workouts)
 - [ ] **YEARLY-04**: Each year section header displays longest streak in that year
 - [ ] **YEARLY-05**: Each year section header displays best week in that year
-- [ ] **YEARLY-06**: Year summaries exclude sick/vacation weeks from calculations
-- [ ] **YEARLY-07**: Year summaries handle Week 53 edge cases correctly
+- [x] **YEARLY-06**: Year summaries exclude sick/vacation weeks from calculations
+- [x] **YEARLY-07**: Year summaries handle Week 53 edge cases correctly
 
 ### Trend Indicators
 
@@ -70,7 +70,7 @@ Requirements for the enhanced analytics milestone. Each maps to roadmap phases.
 
 - [ ] **PERF-01**: Dashboard loads smoothly with 100+ weeks of historical data
 - [ ] **PERF-02**: Timeline rendering does not block main thread
-- [ ] **PERF-03**: Lazy loading prevents Firebase read cost spikes
+- [x] **PERF-03**: Lazy loading prevents Firebase read cost spikes
 - [ ] **PERF-04**: Color contrast meets WCAG AA standards (4.5:1 ratio)
 - [ ] **PERF-05**: Keyboard navigation works for collapsible sections
 - [ ] **PERF-06**: Empty state messaging appears for users with no historical data
@@ -123,13 +123,13 @@ Which phases cover which requirements. Updated during roadmap creation.
 | COLOR-06 | Phase 1 | Complete |
 | COLOR-07 | Phase 1 | Complete |
 | COLOR-08 | Phase 4 | Pending |
-| TIMELINE-01 | Phase 2 | Pending |
-| TIMELINE-02 | Phase 2 | Pending |
-| TIMELINE-03 | Phase 2 | Pending |
-| TIMELINE-04 | Phase 2 | Pending |
+| TIMELINE-01 | Phase 2 | Complete |
+| TIMELINE-02 | Phase 2 | Complete |
+| TIMELINE-03 | Phase 2 | Complete |
+| TIMELINE-04 | Phase 2 | Complete |
 | TIMELINE-05 | Phase 2 | Pending |
 | TIMELINE-06 | Phase 2 | Pending |
-| TIMELINE-07 | Phase 2 | Pending |
+| TIMELINE-07 | Phase 2 | Complete |
 | TIMELINE-08 | Phase 2 | Pending |
 | TIMELINE-09 | Phase 2 | Pending |
 | TIMELINE-10 | Phase 2 | Pending |
@@ -139,16 +139,16 @@ Which phases cover which requirements. Updated during roadmap creation.
 | MONTHLY-02 | Phase 2 | Pending |
 | MONTHLY-03 | Phase 2 | Pending |
 | MONTHLY-04 | Phase 2 | Pending |
-| MONTHLY-05 | Phase 2 | Pending |
-| MONTHLY-06 | Phase 2 | Pending |
-| MONTHLY-07 | Phase 2 | Pending |
+| MONTHLY-05 | Phase 2 | Complete |
+| MONTHLY-06 | Phase 2 | Complete |
+| MONTHLY-07 | Phase 2 | Complete |
 | YEARLY-01 | Phase 2 | Pending |
 | YEARLY-02 | Phase 2 | Pending |
 | YEARLY-03 | Phase 2 | Pending |
 | YEARLY-04 | Phase 2 | Pending |
 | YEARLY-05 | Phase 2 | Pending |
-| YEARLY-06 | Phase 2 | Pending |
-| YEARLY-07 | Phase 2 | Pending |
+| YEARLY-06 | Phase 2 | Complete |
+| YEARLY-07 | Phase 2 | Complete |
 | TREND-01 | Phase 3 | Pending |
 | TREND-02 | Phase 3 | Pending |
 | TREND-03 | Phase 3 | Pending |
@@ -161,7 +161,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | TREND-10 | Phase 3 | Pending |
 | PERF-01 | Phase 2 | Pending |
 | PERF-02 | Phase 2 | Pending |
-| PERF-03 | Phase 2 | Pending |
+| PERF-03 | Phase 2 | Complete |
 | PERF-04 | Phase 4 | Pending |
 | PERF-05 | Phase 4 | Pending |
 | PERF-06 | Phase 4 | Pending |
