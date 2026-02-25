@@ -19,6 +19,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 ## Phase Details
 
+
 ### Phase 1: Health Bar Color Foundation
 **Goal**: Establish intuitive color scheme matching DOOM health mechanics and lazy loading architecture before building UI
 **Depends on**: Nothing (first phase)
@@ -29,11 +30,10 @@ Decimal phases appear between their surrounding integers in numeric order.
   3. User sees red colors for low workout counts (0-2 per week) matching "critical health" state
   4. Dashboard week grid uses new color scheme consistently across all visualizations
   5. Centralized color utility function exists that all components can use for consistent color mapping
-**Plans**: TBD
+**Plans**: 1 plan
 
 Plans:
-- [ ] TBD
-
+- [ ] 01-01-PLAN.md — Replace traffic light colors with health bar paradigm (centralized utilities + Dashboard migration)
 ### Phase 2: Expandable Timeline & Summaries
 **Goal**: Remove 12-week limitation and provide complete workout history through collapsible timeline with monthly/yearly aggregations
 **Depends on**: Phase 1
@@ -90,7 +90,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Health Bar Color Foundation | 0/TBD | Not started | - |
+| 1. Health Bar Color Foundation | 0/1 | Not started | - |
 | 2. Expandable Timeline & Summaries | 0/TBD | Not started | - |
 | 3. Trend Indicators & Comparisons | 0/TBD | Not started | - |
 | 4. Accessibility & Polish | 0/TBD | Not started | - |
