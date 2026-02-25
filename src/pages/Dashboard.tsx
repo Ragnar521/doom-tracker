@@ -1,6 +1,10 @@
 import { useAllWeeks } from '../hooks/useAllWeeks';
-import { getWeekNumber } from '../lib/weekUtils';
+import { getWeekNumber, getHealthColor, getStatusBorderClass } from '../lib/weekUtils';
 import LoadingSpinner from '../components/LoadingSpinner';
+import { useTimelineData } from '../hooks/useTimelineData';
+import { useTrendData } from '../hooks/useTrendData';
+import YearSection from '../components/timeline/YearSection';
+import StatChip from '../components/timeline/StatChip';
 
 const DAY_NAMES = ['MO', 'TU', 'WE', 'TH', 'FR', 'SA', 'SU'];
 
@@ -12,14 +16,6 @@ function StatCard({ label, value, sublabel }: { label: string; value: string | n
       {sublabel && <p className="text-[8px] text-gray-600">{sublabel}</p>}
     </div>
   );
-}
-
-function getWeekColor(count: number, status: string): string {
-  if (status === 'sick' || status === 'vacation') return 'bg-gray-600';
-  if (count >= 5) return 'bg-doom-gold';
-  if (count >= 4) return 'bg-doom-green';
-  if (count >= 3) return 'bg-yellow-600';
-  return 'bg-doom-red';
 }
 
 function getHeatmapColor(count: number, max: number): string {
@@ -34,6 +30,8 @@ function getHeatmapColor(count: number, max: number): string {
 
 export default function Dashboard() {
   const { stats, loading } = useAllWeeks();
+  const { availableYears, getYearWeeks, yearMonthGroups } = useTimelineData();
+  const globalData = useTrendData();
 
   if (loading) {
     return <LoadingSpinner size="lg" text="CALCULATING DAMAGE..." />;
@@ -92,7 +90,7 @@ export default function Dashboard() {
           {stats.recentWeeks.map((week) => (
             <div
               key={week.weekId}
-              className={`aspect-square rounded ${getWeekColor(week.workoutCount, week.status)} flex items-center justify-center`}
+              className={`aspect-square rounded ${getHealthColor(week.workoutCount)} ${getStatusBorderClass(week.status)} flex items-center justify-center`}
               title={`Week ${getWeekNumber(week.weekId)}: ${week.workoutCount} workouts`}
             >
               <span className="text-[8px] text-white font-bold">{week.workoutCount}</span>
@@ -101,19 +99,75 @@ export default function Dashboard() {
         </div>
         <div className="flex justify-center gap-3 mt-3 text-[7px]">
           <span className="flex items-center gap-1">
-            <span className="w-2 h-2 rounded bg-doom-red" /> 0-2
+            <span className="w-2 h-2 rounded bg-doom-red" /> 1-2
           </span>
           <span className="flex items-center gap-1">
-            <span className="w-2 h-2 rounded bg-yellow-600" /> 3
+            <span className="w-2 h-2 rounded bg-yellow-600" /> 3-4
           </span>
           <span className="flex items-center gap-1">
-            <span className="w-2 h-2 rounded bg-doom-green" /> 4
+            <span className="w-2 h-2 rounded bg-green-600" /> 5
           </span>
           <span className="flex items-center gap-1">
-            <span className="w-2 h-2 rounded bg-doom-gold" /> 5+
+            <span className="w-2 h-2 rounded bg-doom-green" /> 6-7
           </span>
         </div>
       </div>
+
+      {/* Lifetime Stats */}
+      <div className="doom-panel p-3">
+        <h3 className="text-doom-gold text-[10px] mb-3 text-center tracking-widest uppercase">
+          Lifetime Stats
+        </h3>
+        <div className="flex flex-wrap gap-2 justify-center">
+          <StatChip
+            label="YOUR AVERAGE"
+            value={`${globalData.allTimeAverage.toFixed(1)} workouts/week`}
+          />
+          <StatChip
+            label="CONSISTENCY"
+            value={`${globalData.consistencyRate.toFixed(0)}%`}
+          />
+        </div>
+        <p className="text-gray-500 text-[8px] text-center mt-2">
+          Across {globalData.totalNormalWeeks} normal weeks (excludes sick/vacation)
+        </p>
+      </div>
+
+      {/* Historical Timeline - appears only if historical data exists */}
+      {availableYears.length > 0 && (
+        <div className="doom-panel p-3">
+          <h3 className="text-gray-400 text-[10px] mb-3 text-center tracking-widest">
+            COMPLETE BATTLE HISTORY
+          </h3>
+          <div className="space-y-2">
+            {availableYears.map((year, index) => {
+              const yearWeeks = getYearWeeks(year);
+              const monthGroups = yearMonthGroups.get(year) || new Map();
+
+              // Get previous year data for year-over-year trends
+              const previousYear = availableYears[index + 1];
+              const previousYearWeeks = previousYear ? getYearWeeks(previousYear) : [];
+              const previousYearMonthGroups = previousYear ? yearMonthGroups.get(previousYear) : undefined;
+
+              // Get year-ago data for year-over-year month comparisons
+              const yearAgo = year - 1;
+              const yearAgoMonthGroups = yearMonthGroups.get(yearAgo);
+
+              return (
+                <YearSection
+                  key={year}
+                  year={year}
+                  yearWeeks={yearWeeks}
+                  monthGroups={monthGroups}
+                  previousYearWeeks={previousYearWeeks}
+                  previousYearMonthGroups={previousYearMonthGroups}
+                  yearAgoMonthGroups={yearAgoMonthGroups}
+                />
+              );
+            })}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

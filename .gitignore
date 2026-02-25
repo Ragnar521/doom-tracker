@@ -21,6 +21,9 @@ playwright/.cache/
 # Firebase emulator data
 .firebase/
 
+# Firebase service account keys
+*-firebase-adminsdk-*
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
