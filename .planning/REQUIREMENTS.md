@@ -35,21 +35,21 @@ Requirements for the enhanced analytics milestone. Each maps to roadmap phases.
 
 ### Monthly Summaries
 
-- [ ] **MONTHLY-01**: Each month section header displays total workouts for that month
-- [ ] **MONTHLY-02**: Each month section header displays average workouts per week
-- [ ] **MONTHLY-03**: Each month section header displays success rate (% weeks with 3+ workouts)
-- [ ] **MONTHLY-04**: Each month section header displays best week in that month
+- [x] **MONTHLY-01**: Each month section header displays total workouts for that month
+- [x] **MONTHLY-02**: Each month section header displays average workouts per week
+- [x] **MONTHLY-03**: Each month section header displays success rate (% weeks with 3+ workouts)
+- [x] **MONTHLY-04**: Each month section header displays best week in that month
 - [x] **MONTHLY-05**: Month summaries exclude sick/vacation weeks from calculations
 - [x] **MONTHLY-06**: Month boundaries determined by ISO week Thursday rule
 - [x] **MONTHLY-07**: Monthly totals sum correctly to yearly totals
 
 ### Yearly Summaries
 
-- [ ] **YEARLY-01**: Each year section header displays total workouts for that year
-- [ ] **YEARLY-02**: Each year section header displays average workouts per week
-- [ ] **YEARLY-03**: Each year section header displays success rate (% weeks with 3+ workouts)
-- [ ] **YEARLY-04**: Each year section header displays longest streak in that year
-- [ ] **YEARLY-05**: Each year section header displays best week in that year
+- [x] **YEARLY-01**: Each year section header displays total workouts for that year
+- [x] **YEARLY-02**: Each year section header displays average workouts per week
+- [x] **YEARLY-03**: Each year section header displays success rate (% weeks with 3+ workouts)
+- [x] **YEARLY-04**: Each year section header displays longest streak in that year
+- [x] **YEARLY-05**: Each year section header displays best week in that year
 - [x] **YEARLY-06**: Year summaries exclude sick/vacation weeks from calculations
 - [x] **YEARLY-07**: Year summaries handle Week 53 edge cases correctly
 
@@ -69,7 +69,7 @@ Requirements for the enhanced analytics milestone. Each maps to roadmap phases.
 ### Performance & Polish
 
 - [ ] **PERF-01**: Dashboard loads smoothly with 100+ weeks of historical data
-- [ ] **PERF-02**: Timeline rendering does not block main thread
+- [x] **PERF-02**: Timeline rendering does not block main thread
 - [x] **PERF-03**: Lazy loading prevents Firebase read cost spikes
 - [ ] **PERF-04**: Color contrast meets WCAG AA standards (4.5:1 ratio)
 - [ ] **PERF-05**: Keyboard navigation works for collapsible sections
@@ -135,18 +135,18 @@ Which phases cover which requirements. Updated during roadmap creation.
 | TIMELINE-10 | Phase 2 | Pending |
 | TIMELINE-11 | Phase 2 | Pending |
 | TIMELINE-12 | Phase 2 | Pending |
-| MONTHLY-01 | Phase 2 | Pending |
-| MONTHLY-02 | Phase 2 | Pending |
-| MONTHLY-03 | Phase 2 | Pending |
-| MONTHLY-04 | Phase 2 | Pending |
+| MONTHLY-01 | Phase 2 | Complete |
+| MONTHLY-02 | Phase 2 | Complete |
+| MONTHLY-03 | Phase 2 | Complete |
+| MONTHLY-04 | Phase 2 | Complete |
 | MONTHLY-05 | Phase 2 | Complete |
 | MONTHLY-06 | Phase 2 | Complete |
 | MONTHLY-07 | Phase 2 | Complete |
-| YEARLY-01 | Phase 2 | Pending |
-| YEARLY-02 | Phase 2 | Pending |
-| YEARLY-03 | Phase 2 | Pending |
-| YEARLY-04 | Phase 2 | Pending |
-| YEARLY-05 | Phase 2 | Pending |
+| YEARLY-01 | Phase 2 | Complete |
+| YEARLY-02 | Phase 2 | Complete |
+| YEARLY-03 | Phase 2 | Complete |
+| YEARLY-04 | Phase 2 | Complete |
+| YEARLY-05 | Phase 2 | Complete |
 | YEARLY-06 | Phase 2 | Complete |
 | YEARLY-07 | Phase 2 | Complete |
 | TREND-01 | Phase 3 | Pending |
@@ -160,7 +160,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | TREND-09 | Phase 3 | Pending |
 | TREND-10 | Phase 3 | Pending |
 | PERF-01 | Phase 2 | Pending |
-| PERF-02 | Phase 2 | Pending |
+| PERF-02 | Phase 2 | Complete |
 | PERF-03 | Phase 2 | Complete |
 | PERF-04 | Phase 4 | Pending |
 | PERF-05 | Phase 4 | Pending |

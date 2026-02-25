@@ -94,6 +94,6 @@ Phases execute in numeric order: 1 → 2 → 3 → 4
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Health Bar Color Foundation | 0/1 | Not started | - |
-| 2. Expandable Timeline & Summaries | 0/TBD | Not started | - |
+| 2. Expandable Timeline & Summaries | 3/5 | In Progress|  |
 | 3. Trend Indicators & Comparisons | 0/TBD | Not started | - |
 | 4. Accessibility & Polish | 0/TBD | Not started | - |
