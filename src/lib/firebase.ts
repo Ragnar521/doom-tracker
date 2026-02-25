@@ -1,6 +1,6 @@
 import { initializeApp } from 'firebase/app';
-import { getAuth, GoogleAuthProvider } from 'firebase/auth';
-import { getFirestore } from 'firebase/firestore';
+import { getAuth, GoogleAuthProvider, connectAuthEmulator } from 'firebase/auth';
+import { getFirestore, connectFirestoreEmulator } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
 
 const firebaseConfig = {
@@ -18,3 +18,24 @@ export const auth = getAuth(app);
 export const db = getFirestore(app);
 export const storage = getStorage(app);
 export const googleProvider = new GoogleAuthProvider();
+
+// Connect to Firebase Emulators in test/development mode
+// Check for emulator flag in localStorage (set by tests)
+if (typeof window !== 'undefined') {
+  const useEmulator = localStorage.getItem('USE_FIREBASE_EMULATOR') === 'true';
+
+  if (useEmulator) {
+    try {
+      // Connect to Auth Emulator (port 9099)
+      connectAuthEmulator(auth, 'http://localhost:9099', { disableWarnings: true });
+
+      // Connect to Firestore Emulator (port 8080)
+      connectFirestoreEmulator(db, 'localhost', 8080);
+
+      console.log('🔧 Connected to Firebase Emulators');
+    } catch (error) {
+      // Emulators might already be connected, ignore error
+      console.warn('Emulator connection warning:', error);
+    }
+  }
+}
