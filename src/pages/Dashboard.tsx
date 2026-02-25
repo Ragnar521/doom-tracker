@@ -117,15 +117,28 @@ export default function Dashboard() {
             COMPLETE BATTLE HISTORY
           </h3>
           <div className="space-y-2">
-            {availableYears.map((year) => {
+            {availableYears.map((year, index) => {
               const yearWeeks = getYearWeeks(year);
               const monthGroups = yearMonthGroups.get(year) || new Map();
+
+              // Get previous year data for year-over-year trends
+              const previousYear = availableYears[index + 1];
+              const previousYearWeeks = previousYear ? getYearWeeks(previousYear) : [];
+              const previousYearMonthGroups = previousYear ? yearMonthGroups.get(previousYear) : undefined;
+
+              // Get year-ago data for year-over-year month comparisons
+              const yearAgo = year - 1;
+              const yearAgoMonthGroups = yearMonthGroups.get(yearAgo);
+
               return (
                 <YearSection
                   key={year}
                   year={year}
                   yearWeeks={yearWeeks}
                   monthGroups={monthGroups}
+                  previousYearWeeks={previousYearWeeks}
+                  previousYearMonthGroups={previousYearMonthGroups}
+                  yearAgoMonthGroups={yearAgoMonthGroups}
                 />
               );
             })}

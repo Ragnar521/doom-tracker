@@ -1,19 +1,33 @@
 import { useState, useMemo } from 'react';
 import type { WeekRecord } from '../../hooks/useAllWeeks';
-import { calculateYearStats } from '../../hooks/usePeriodStats';
+import { calculateYearStatsWithTrends } from '../../hooks/usePeriodStats';
 import StatChip from './StatChip';
+import TrendIndicator from './TrendIndicator';
 import MonthSection from './MonthSection';
 
 interface YearSectionProps {
   year: number;
   yearWeeks: WeekRecord[];
   monthGroups: Map<number, WeekRecord[]>;
+  previousYearWeeks?: WeekRecord[];
+  previousYearMonthGroups?: Map<number, WeekRecord[]>;
+  yearAgoMonthGroups?: Map<number, WeekRecord[]>;
 }
 
-export default function YearSection({ year, yearWeeks, monthGroups }: YearSectionProps) {
+export default function YearSection({
+  year,
+  yearWeeks,
+  monthGroups,
+  previousYearWeeks = [],
+  previousYearMonthGroups,
+  yearAgoMonthGroups
+}: YearSectionProps) {
   const [expanded, setExpanded] = useState(false);
 
-  const stats = useMemo(() => calculateYearStats(yearWeeks), [yearWeeks]);
+  const stats = useMemo(
+    () => calculateYearStatsWithTrends(yearWeeks, previousYearWeeks),
+    [yearWeeks, previousYearWeeks]
+  );
 
   return (
     <div className="doom-panel mb-2">
@@ -37,6 +51,7 @@ export default function YearSection({ year, yearWeeks, monthGroups }: YearSectio
         {stats.bestWeek && (
           <StatChip label="BEST" value={`${stats.bestWeek.count} workouts`} />
         )}
+        <TrendIndicator trend={stats.trendVsPreviousYear} label={`vs ${year - 1}`} />
       </div>
 
       {/* Expanded month sections */}
@@ -44,9 +59,27 @@ export default function YearSection({ year, yearWeeks, monthGroups }: YearSectio
         <div className="px-3 pb-3 space-y-2 transition-all duration-300">
           {Array.from(monthGroups.entries())
             .sort((a, b) => a[0] - b[0]) // Jan-Dec
-            .map(([month, weeks]) => (
-              <MonthSection key={month} year={year} month={month} weeks={weeks} />
-            ))}
+            .map(([month, weeks]) => {
+              // Get previous month weeks (handle year boundary)
+              const previousMonth = (month - 1 + 12) % 12;
+              const previousMonthWeeks = month === 0
+                ? previousYearMonthGroups?.get(11) || []
+                : monthGroups.get(previousMonth) || [];
+
+              // Get year-ago month weeks
+              const yearAgoMonthWeeks = yearAgoMonthGroups?.get(month) || [];
+
+              return (
+                <MonthSection
+                  key={month}
+                  year={year}
+                  month={month}
+                  weeks={weeks}
+                  previousMonthWeeks={previousMonthWeeks}
+                  yearAgoMonthWeeks={yearAgoMonthWeeks}
+                />
+              );
+            })}
         </div>
       )}
     </div>
