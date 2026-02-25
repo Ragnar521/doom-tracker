@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { clearStorage } from '../utils/setup';
 
 /**
  * Authentication E2E Tests
@@ -12,6 +13,8 @@ test.describe('Authentication Page', () => {
   test.beforeEach(async ({ page }) => {
     // Navigate to login page
     await page.goto('/login');
+    // Clear storage to ensure clean state between tests
+    await clearStorage(page);
     // Wait for page to load
     await page.waitForSelector('h1:has-text("REP & TEAR")');
   });
@@ -49,10 +52,8 @@ test.describe('Authentication Page', () => {
     const registerTab = page.locator('button:has-text("REGISTER")').first();
     await registerTab.click();
 
-    // Wait for UI to update
-    await page.waitForTimeout(300);
-
     // Button text should change to "CREATE ACCOUNT"
+    // Playwright's expect().toBeVisible() has built-in auto-waiting
     await expect(page.locator('button[type="submit"]:has-text("CREATE ACCOUNT")')).toBeVisible();
 
     // Should show "Confirm Password" field
@@ -68,16 +69,14 @@ test.describe('Authentication Page', () => {
   test('should toggle back from registration to login mode', async ({ page }) => {
     // Switch to register mode
     await page.locator('button:has-text("REGISTER")').first().click();
-    await page.waitForTimeout(300);
 
-    // Verify we're in register mode
+    // Verify we're in register mode (auto-waits for element)
     await expect(page.locator('button[type="submit"]:has-text("CREATE ACCOUNT")')).toBeVisible();
 
     // Click "ALREADY HAVE AN ACCOUNT? SIGN IN" link
     await page.locator('text="ALREADY HAVE AN ACCOUNT? SIGN IN"').click();
-    await page.waitForTimeout(300);
 
-    // Should be back in login mode
+    // Should be back in login mode (auto-waits for element)
     await expect(page.locator('button[type="submit"]:has-text("SIGN IN")')).toBeVisible();
 
     // Confirm password field should be hidden
@@ -91,10 +90,7 @@ test.describe('Authentication Page', () => {
     // Click "FORGOT PASSWORD?" link
     await page.locator('text="FORGOT PASSWORD?"').click();
 
-    // Wait for modal to appear
-    await page.waitForTimeout(500);
-
-    // Modal should be visible with title
+    // Modal should be visible with title (auto-waits for element)
     await expect(page.locator('text="RESET THE PASSWORD"')).toBeVisible();
 
     // Should have send button
@@ -108,10 +104,7 @@ test.describe('Authentication Page', () => {
     // Click sign in
     await page.locator('button[type="submit"]:has-text("SIGN IN")').click();
 
-    // Wait for validation
-    await page.waitForTimeout(500);
-
-    // Should show error message
+    // Should show error message (auto-waits for element)
     await expect(page.locator('text=/EMAIL IS REQUIRED/i')).toBeVisible();
   });
 
@@ -122,10 +115,7 @@ test.describe('Authentication Page', () => {
     // Click sign in
     await page.locator('button[type="submit"]:has-text("SIGN IN")').click();
 
-    // Wait for validation
-    await page.waitForTimeout(500);
-
-    // Should show error message
+    // Should show error message (auto-waits for element)
     await expect(page.locator('text=/PASSWORD IS REQUIRED/i')).toBeVisible();
   });
 
@@ -137,17 +127,16 @@ test.describe('Authentication Page', () => {
     // Click sign in
     await page.locator('button[type="submit"]:has-text("SIGN IN")').click();
 
-    // Wait for validation
-    await page.waitForTimeout(500);
-
-    // Should show error message about password length
+    // Should show error message about password length (auto-waits for element)
     await expect(page.locator('text=/PASSWORD MUST BE AT LEAST 6 CHARACTERS/i')).toBeVisible();
   });
 
   test('should validate matching passwords in register mode', async ({ page }) => {
     // Switch to register mode
     await page.locator('button:has-text("REGISTER")').first().click();
-    await page.waitForTimeout(300);
+
+    // Wait for register mode to be active
+    await expect(page.locator('button[type="submit"]:has-text("CREATE ACCOUNT")')).toBeVisible();
 
     // Fill form with non-matching passwords
     await page.fill('input[type="email"]', 'test@example.com');
@@ -160,10 +149,7 @@ test.describe('Authentication Page', () => {
     // Click create account
     await page.locator('button[type="submit"]:has-text("CREATE ACCOUNT")').click();
 
-    // Wait for validation
-    await page.waitForTimeout(500);
-
-    // Should show error about passwords not matching
+    // Should show error about passwords not matching (auto-waits for element)
     await expect(page.locator('text=/PASSWORDS DO NOT MATCH/i')).toBeVisible();
   });
 
@@ -173,9 +159,8 @@ test.describe('Authentication Page', () => {
 
     // Switch to register mode
     await page.locator('button:has-text("REGISTER")').first().click();
-    await page.waitForTimeout(300);
 
-    // Should change to "JOIN THE ARENA"
+    // Should change to "JOIN THE ARENA" (auto-waits for element)
     await expect(page.locator('text="JOIN THE ARENA"')).toBeVisible();
   });
 });
