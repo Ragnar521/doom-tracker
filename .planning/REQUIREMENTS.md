@@ -55,11 +55,11 @@ Requirements for the enhanced analytics milestone. Each maps to roadmap phases.
 
 ### Trend Indicators
 
-- [ ] **TREND-01**: User sees trend indicator comparing current month vs previous month
-- [ ] **TREND-02**: User sees trend indicator comparing current year vs previous year
-- [ ] **TREND-03**: Trend indicators show up arrow (↑) when performance improves
-- [ ] **TREND-04**: Trend indicators show down arrow (↓) when performance declines
-- [ ] **TREND-05**: Trend indicators show right arrow (→) when performance is stable
+- [x] **TREND-01**: User sees trend indicator comparing current month vs previous month
+- [x] **TREND-02**: User sees trend indicator comparing current year vs previous year
+- [x] **TREND-03**: Trend indicators show up arrow (↑) when performance improves
+- [x] **TREND-04**: Trend indicators show down arrow (↓) when performance declines
+- [x] **TREND-05**: Trend indicators show right arrow (→) when performance is stable
 - [x] **TREND-06**: Trend indicators display percentage change (e.g., "+15%")
 - [x] **TREND-07**: User sees comparison vs personal all-time average
 - [x] **TREND-08**: Trend calculations exclude sick/vacation weeks
@@ -149,11 +149,11 @@ Which phases cover which requirements. Updated during roadmap creation.
 | YEARLY-05 | Phase 2 | Complete |
 | YEARLY-06 | Phase 2 | Complete |
 | YEARLY-07 | Phase 2 | Complete |
-| TREND-01 | Phase 3 | Pending |
-| TREND-02 | Phase 3 | Pending |
-| TREND-03 | Phase 3 | Pending |
-| TREND-04 | Phase 3 | Pending |
-| TREND-05 | Phase 3 | Pending |
+| TREND-01 | Phase 3 | Complete |
+| TREND-02 | Phase 3 | Complete |
+| TREND-03 | Phase 3 | Complete |
+| TREND-04 | Phase 3 | Complete |
+| TREND-05 | Phase 3 | Complete |
 | TREND-06 | Phase 3 | Complete |
 | TREND-07 | Phase 3 | Complete |
 | TREND-08 | Phase 3 | Complete |

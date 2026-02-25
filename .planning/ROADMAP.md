@@ -14,7 +14,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 - [ ] **Phase 1: Health Bar Color Foundation** - Replace confusing traffic light colors with health bar paradigm and establish lazy loading architecture
 - [x] **Phase 2: Expandable Timeline & Summaries** - Remove 12-week limitation with collapsible year/month sections and period aggregations (completed 2026-02-25)
-- [ ] **Phase 3: Trend Indicators & Comparisons** - Add momentum arrows and comparative benchmarks for context
+- [x] **Phase 3: Trend Indicators & Comparisons** - Add momentum arrows and comparative benchmarks for context (completed 2026-02-25)
 - [ ] **Phase 4: Accessibility & Polish** - Ensure colorblind support, keyboard navigation, and performance at scale
 
 ## Phase Details
@@ -70,7 +70,7 @@ Plans:
 
 Plans:
 - [x] 03-01-PLAN.md — Trend Calculation Infrastructure (trendUtils + period stats extensions + global average hook)
-- [ ] 03-02-PLAN.md — Trend UI Integration (TrendIndicator component + timeline updates + Dashboard stats)
+- [x] 03-02-PLAN.md — Trend UI Integration (TrendIndicator component + timeline updates + Dashboard stats)
 
 ### Phase 4: Accessibility & Polish
 **Goal**: Ensure features work for all users through colorblind support, keyboard navigation, and performance validation
@@ -96,5 +96,5 @@ Phases execute in numeric order: 1 → 2 → 3 → 4
 |-------|----------------|--------|-----------|
 | 1. Health Bar Color Foundation | 0/1 | Not started | - |
 | 2. Expandable Timeline & Summaries | 5/5 | Complete   | 2026-02-25 |
-| 3. Trend Indicators & Comparisons | 1/2 | In Progress | - |
+| 3. Trend Indicators & Comparisons | 2/2 | Complete | 2026-02-25 |
 | 4. Accessibility & Polish | 0/TBD | Not started | - |
