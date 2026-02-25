@@ -28,9 +28,9 @@ Requirements for the enhanced analytics milestone. Each maps to roadmap phases.
 - [ ] **TIMELINE-06**: User can expand/collapse month sections with click/tap
 - [x] **TIMELINE-07**: Expanded sections lazy load data (not loaded upfront)
 - [ ] **TIMELINE-08**: Loading skeletons appear while data fetches
-- [ ] **TIMELINE-09**: Expanded sections display week grids with workout counts
-- [ ] **TIMELINE-10**: Week grids use health bar color scheme
-- [ ] **TIMELINE-11**: Mobile UI has 44px minimum touch targets for expand/collapse
+- [x] **TIMELINE-09**: Expanded sections display week grids with workout counts
+- [x] **TIMELINE-10**: Week grids use health bar color scheme
+- [x] **TIMELINE-11**: Mobile UI has 44px minimum touch targets for expand/collapse
 - [ ] **TIMELINE-12**: Timeline works smoothly on mobile with 100+ weeks of data
 
 ### Monthly Summaries
@@ -131,9 +131,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 | TIMELINE-06 | Phase 2 | Pending |
 | TIMELINE-07 | Phase 2 | Complete |
 | TIMELINE-08 | Phase 2 | Pending |
-| TIMELINE-09 | Phase 2 | Pending |
-| TIMELINE-10 | Phase 2 | Pending |
-| TIMELINE-11 | Phase 2 | Pending |
+| TIMELINE-09 | Phase 2 | Complete |
+| TIMELINE-10 | Phase 2 | Complete |
+| TIMELINE-11 | Phase 2 | Complete |
 | TIMELINE-12 | Phase 2 | Pending |
 | MONTHLY-01 | Phase 2 | Complete |
 | MONTHLY-02 | Phase 2 | Complete |
