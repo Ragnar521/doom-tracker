@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { signInTestUser, setupMockWeekData } from '../utils/mockAuth';
+import { signInTestUser } from '../utils/mockAuth';
 
 /**
  * Achievements Page - Authenticated Tests
@@ -26,9 +26,6 @@ test.describe('Achievements Page - Authenticated', () => {
   test.beforeEach(async ({ page }) => {
     // Sign in test user (creates user if doesn't exist)
     await signInTestUser(page);
-
-    // Setup mock week data
-    await setupMockWeekData(page);
 
     // Navigate to achievements page
     await page.goto('/achievements');
@@ -91,10 +88,10 @@ test.describe('Achievements Page - Authenticated', () => {
     expect(hasStreak || hasPerformance).toBeTruthy();
   });
 
-  test('should display progress bars for long-term achievements', async ({ page }) => {
-    // Achievements may show progress bars when locked
-    // This is a UI structure test - just verify the page loaded correctly
-    await expect(page.locator('h2:has-text("ACHIEVEMENTS")')).toBeVisible();
+  test.skip('should display progress bars for long-term achievements', async () => {
+    // TODO: Seed Firestore with achievement data to test progress bars
+    // Currently skipped because authenticated users have empty Firestore (no seeded data)
+    // See GitHub issue for Firestore Admin SDK seeding
   });
 
   test('should show unlocked achievements differently than locked ones', async ({ page }) => {
@@ -109,18 +106,16 @@ test.describe('Achievements Page - Authenticated', () => {
     expect(unlockedCount + lockedCount).toBeGreaterThan(0);
   });
 
-  test('should display unlock date for unlocked achievements', async ({ page }) => {
-    // NOTE: Mock data writes to localStorage but authenticated users read from Firestore
-    // This test only verifies UI structure, not actual unlocked state
-    // Just verify the page structure is correct
-    await expect(page.locator('h2:has-text("ACHIEVEMENTS")')).toBeVisible();
+  test.skip('should display unlock date for unlocked achievements', async () => {
+    // TODO: Seed Firestore with unlocked achievement data
+    // Currently skipped because authenticated users have empty Firestore (no seeded data)
+    // Need to use Firestore Admin SDK or emulator REST API to seed data
   });
 
-  test('should hide hidden achievements until unlocked', async ({ page }) => {
-    // Hidden category achievements shouldn't be visible when locked
-    // This is hard to test without knowing exact achievement IDs
-    // Just verify the page loads correctly
-    await expect(page.locator('h2:has-text("ACHIEVEMENTS")')).toBeVisible();
+  test.skip('should hide hidden achievements until unlocked', async () => {
+    // TODO: Seed Firestore with locked hidden achievements and verify they're not shown
+    // Currently skipped because authenticated users have empty Firestore (no seeded data)
+    // Need specific achievement IDs and Firestore seeding
   });
 
   test('should show total achievements count', async ({ page }) => {

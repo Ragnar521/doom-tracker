@@ -129,16 +129,16 @@ test.describe('Navigation', () => {
     await page.goto('/this-route-does-not-exist');
 
     // Wait for page load
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
 
-    // App doesn't have a catch-all route, so non-existent routes show blank page
-    // This is expected behavior - no route matches, nothing renders
+    // Verify URL stayed at the non-existent route (no redirect)
     const url = page.url();
     expect(url).toContain('/this-route-does-not-exist');
 
-    // No content should be visible (blank page)
-    const mainHeading = page.locator('h1:has-text("REP & TEAR")');
-    await expect(mainHeading).not.toBeVisible();
+    // React Router SPA without catch-all route shows blank page
+    // Verify the page is empty (no main heading from any route)
+    const bodyText = await page.locator('body').textContent();
+    expect(bodyText?.trim() || '').toBe('');
   });
 
   test('should load login page quickly', async ({ page }) => {

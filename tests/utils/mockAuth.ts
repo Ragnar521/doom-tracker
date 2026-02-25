@@ -29,8 +29,13 @@ export async function signInTestUser(page: Page) {
   await page.fill('input[type="password"]', TEST_USER.password);
   await page.locator('button[type="submit"]:has-text("SIGN IN")').click();
 
-  // Wait to see what happens
-  await page.waitForTimeout(2000);
+  // Wait for either redirect (success) or error message (failure)
+  await Promise.race([
+    page.waitForURL((url) => !url.toString().includes('/login'), { timeout: 5000 }),
+    page.waitForSelector('text=/USER NOT FOUND|WRONG PASSWORD|EMAIL ALREADY IN USE/i', { timeout: 5000 }),
+  ]).catch(() => {
+    // Timeout is okay - we'll check the current state below
+  });
 
   let currentUrl = page.url();
 

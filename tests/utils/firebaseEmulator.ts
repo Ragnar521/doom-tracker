@@ -1,14 +1,16 @@
-import { spawn } from 'child_process';
+import { spawn, execSync, ChildProcess } from 'child_process';
 import { promisify } from 'util';
 
 const sleep = promisify(setTimeout);
+
+// Track the emulator process for clean teardown
+let emulatorProcess: ChildProcess | null = null;
 
 /**
  * Check if a port is responding
  */
 async function isPortResponding(port: number): Promise<boolean> {
   try {
-    const { execSync } = await import('child_process');
     // Use curl to check if port is responding (works on macOS and Linux)
     execSync(`curl -s http://localhost:${port} > /dev/null 2>&1`, { timeout: 1000 });
     return true;
@@ -22,7 +24,6 @@ async function isPortResponding(port: number): Promise<boolean> {
  */
 async function killPort(port: number): Promise<void> {
   try {
-    const { execSync } = await import('child_process');
     if (process.platform === 'win32') {
       // Windows: Extract PID from netstat and kill the process
       const output = execSync(`netstat -ano | findstr :${port} | findstr LISTENING`, { encoding: 'utf-8' });
@@ -56,7 +57,6 @@ export async function startEmulators(): Promise<void> {
 
   try {
     // Verify Java version
-    const { execSync } = await import('child_process');
     try {
       const javaVersion = execSync('java -version 2>&1', { encoding: 'utf-8' });
       console.log('Java version:', javaVersion.split('\n')[0]);
@@ -76,7 +76,7 @@ export async function startEmulators(): Promise<void> {
     console.log('JAVA_HOME:', process.env.JAVA_HOME);
     console.log('PATH:', process.env.PATH?.slice(0, 200));
 
-    const emulatorProcess = spawn('npx', ['firebase', 'emulators:start', '--only', 'auth,firestore'], {
+    emulatorProcess = spawn('npx', ['firebase', 'emulators:start', '--only', 'auth,firestore'], {
       detached: true,
       stdio: ['ignore', 'pipe', 'pipe'], // Capture stdout/stderr for debugging
       env: process.env,
@@ -135,20 +135,23 @@ export async function stopEmulators(): Promise<void> {
   console.log('Stopping Firebase Emulators...');
 
   try {
-    const { execSync } = await import('child_process');
-
-    // Kill emulator processes (cross-platform)
-    try {
-      if (process.platform === 'win32') {
-        execSync('taskkill /F /IM java.exe /FI "WINDOWTITLE eq firebase*" 2>nul', { stdio: 'ignore' });
-      } else {
-        execSync('pkill -f "firebase.*emulators" 2>/dev/null', { stdio: 'ignore' });
+    // Kill the specific emulator process if we have its PID
+    if (emulatorProcess && emulatorProcess.pid) {
+      try {
+        if (process.platform === 'win32') {
+          execSync(`taskkill /F /PID ${emulatorProcess.pid} /T`, { stdio: 'ignore' });
+        } else {
+          // Kill process group to ensure child processes are also killed
+          process.kill(-emulatorProcess.pid, 'SIGTERM');
+        }
+        console.log(`Killed emulator process ${emulatorProcess.pid}`);
+      } catch {
+        // Process might already be dead
       }
-    } catch {
-      // Ignore errors - emulators might not be running
+      emulatorProcess = null;
     }
 
-    // Kill ports as backup
+    // Kill ports as backup (in case process tracking failed)
     await Promise.all([
       killPort(9099),
       killPort(8080),
