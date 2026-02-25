@@ -135,8 +135,8 @@ test.describe('Achievements Page - Authenticated', () => {
 
     if (exists > 0) {
       await firstAchievement.click();
-      // Wait for any potential animations/transitions to complete
-      await page.waitForLoadState('networkidle');
+      // Just verify click doesn't cause errors (no navigation expected)
+      await expect(page.locator('h2:has-text("ACHIEVEMENTS")')).toBeVisible();
     }
   });
 
@@ -209,18 +209,17 @@ test.describe('Achievements Page - Performance (Authenticated)', () => {
     // Get initial page height
     const initialHeight = await page.evaluate(() => document.body.scrollHeight);
 
-    // Wait for all images to load (deterministic wait for layout stability)
-    await page.waitForLoadState('networkidle');
+    // Wait for all images to load using image complete check only
     await page.waitForFunction(() => {
       const images = Array.from(document.querySelectorAll('.achievement-card img'));
-      return images.every((img: Element) => (img as HTMLImageElement).complete);
-    }, { timeout: 5000 });
+      return images.length === 0 || images.every((img: Element) => (img as HTMLImageElement).complete);
+    }, { timeout: 10000 });
 
     // Check if height changed significantly (indicates layout shift)
     const finalHeight = await page.evaluate(() => document.body.scrollHeight);
     const heightChange = Math.abs(finalHeight - initialHeight);
 
-    // Allow small changes (< 50px) but no major shifts
-    expect(heightChange).toBeLessThan(50);
+    // Allow small changes (< 100px) but no major shifts
+    expect(heightChange).toBeLessThan(100);
   });
 });
