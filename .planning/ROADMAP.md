@@ -13,7 +13,7 @@ This milestone enhances Rep & Tear's analytics capabilities by fixing the confus
 Decimal phases appear between their surrounding integers in numeric order.
 
 - [ ] **Phase 1: Health Bar Color Foundation** - Replace confusing traffic light colors with health bar paradigm and establish lazy loading architecture
-- [ ] **Phase 2: Expandable Timeline & Summaries** - Remove 12-week limitation with collapsible year/month sections and period aggregations
+- [x] **Phase 2: Expandable Timeline & Summaries** - Remove 12-week limitation with collapsible year/month sections and period aggregations (completed 2026-02-25)
 - [ ] **Phase 3: Trend Indicators & Comparisons** - Add momentum arrows and comparative benchmarks for context
 - [ ] **Phase 4: Accessibility & Polish** - Ensure colorblind support, keyboard navigation, and performance at scale
 
@@ -94,6 +94,6 @@ Phases execute in numeric order: 1 → 2 → 3 → 4
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Health Bar Color Foundation | 0/1 | Not started | - |
-| 2. Expandable Timeline & Summaries | 3/5 | In Progress|  |
+| 2. Expandable Timeline & Summaries | 5/5 | Complete   | 2026-02-25 |
 | 3. Trend Indicators & Comparisons | 0/TBD | Not started | - |
 | 4. Accessibility & Polish | 0/TBD | Not started | - |
