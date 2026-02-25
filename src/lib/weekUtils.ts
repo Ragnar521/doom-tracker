@@ -1,4 +1,5 @@
 // ISO Week utilities
+import type { WeekStatus } from '../hooks/useWeek';
 
 /**
  * Get ISO week ID from a date (e.g., "2025-W01")
@@ -141,4 +142,54 @@ export function isFutureWeek(weekId: string): boolean {
   const currentWeekStart = getWeekStart(getCurrentWeekId());
   const targetWeekStart = getWeekStart(weekId);
   return targetWeekStart > currentWeekStart;
+}
+
+/**
+ * Get health bar color based on workout count
+ *
+ * Maps workout count to Tailwind background color class using DOOM health bar paradigm:
+ * - Green represents full health (best performance)
+ * - Yellow represents damaged state (moderate performance)
+ * - Red represents critical health (low performance)
+ *
+ * Color mapping:
+ * - 6-7 workouts → bg-doom-green (full health, godmode)
+ * - 5 workouts → bg-green-600 (strong health, lighter green shade)
+ * - 3-4 workouts → bg-yellow-600 (damaged, meets 3+ workout target)
+ * - 1-2 workouts → bg-doom-red (critical health)
+ * - 0 workouts → bg-gray-800 (tracked but inactive)
+ *
+ * @param workoutCount - Number of workouts completed in the week (0-7)
+ * @returns Tailwind background color class string
+ */
+export function getHealthColor(workoutCount: number): string {
+  if (workoutCount >= 6) return 'bg-doom-green';
+  if (workoutCount >= 5) return 'bg-green-600';
+  if (workoutCount >= 3) return 'bg-yellow-600';
+  if (workoutCount >= 1) return 'bg-doom-red';
+  return 'bg-gray-800';
+}
+
+/**
+ * Get status border class for dual visual encoding
+ *
+ * Dual encoding system:
+ * - Border shows week status (sick/vacation/normal)
+ * - Background shows performance (via getHealthColor)
+ *
+ * This allows users to see both status AND performance at a glance.
+ * For example: a sick week with 5 workouts shows gold border + light green background.
+ *
+ * Border mapping:
+ * - sick → border-2 border-doom-gold (gold border indicates sick status)
+ * - vacation → border-2 border-blue-500 (blue border indicates vacation status)
+ * - normal → '' (no border, performance color only)
+ *
+ * @param status - Week status ('normal' | 'sick' | 'vacation')
+ * @returns Tailwind border class string (or empty string for normal status)
+ */
+export function getStatusBorderClass(status: WeekStatus): string {
+  if (status === 'sick') return 'border-2 border-doom-gold';
+  if (status === 'vacation') return 'border-2 border-blue-500';
+  return '';
 }
