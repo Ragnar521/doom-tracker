@@ -707,19 +707,6 @@
   }
 }
 
-/* Timeline section transitions */
-.timeline-section {
-  max-height: 0;
-  overflow: hidden;
-  transition: max-height 0.25s ease-in-out, opacity 0.2s ease;
-  opacity: 0;
-}
-
-.timeline-section.expanded {
-  max-height: 3000px; /* Large enough for year with 12 months */
-  opacity: 1;
-}
-
 /* Loading skeleton animation (reuse existing pulse) */
 .timeline-skeleton {
   @apply animate-pulse bg-gray-800 rounded;

@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import type { WeekRecord } from '../../hooks/useAllWeeks';
-import { calculateYearStatsWithTrends } from '../../hooks/usePeriodStats';
+import { calculateYearStatsWithTrends } from '../../lib/periodStats';
 import StatChip from './StatChip';
 import TrendIndicator from './TrendIndicator';
 import MonthSection from './MonthSection';

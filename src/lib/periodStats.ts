@@ -1,6 +1,6 @@
-import type { WeekRecord } from './useAllWeeks';
-import { getNormalWeeks } from '../lib/timelineUtils';
-import { calculateTrend, type TrendData } from '../lib/trendUtils';
+import type { WeekRecord } from '../hooks/useAllWeeks';
+import { getNormalWeeks } from './timelineUtils';
+import { calculateTrend, type TrendData } from './trendUtils';
 
 export interface MonthStats {
   totalWorkouts: number;
