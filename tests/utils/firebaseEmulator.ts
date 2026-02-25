@@ -138,10 +138,14 @@ export async function stopEmulators(): Promise<void> {
     const { execSync } = await import('child_process');
 
     // Kill emulator processes (cross-platform)
-    if (process.platform === 'win32') {
-      execSync('taskkill /F /IM java.exe /FI "WINDOWTITLE eq firebase*" 2>nul || true', { stdio: 'ignore' });
-    } else {
-      execSync('pkill -f "firebase.*emulators" 2>/dev/null || true', { stdio: 'ignore' });
+    try {
+      if (process.platform === 'win32') {
+        execSync('taskkill /F /IM java.exe /FI "WINDOWTITLE eq firebase*" 2>nul', { stdio: 'ignore' });
+      } else {
+        execSync('pkill -f "firebase.*emulators" 2>/dev/null', { stdio: 'ignore' });
+      }
+    } catch {
+      // Ignore errors - emulators might not be running
     }
 
     // Kill ports as backup
