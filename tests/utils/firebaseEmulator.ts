@@ -24,7 +24,17 @@ async function killPort(port: number): Promise<void> {
   try {
     const { execSync } = await import('child_process');
     if (process.platform === 'win32') {
-      execSync(`netstat -ano | findstr :${port} | findstr LISTENING`, { stdio: 'ignore' });
+      // Windows: Extract PID from netstat and kill the process
+      const output = execSync(`netstat -ano | findstr :${port} | findstr LISTENING`, { encoding: 'utf-8' });
+      // Output format: "  TCP    0.0.0.0:9099    0.0.0.0:0    LISTENING    12345"
+      const lines = output.trim().split('\n');
+      for (const line of lines) {
+        const parts = line.trim().split(/\s+/);
+        const pid = parts[parts.length - 1]; // PID is last column
+        if (pid && /^\d+$/.test(pid)) {
+          execSync(`taskkill /F /PID ${pid}`, { stdio: 'ignore' });
+        }
+      }
     } else {
       execSync(`lsof -ti:${port} | xargs kill -9 2>/dev/null || true`, { stdio: 'ignore' });
     }
@@ -68,19 +78,35 @@ export async function startEmulators(): Promise<void> {
 
     const emulatorProcess = spawn('npx', ['firebase', 'emulators:start', '--only', 'auth,firestore'], {
       detached: true,
-      stdio: 'ignore',
+      stdio: ['ignore', 'pipe', 'pipe'], // Capture stdout/stderr for debugging
       env: process.env,
+    });
+
+    // Log emulator errors for debugging
+    if (emulatorProcess.stderr) {
+      emulatorProcess.stderr.on('data', (data) => {
+        // Log errors immediately for debugging
+        console.error('Emulator stderr:', data.toString());
+      });
+    }
+
+    emulatorProcess.on('error', (err) => {
+      console.error('Emulator process error:', err);
     });
 
     emulatorProcess.unref();
 
     // Wait for BOTH emulators to be ready
     console.log('Waiting for emulators to start...');
-    const maxAttempts = 30;
+    const maxAttempts = 60; // Increased to 60 seconds for CI
 
     for (let attempt = 0; attempt < maxAttempts; attempt++) {
       const authReady = await isPortResponding(9099);
       const firestoreReady = await isPortResponding(8080);
+
+      if (attempt % 5 === 0) {
+        console.log(`  Attempt ${attempt + 1}/${maxAttempts}: Auth=${authReady}, Firestore=${firestoreReady}`);
+      }
 
       if (authReady && firestoreReady) {
         console.log('✅ Firebase Emulators ready!');
@@ -93,7 +119,7 @@ export async function startEmulators(): Promise<void> {
       await sleep(1000); // Async sleep, non-blocking
     }
 
-    throw new Error('Firebase Emulators failed to start after 30 seconds');
+    throw new Error('Firebase Emulators failed to start after 60 seconds');
   } catch (error) {
     console.error('Failed to start Firebase Emulators:', error);
     throw error;

@@ -171,14 +171,14 @@ test.describe('Navigation', () => {
     // Scroll down on login page
     await page.evaluate(() => window.scrollTo(0, 500));
 
-    // Wait a bit
-    await page.waitForTimeout(500);
+    // Wait for scroll to complete
+    await page.waitForFunction(() => window.scrollY >= 400, { timeout: 2000 });
 
     // Check scroll position
     const scrollY = await page.evaluate(() => window.scrollY);
 
-    // Should have scrolled (though login page might not have enough content)
-    // Just verify the page responds to scroll commands
-    expect(scrollY).toBeGreaterThanOrEqual(0);
+    // Should have scrolled (though login page might not have enough content to scroll)
+    // Verify scroll actually happened, or page is too short to scroll
+    expect(scrollY).toBeGreaterThan(0);
   });
 });

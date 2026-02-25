@@ -9,7 +9,9 @@ import { startEmulators } from '../utils/firebaseEmulator.js';
 async function globalSetup() {
   try {
     await startEmulators();
+    process.env.EMULATORS_AVAILABLE = 'true';
   } catch {
+    process.env.EMULATORS_AVAILABLE = 'false';
     console.warn('⚠️  Firebase Emulators unavailable — authenticated tests will be skipped');
     console.warn('   Install Java 21+ to run authenticated tests:');
     console.warn('   macOS: brew install openjdk@21');

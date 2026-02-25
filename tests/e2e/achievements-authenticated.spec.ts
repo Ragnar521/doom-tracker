@@ -7,6 +7,11 @@ import { signInTestUser, setupMockWeekData } from '../utils/mockAuth';
  * These tests use Firebase Emulator to create a real test user
  * and test the achievements page UI and functionality.
  *
+ * IMPORTANT: These tests verify UI structure only, not actual achievement data.
+ * setupMockWeekData() writes to localStorage, but authenticated users read from Firestore.
+ * This means achievement state is tested with empty Firestore data.
+ * TODO: Seed Firestore via emulator REST API for realistic achievement testing.
+ *
  * Requirements:
  * - Firebase Emulators must be running (started by globalSetup)
  * - Auth Emulator on port 9099
@@ -15,6 +20,9 @@ import { signInTestUser, setupMockWeekData } from '../utils/mockAuth';
  */
 
 test.describe('Achievements Page - Authenticated', () => {
+  // Skip all tests if emulators are unavailable
+  test.skip(process.env.EMULATORS_AVAILABLE !== 'true', 'Firebase Emulators not available');
+
   test.beforeEach(async ({ page }) => {
     // Sign in test user (creates user if doesn't exist)
     await signInTestUser(page);
@@ -85,10 +93,8 @@ test.describe('Achievements Page - Authenticated', () => {
 
   test('should display progress bars for long-term achievements', async ({ page }) => {
     // Achievements may show progress bars when locked
-    const progressBars = page.locator('.achievement-progress');
-    // May be 0 if all are unlocked or no progress achievements visible
-    const count = await progressBars.count();
-    expect(count).toBeGreaterThanOrEqual(0);
+    // This is a UI structure test - just verify the page loaded correctly
+    await expect(page.locator('h2:has-text("ACHIEVEMENTS")')).toBeVisible();
   });
 
   test('should show unlocked achievements differently than locked ones', async ({ page }) => {
@@ -104,12 +110,10 @@ test.describe('Achievements Page - Authenticated', () => {
   });
 
   test('should display unlock date for unlocked achievements', async ({ page }) => {
-    // Show when achievement was unlocked
-    const unlockedDates = page.locator('.achievement-card.unlocked p.text-doom-gold');
-    const count = await unlockedDates.count();
-
-    // Based on mock data, should have at least 1 unlocked achievement
-    expect(count).toBeGreaterThanOrEqual(0);
+    // NOTE: Mock data writes to localStorage but authenticated users read from Firestore
+    // This test only verifies UI structure, not actual unlocked state
+    // Just verify the page structure is correct
+    await expect(page.locator('h2:has-text("ACHIEVEMENTS")')).toBeVisible();
   });
 
   test('should hide hidden achievements until unlocked', async ({ page }) => {
@@ -131,8 +135,8 @@ test.describe('Achievements Page - Authenticated', () => {
 
     if (exists > 0) {
       await firstAchievement.click();
-      // No error should occur
-      await page.waitForTimeout(500);
+      // Wait for any potential animations/transitions to complete
+      await page.waitForLoadState('networkidle');
     }
   });
 
@@ -152,19 +156,25 @@ test.describe('Achievements Page - Authenticated', () => {
   test('should maintain scroll position on achievements page', async ({ page }) => {
     // If many achievements, test scroll behavior
     await page.evaluate(() => window.scrollTo(0, 500));
-    await page.waitForTimeout(300);
+    // Wait for scroll to complete (using small timeout is unavoidable for scroll)
+    await page.waitForFunction(() => window.scrollY >= 400, { timeout: 2000 });
     const scrollY = await page.evaluate(() => window.scrollY);
-    expect(scrollY).toBeGreaterThanOrEqual(0);
+    expect(scrollY).toBeGreaterThan(400); // Actually verify scroll happened
   });
 
   test('should have responsive layout for achievements grid', async ({ page }) => {
     // Test on different viewport sizes
     await page.setViewportSize({ width: 375, height: 667 }); // Mobile
 
-    // Grid should still be visible
+    // Grid should still be visible and responsive
     const achievementCards = page.locator('.achievement-card');
     const count = await achievementCards.count();
-    expect(count).toBeGreaterThanOrEqual(0);
+
+    // Should have at least some achievement cards visible
+    expect(count).toBeGreaterThan(0);
+
+    // Verify page heading is still visible on mobile
+    await expect(page.locator('h2:has-text("ACHIEVEMENTS")')).toBeVisible();
   });
 });
 
@@ -172,6 +182,9 @@ test.describe('Achievements Page - Authenticated', () => {
  * Achievements Page - Performance Tests (Authenticated)
  */
 test.describe('Achievements Page - Performance (Authenticated)', () => {
+  // Skip all tests if emulators are unavailable
+  test.skip(process.env.EMULATORS_AVAILABLE !== 'true', 'Firebase Emulators not available');
+
   test.beforeEach(async ({ page }) => {
     // Sign in test user
     await signInTestUser(page);
@@ -196,8 +209,12 @@ test.describe('Achievements Page - Performance (Authenticated)', () => {
     // Get initial page height
     const initialHeight = await page.evaluate(() => document.body.scrollHeight);
 
-    // Wait a bit to see if layout shifts
-    await page.waitForTimeout(1000);
+    // Wait for all images to load (deterministic wait for layout stability)
+    await page.waitForLoadState('networkidle');
+    await page.waitForFunction(() => {
+      const images = Array.from(document.querySelectorAll('.achievement-card img'));
+      return images.every((img: Element) => (img as HTMLImageElement).complete);
+    }, { timeout: 5000 });
 
     // Check if height changed significantly (indicates layout shift)
     const finalHeight = await page.evaluate(() => document.body.scrollHeight);

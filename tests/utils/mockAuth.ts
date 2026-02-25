@@ -57,7 +57,11 @@ export async function signInTestUser(page: Page) {
 
     // Create account
     await page.locator('button[type="submit"]:has-text("CREATE ACCOUNT")').click();
-    await page.waitForTimeout(3000); // Wait for account creation
+
+    // Wait for redirect after account creation (to tracker page)
+    await page.waitForURL('**/', { timeout: 5000 }).catch(() => {
+      // If waitForURL times out, check if we're still on login
+    });
 
     currentUrl = page.url();
 
@@ -84,7 +88,11 @@ export async function signInTestUser(page: Page) {
     await page.fill('input[type="password"]', TEST_USER.password);
     await page.locator('button[type="submit"]:has-text("SIGN IN")').click();
 
-    await page.waitForTimeout(2000);
+    // Wait for redirect after login (to tracker page)
+    await page.waitForURL('**/', { timeout: 5000 }).catch(() => {
+      // If waitForURL times out, check if we're still on login
+    });
+
     currentUrl = page.url();
 
     if (!currentUrl.includes('/login')) {
