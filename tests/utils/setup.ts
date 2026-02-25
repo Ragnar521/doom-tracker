@@ -14,7 +14,7 @@ export async function clearStorage(page: Page) {
       localStorage.clear();
       sessionStorage.clear();
     });
-  } catch (error) {
+  } catch {
     // Ignore errors if storage is not accessible yet
     // This can happen if called before navigating to any page
   }

@@ -25,7 +25,7 @@ jobs:
       run: npm ci
 
     - name: Install Playwright Browsers
-      run: npx playwright install --with-deps chromium firefox webkit
+      run: npx playwright install --with-deps chromium
 
     - name: Create test environment file
       run: |
