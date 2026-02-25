@@ -50,7 +50,7 @@ export async function startEmulators(): Promise<void> {
     try {
       const javaVersion = execSync('java -version 2>&1', { encoding: 'utf-8' });
       console.log('Java version:', javaVersion.split('\n')[0]);
-    } catch (error) {
+    } catch {
       console.warn('⚠️  Could not verify Java installation');
     }
 
