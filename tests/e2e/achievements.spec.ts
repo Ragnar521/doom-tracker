@@ -89,7 +89,7 @@ test.describe('Achievements Page - Navigation', () => {
     expect(page.url()).toContain('/login');
   });
 
-  test.skip('should show achievements in bottom navigation after authentication', async ({ page }) => {
+  test.skip('should show achievements in bottom navigation after authentication', async () => {
     // Requires authentication
     // After login, bottom nav should have achievements icon/link
     // Implemented in authenticated tests (achievements-authenticated.spec.ts)

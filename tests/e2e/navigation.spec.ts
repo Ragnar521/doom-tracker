@@ -120,15 +120,7 @@ test.describe('Navigation', () => {
 
     // Check if typical navigation items are absent
     // Bottom nav usually has specific icons/links
-    const trackerNav = page.locator('nav a[href="/"]');
-    const dashboardNav = page.locator('nav a[href="/dashboard"]');
-
-    // These should not be visible on login page (or not exist)
-    const trackerCount = await trackerNav.count();
-    const dashboardCount = await dashboardNav.count();
-
-    // Either 0 (not present) or hidden
-    // We just verify the login page is showing correctly
+    // We just verify the login page is showing correctly (no bottom nav expected)
     expect(page.url()).toContain('/login');
   });
 
