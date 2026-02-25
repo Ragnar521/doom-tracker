@@ -45,6 +45,15 @@ export async function startEmulators(): Promise<void> {
   console.log('Starting Firebase Emulators...');
 
   try {
+    // Verify Java version
+    const { execSync } = await import('child_process');
+    try {
+      const javaVersion = execSync('java -version 2>&1', { encoding: 'utf-8' });
+      console.log('Java version:', javaVersion.split('\n')[0]);
+    } catch (error) {
+      console.warn('⚠️  Could not verify Java installation');
+    }
+
     // Kill any existing processes on emulator ports
     await Promise.all([
       killPort(9099), // Auth
@@ -54,6 +63,9 @@ export async function startEmulators(): Promise<void> {
 
     // Start emulators in background
     // Trust JAVA_HOME from environment (CI sets this via setup-java action)
+    console.log('JAVA_HOME:', process.env.JAVA_HOME);
+    console.log('PATH:', process.env.PATH?.slice(0, 200));
+
     const emulatorProcess = spawn('npx', ['firebase', 'emulators:start', '--only', 'auth,firestore'], {
       detached: true,
       stdio: 'ignore',
