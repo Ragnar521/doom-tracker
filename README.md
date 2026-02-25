@@ -118,6 +118,8 @@ Rep & Tear transforms gym tracking into an immersive DOOM experience. Watch the 
 - **ESLint 9** - Code linting
 - **TypeScript ESLint** - TypeScript-specific rules
 - **PostCSS & Autoprefixer** - CSS processing
+- **Playwright** - E2E testing framework
+- **Firebase Emulators** - Local testing environment
 
 ## Architecture
 
@@ -163,9 +165,24 @@ doom-tracker/
 │   ├── App.tsx            # Root component with routing
 │   ├── main.tsx           # Entry point
 │   └── index.css          # Global styles + DOOM theme
+├── tests/                 # E2E test suite (Playwright)
+│   ├── e2e/              # Test spec files
+│   │   └── auth.spec.ts  # Authentication tests
+│   ├── utils/            # Test helper functions
+│   │   └── setup.ts      # Common test utilities
+│   └── README.md         # Testing documentation
+├── .github/
+│   └── workflows/        # CI/CD workflows
+│       ├── playwright.yml    # E2E testing workflow
+│       ├── claude.yml        # Claude Code integration
+│       └── claude-code-review.yml  # Automated PR reviews
 ├── doom-assets/           # Original asset source files
 ├── public/                # Static public files
 ├── .env.local            # Firebase config (not in git)
+├── .env.test             # Test environment config (not in git)
+├── firebase.json         # Firebase emulator configuration
+├── firestore.indexes.json # Firestore indexes
+├── playwright.config.ts  # Playwright test configuration
 ├── vercel.json           # Vercel deployment config
 ├── vite.config.ts        # Vite configuration
 ├── tailwind.config.js    # Tailwind theme extensions
@@ -318,6 +335,115 @@ Serves the production build locally for testing.
 ```bash
 npm run lint
 ```
+
+## Testing
+
+### E2E Testing with Playwright
+
+The project includes comprehensive end-to-end tests using Playwright that run across 5 browsers (Chrome, Firefox, Safari, Mobile Chrome, Mobile Safari).
+
+**Current Test Coverage:**
+- ✅ **45 tests passing** (9 test scenarios × 5 browsers)
+- ✅ Authentication page (login, register, validation)
+- ✅ Form validation (empty fields, password requirements)
+- ✅ Mode switching (login ↔ register)
+- ✅ Password reset flow
+
+#### Running Tests
+
+```bash
+# Run all tests (headless mode)
+npm run test:e2e
+
+# Interactive UI mode (recommended for development)
+npm run test:e2e:ui
+
+# Run tests with browser visible
+npm run test:e2e:headed
+
+# Debug specific test
+npm run test:e2e:debug
+
+# View HTML report
+npm run test:e2e:report
+```
+
+#### Writing New Tests
+
+Tests are located in `tests/e2e/`. See `tests/README.md` for detailed documentation on:
+- Test structure and patterns
+- Helper functions available
+- Best practices
+- Debugging tips
+
+Example test structure:
+```typescript
+import { test, expect } from '@playwright/test';
+
+test.describe('Feature Name', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.goto('/page');
+  });
+
+  test('should do something', async ({ page }) => {
+    // Arrange
+    const button = page.locator('button:has-text("Click")');
+
+    // Act
+    await button.click();
+
+    // Assert
+    await expect(page.locator('text="Success"')).toBeVisible();
+  });
+});
+```
+
+#### CI/CD Integration
+
+Tests automatically run on:
+- **Pull requests** to `main` branch
+- **Pushes** to `main` branch
+
+GitHub Actions workflow (`.github/workflows/playwright.yml`):
+1. Runs ESLint
+2. Builds the project
+3. Runs all Playwright tests
+4. Uploads test reports and videos as artifacts
+
+**Viewing CI Results:**
+1. Go to GitHub → Actions tab
+2. Click on the workflow run
+3. Download artifacts (HTML report, videos) if tests failed
+4. View locally: `npx playwright show-report`
+
+#### Firebase Emulators (Optional)
+
+For testing authenticated features locally:
+
+```bash
+# Terminal 1: Start emulators
+npm run emulators
+
+# Terminal 2: Run tests
+npm run test:e2e
+```
+
+Emulator UI available at: `http://localhost:4000`
+
+**Services:**
+- Auth Emulator: `localhost:9099`
+- Firestore Emulator: `localhost:8080`
+
+#### Test Documentation
+
+Complete testing guide: `tests/README.md`
+
+Includes:
+- Quick start guide
+- Helper function reference
+- Best practices
+- Debugging strategies
+- CI/CD integration details
 
 ## Deployment
 
@@ -509,14 +635,26 @@ Click the "BOOST MOTIVATION" button on Tracker page to:
 
 ### Testing Checklist
 
-- [ ] Test on mobile viewport
+Before submitting a PR:
+
+- [ ] Run linting: `npm run lint`
+- [ ] Run E2E tests: `npm run test:e2e`
+- [ ] All tests passing locally
+- [ ] Test on mobile viewport (or use Mobile Chrome/Safari in Playwright)
 - [ ] Test authentication flow (login/logout)
 - [ ] Test workout toggle functionality
 - [ ] Test week navigation
 - [ ] Test streak calculations
 - [ ] Test achievement unlocks
 - [ ] Test offline behavior
-- [ ] Test across different browsers
+- [ ] Build succeeds: `npm run build`
+- [ ] Preview build works: `npm run preview`
+
+**Automated on PR:**
+- ✅ ESLint checks
+- ✅ Build verification
+- ✅ E2E tests (45 tests across 5 browsers)
+- ✅ Test reports uploaded as artifacts
 
 ## Project History
 
@@ -535,6 +673,15 @@ Click the "BOOST MOTIVATION" button on Tracker page to:
 - 🔧 Updated Firestore security rules for friend discovery
 - 🔧 Created migration utility for existing users
 - 📱 Added Squad navigation (5th nav item)
+
+**Testing Infrastructure Update** (2026-02-25)
+- ✨ Added Playwright E2E testing framework
+- ✨ 45 tests passing across 5 browsers
+- ✨ GitHub Actions CI/CD workflow for automated testing
+- ✨ Firebase emulator configuration for local testing
+- 📚 Comprehensive testing documentation
+- 🔧 Test utilities and helper functions
+- 🤖 Automated test runs on pull requests
 
 **Recent Updates**
 - `452de06` - Status improvements
