@@ -12,6 +12,15 @@ dist
 dist-ssr
 *.local
 
+# Testing
+test-results/
+playwright-report/
+playwright/.cache/
+.env.test
+
+# Firebase emulator data
+.firebase/
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
