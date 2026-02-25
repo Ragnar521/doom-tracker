@@ -1,6 +1,8 @@
 import { useAllWeeks } from '../hooks/useAllWeeks';
 import { getWeekNumber, getHealthColor, getStatusBorderClass } from '../lib/weekUtils';
 import LoadingSpinner from '../components/LoadingSpinner';
+import { useTimelineData } from '../hooks/useTimelineData';
+import YearSection from '../components/timeline/YearSection';
 
 const DAY_NAMES = ['MO', 'TU', 'WE', 'TH', 'FR', 'SA', 'SU'];
 
@@ -26,6 +28,7 @@ function getHeatmapColor(count: number, max: number): string {
 
 export default function Dashboard() {
   const { stats, loading } = useAllWeeks();
+  const { availableYears, getYearWeeks, yearMonthGroups } = useTimelineData();
 
   if (loading) {
     return <LoadingSpinner size="lg" text="CALCULATING DAMAGE..." />;
@@ -106,6 +109,29 @@ export default function Dashboard() {
           </span>
         </div>
       </div>
+
+      {/* Historical Timeline - appears only if historical data exists */}
+      {availableYears.length > 0 && (
+        <div className="doom-panel p-3">
+          <h3 className="text-gray-400 text-[10px] mb-3 text-center tracking-widest">
+            COMPLETE BATTLE HISTORY
+          </h3>
+          <div className="space-y-2">
+            {availableYears.map((year) => {
+              const yearWeeks = getYearWeeks(year);
+              const monthGroups = yearMonthGroups.get(year) || new Map();
+              return (
+                <YearSection
+                  key={year}
+                  year={year}
+                  yearWeeks={yearWeeks}
+                  monthGroups={monthGroups}
+                />
+              );
+            })}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
