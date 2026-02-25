@@ -8,6 +8,7 @@ import { defineConfig, devices } from '@playwright/test';
  * - Tests across Chrome, Firefox, Safari, and mobile devices
  * - Captures screenshots/videos on failure for debugging
  * - Retries failed tests in CI environment
+ * - Uses Firebase Emulators for authenticated testing
  */
 export default defineConfig({
   testDir: './tests/e2e',
@@ -31,6 +32,10 @@ export default defineConfig({
   reporter: process.env.CI
     ? [['html'], ['github']] // GitHub Actions annotations + HTML report
     : [['html'], ['list']],  // Local: HTML report + console output
+
+  // Global setup/teardown for Firebase Emulators
+  globalSetup: './tests/setup/globalSetup.ts',
+  globalTeardown: './tests/setup/globalTeardown.ts',
 
   use: {
     // Base URL for all tests
@@ -64,5 +69,10 @@ export default defineConfig({
     url: 'http://localhost:5173',
     reuseExistingServer: !process.env.CI, // Reuse existing server in dev
     timeout: 120 * 1000, // 2 minutes to start
+    env: {
+      // Load test environment variables
+      // This enables Firebase Emulator mode via VITE_USE_EMULATOR
+      ...process.env,
+    },
   },
 });
