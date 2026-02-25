@@ -12,6 +12,8 @@ export default function WeekTracker({ workouts, onToggleDay }: WeekTrackerProps)
         {workouts.map((completed, index) => (
           <button
             key={index}
+            data-day={index}
+            data-completed={completed}
             onClick={() => onToggleDay(index)}
             className={`
               day-button aspect-square flex flex-col items-center justify-center

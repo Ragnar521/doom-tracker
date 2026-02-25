@@ -5,6 +5,8 @@ export default function PixelatedTransition() {
   const location = useLocation();
   const [isTransitioning, setIsTransitioning] = useState(false);
   const previousPathname = useRef(location.pathname);
+  const timerRef = useRef<NodeJS.Timeout>();
+  const rafRef = useRef<number>();
 
   useEffect(() => {
     // Only trigger transition if pathname actually changed
@@ -12,10 +14,20 @@ export default function PixelatedTransition() {
       previousPathname.current = location.pathname;
 
       // Use RAF to avoid synchronous setState in effect
-      requestAnimationFrame(() => {
+      rafRef.current = requestAnimationFrame(() => {
         setIsTransitioning(true);
-        setTimeout(() => setIsTransitioning(false), 180);
+        timerRef.current = setTimeout(() => setIsTransitioning(false), 180);
       });
+
+      // Cleanup: cancel pending animations/timers if component unmounts
+      return () => {
+        if (rafRef.current !== undefined) {
+          cancelAnimationFrame(rafRef.current);
+        }
+        if (timerRef.current !== undefined) {
+          clearTimeout(timerRef.current);
+        }
+      };
     }
   }, [location.pathname]);
 

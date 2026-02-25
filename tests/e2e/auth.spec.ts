@@ -11,10 +11,10 @@ import { clearStorage } from '../utils/setup';
  */
 test.describe('Authentication Page', () => {
   test.beforeEach(async ({ page }) => {
+    // Clear storage BEFORE navigation to prevent auth state pollution
+    await clearStorage(page);
     // Navigate to login page
     await page.goto('/login');
-    // Clear storage to ensure clean state between tests
-    await clearStorage(page);
     // Wait for page to load
     await page.waitForSelector('h1:has-text("REP & TEAR")');
   });

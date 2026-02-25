@@ -75,8 +75,8 @@ export async function getFaceState(page: Page): Promise<string> {
 export async function toggleWorkoutDay(page: Page, dayIndex: number) {
   const dayButton = page.locator(`[data-day="${dayIndex}"]`).first();
   await dayButton.click();
-  // Wait a bit for state to update
-  await page.waitForTimeout(300);
+  // No explicit wait needed - callers should assert on expected state
+  // This avoids flaky fixed delays and lets tests fail fast if state doesn't update
 }
 
 /**
@@ -87,10 +87,10 @@ export async function getWorkoutCount(page: Page): Promise<number> {
 
   for (let i = 0; i < 7; i++) {
     const dayButton = page.locator(`[data-day="${i}"]`).first();
-    const classes = await dayButton.getAttribute('class');
+    // Use data attribute instead of CSS classes for stable test selectors
+    const isCompleted = await dayButton.getAttribute('data-completed');
 
-    // Check if day is marked as complete
-    if (classes && (classes.includes('completed') || classes.includes('bg-doom-green'))) {
+    if (isCompleted === 'true') {
       count++;
     }
   }
