@@ -1,5 +1,5 @@
 import { useAllWeeks } from '../hooks/useAllWeeks';
-import { getWeekNumber } from '../lib/weekUtils';
+import { getWeekNumber, getHealthColor, getStatusBorderClass } from '../lib/weekUtils';
 import LoadingSpinner from '../components/LoadingSpinner';
 
 const DAY_NAMES = ['MO', 'TU', 'WE', 'TH', 'FR', 'SA', 'SU'];
@@ -12,14 +12,6 @@ function StatCard({ label, value, sublabel }: { label: string; value: string | n
       {sublabel && <p className="text-[8px] text-gray-600">{sublabel}</p>}
     </div>
   );
-}
-
-function getWeekColor(count: number, status: string): string {
-  if (status === 'sick' || status === 'vacation') return 'bg-gray-600';
-  if (count >= 5) return 'bg-doom-gold';
-  if (count >= 4) return 'bg-doom-green';
-  if (count >= 3) return 'bg-yellow-600';
-  return 'bg-doom-red';
 }
 
 function getHeatmapColor(count: number, max: number): string {
@@ -92,7 +84,7 @@ export default function Dashboard() {
           {stats.recentWeeks.map((week) => (
             <div
               key={week.weekId}
-              className={`aspect-square rounded ${getWeekColor(week.workoutCount, week.status)} flex items-center justify-center`}
+              className={`aspect-square rounded ${getHealthColor(week.workoutCount)} ${getStatusBorderClass(week.status)} flex items-center justify-center`}
               title={`Week ${getWeekNumber(week.weekId)}: ${week.workoutCount} workouts`}
             >
               <span className="text-[8px] text-white font-bold">{week.workoutCount}</span>
@@ -101,16 +93,16 @@ export default function Dashboard() {
         </div>
         <div className="flex justify-center gap-3 mt-3 text-[7px]">
           <span className="flex items-center gap-1">
-            <span className="w-2 h-2 rounded bg-doom-red" /> 0-2
+            <span className="w-2 h-2 rounded bg-doom-red" /> 1-2
           </span>
           <span className="flex items-center gap-1">
-            <span className="w-2 h-2 rounded bg-yellow-600" /> 3
+            <span className="w-2 h-2 rounded bg-yellow-600" /> 3-4
           </span>
           <span className="flex items-center gap-1">
-            <span className="w-2 h-2 rounded bg-doom-green" /> 4
+            <span className="w-2 h-2 rounded bg-green-600" /> 5
           </span>
           <span className="flex items-center gap-1">
-            <span className="w-2 h-2 rounded bg-doom-gold" /> 5+
+            <span className="w-2 h-2 rounded bg-doom-green" /> 6-7
           </span>
         </div>
       </div>
