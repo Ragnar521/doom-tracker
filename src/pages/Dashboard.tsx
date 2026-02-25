@@ -2,7 +2,9 @@ import { useAllWeeks } from '../hooks/useAllWeeks';
 import { getWeekNumber, getHealthColor, getStatusBorderClass } from '../lib/weekUtils';
 import LoadingSpinner from '../components/LoadingSpinner';
 import { useTimelineData } from '../hooks/useTimelineData';
+import { useTrendData } from '../hooks/useTrendData';
 import YearSection from '../components/timeline/YearSection';
+import StatChip from '../components/timeline/StatChip';
 
 const DAY_NAMES = ['MO', 'TU', 'WE', 'TH', 'FR', 'SA', 'SU'];
 
@@ -29,6 +31,7 @@ function getHeatmapColor(count: number, max: number): string {
 export default function Dashboard() {
   const { stats, loading } = useAllWeeks();
   const { availableYears, getYearWeeks, yearMonthGroups } = useTimelineData();
+  const globalData = useTrendData();
 
   if (loading) {
     return <LoadingSpinner size="lg" text="CALCULATING DAMAGE..." />;
@@ -108,6 +111,26 @@ export default function Dashboard() {
             <span className="w-2 h-2 rounded bg-doom-green" /> 6-7
           </span>
         </div>
+      </div>
+
+      {/* Lifetime Stats */}
+      <div className="doom-panel p-3">
+        <h3 className="text-doom-gold text-[10px] mb-3 text-center tracking-widest uppercase">
+          Lifetime Stats
+        </h3>
+        <div className="flex flex-wrap gap-2 justify-center">
+          <StatChip
+            label="YOUR AVERAGE"
+            value={`${globalData.allTimeAverage.toFixed(1)} workouts/week`}
+          />
+          <StatChip
+            label="CONSISTENCY"
+            value={`${globalData.consistencyRate.toFixed(0)}%`}
+          />
+        </div>
+        <p className="text-gray-500 text-[8px] text-center mt-2">
+          Across {globalData.totalNormalWeeks} normal weeks (excludes sick/vacation)
+        </p>
       </div>
 
       {/* Historical Timeline - appears only if historical data exists */}
