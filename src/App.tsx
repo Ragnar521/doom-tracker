@@ -3,6 +3,8 @@ import BottomNavigation from './components/BottomNavigation';
 import OfflineIndicator from './components/OfflineIndicator';
 import ProtectedRoute from './components/ProtectedRoute';
 import WelcomeToast from './components/WelcomeToast';
+import PixelatedTransition from './components/PixelatedTransition';
+import PageTransition from './components/PageTransition';
 import { AchievementProvider } from './contexts/AchievementContext';
 import { BoostProvider } from './contexts/BoostContext';
 import Login from './pages/Login';
@@ -20,26 +22,31 @@ function AppLayout({ children }: { children: React.ReactNode }) {
 
   return (
     <>
-      <div className="scanlines min-h-screen flex flex-col items-center p-4 pb-24">
-        <div className="max-w-xs w-full space-y-3">
-          {/* Header - Only on Tracker and Settings */}
-          {showHeader && (
-            <div className="doom-panel p-3">
-              <div className="text-center">
-                <h1 className="font-doom text-3xl text-doom-red tracking-wider">
-                  REP & TEAR
-                </h1>
-                <p className="text-gray-600 text-[8px] mt-0.5 tracking-widest">
-                  UNTIL IT IS DONE
-                </p>
-              </div>
-            </div>
-          )}
+      {/* Pixelated Dissolve Transition (Option B) */}
+      <PixelatedTransition />
 
-          {/* Page Content */}
-          {children}
+      <PageTransition locationKey={location.pathname}>
+        <div className="scanlines min-h-screen flex flex-col items-center p-4 pb-24">
+          <div className="max-w-xs w-full space-y-3">
+            {/* Header - Only on Tracker and Settings */}
+            {showHeader && (
+              <div className="doom-panel p-3">
+                <div className="text-center">
+                  <h1 className="font-doom text-3xl text-doom-red tracking-wider">
+                    REP & TEAR
+                  </h1>
+                  <p className="text-gray-600 text-[8px] mt-0.5 tracking-widest">
+                    UNTIL IT IS DONE
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {/* Page Content */}
+            {children}
+          </div>
         </div>
-      </div>
+      </PageTransition>
 
       {/* Bottom Navigation */}
       <BottomNavigation />

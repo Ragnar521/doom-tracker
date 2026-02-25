@@ -23,7 +23,7 @@ export default function BottomNavigation() {
             key={item.path}
             to={item.path}
             className={({ isActive }) =>
-              `flex-1 flex flex-col items-center py-3 transition-colors ${
+              `flex-1 flex flex-col items-center py-3 transition-all active:scale-95 ${
                 isActive
                   ? 'text-doom-red'
                   : 'text-gray-600 hover:text-gray-400'
