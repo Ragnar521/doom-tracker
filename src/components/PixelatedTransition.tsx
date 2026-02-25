@@ -5,8 +5,8 @@ export default function PixelatedTransition() {
   const location = useLocation();
   const [isTransitioning, setIsTransitioning] = useState(false);
   const previousPathname = useRef(location.pathname);
-  const timerRef = useRef<NodeJS.Timeout>();
-  const rafRef = useRef<number>();
+  const timerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  const rafRef = useRef<number | undefined>(undefined);
 
   useEffect(() => {
     // Only trigger transition if pathname actually changed
