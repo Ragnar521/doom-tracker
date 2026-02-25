@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { enableEmulatorMode, signInTestUser, setupMockWeekData } from '../utils/mockAuth';
+import { signInTestUser, setupMockWeekData } from '../utils/mockAuth';
 
 /**
  * Achievements Page - Authenticated Tests
@@ -11,13 +11,11 @@ import { enableEmulatorMode, signInTestUser, setupMockWeekData } from '../utils/
  * - Firebase Emulators must be running (started by globalSetup)
  * - Auth Emulator on port 9099
  * - Firestore Emulator on port 8080
+ * - VITE_USE_EMULATOR=true in .env.test (build-time flag)
  */
 
 test.describe('Achievements Page - Authenticated', () => {
   test.beforeEach(async ({ page }) => {
-    // Enable emulator mode
-    await enableEmulatorMode(page);
-
     // Sign in test user (creates user if doesn't exist)
     await signInTestUser(page);
 
@@ -175,9 +173,6 @@ test.describe('Achievements Page - Authenticated', () => {
  */
 test.describe('Achievements Page - Performance (Authenticated)', () => {
   test.beforeEach(async ({ page }) => {
-    // Enable emulator mode
-    await enableEmulatorMode(page);
-
     // Sign in test user
     await signInTestUser(page);
   });

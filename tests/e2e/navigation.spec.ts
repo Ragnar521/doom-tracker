@@ -21,12 +21,6 @@ test.describe('Navigation', () => {
   });
 
   test('should display bottom navigation on login page', async ({ page }) => {
-    // Bottom navigation should be visible even on login page
-    const nav = page.locator('nav').first();
-
-    // Check if navigation exists
-    const navExists = await nav.count();
-
     // Navigation may or may not be visible on login page (depends on design)
     // Just verify page loads correctly
     await expect(page.locator('h1:has-text("REP & TEAR")')).toBeVisible();
@@ -37,7 +31,7 @@ test.describe('Navigation', () => {
     await page.goto('/');
 
     // Should redirect to /login
-    await page.waitForTimeout(1000); // Give time for redirect
+    await page.waitForURL('**/login');
     expect(page.url()).toContain('/login');
 
     // Should show login page
@@ -49,7 +43,7 @@ test.describe('Navigation', () => {
     await page.goto('/dashboard');
 
     // Should redirect to /login
-    await page.waitForTimeout(1000);
+    await page.waitForURL('**/login');
     expect(page.url()).toContain('/login');
   });
 
@@ -58,7 +52,7 @@ test.describe('Navigation', () => {
     await page.goto('/achievements');
 
     // Should redirect to /login
-    await page.waitForTimeout(1000);
+    await page.waitForURL('**/login');
     expect(page.url()).toContain('/login');
   });
 
@@ -67,7 +61,7 @@ test.describe('Navigation', () => {
     await page.goto('/squad');
 
     // Should redirect to /login
-    await page.waitForTimeout(1000);
+    await page.waitForURL('**/login');
     expect(page.url()).toContain('/login');
   });
 
@@ -76,7 +70,7 @@ test.describe('Navigation', () => {
     await page.goto('/settings');
 
     // Should redirect to /login
-    await page.waitForTimeout(1000);
+    await page.waitForURL('**/login');
     expect(page.url()).toContain('/login');
   });
 
@@ -85,7 +79,7 @@ test.describe('Navigation', () => {
     await page.goto('/dashboard');
 
     // Wait for redirect
-    await page.waitForTimeout(1000);
+    await page.waitForURL('**/login');
 
     // Verify we're on login page with all elements
     await expect(page.locator('h1:has-text("REP & TEAR")')).toBeVisible();
@@ -110,8 +104,8 @@ test.describe('Navigation', () => {
     await page.fill('input[type="password"]', 'wrongpassword');
     await page.locator('button[type="submit"]:has-text("SIGN IN")').click();
 
-    // Wait for validation/error
-    await page.waitForTimeout(1000);
+    // Wait for error message to appear
+    await page.waitForSelector('text=/WRONG PASSWORD|USER NOT FOUND|INVALID/i', { timeout: 3000 }).catch(() => {});
 
     // Should still be on login page
     expect(page.url()).toContain('/login');
@@ -142,8 +136,8 @@ test.describe('Navigation', () => {
     // Navigate to a route that doesn't exist
     await page.goto('/this-route-does-not-exist');
 
-    // Wait for navigation to complete
-    await page.waitForTimeout(1000);
+    // Wait for page load
+    await page.waitForLoadState('networkidle');
 
     // App doesn't have a catch-all route, so non-existent routes show blank page
     // This is expected behavior - no route matches, nothing renders

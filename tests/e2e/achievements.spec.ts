@@ -21,8 +21,7 @@ test.describe('Achievements Page', () => {
     await page.goto('/achievements');
 
     // Will redirect to login if not authenticated
-    // Wait for page to load (either login or achievements)
-    await page.waitForTimeout(1000);
+    await page.waitForURL('**/login');
   });
 
   test('should redirect to login when not authenticated', async ({ page }) => {
@@ -56,18 +55,18 @@ test.describe('Achievements Page - Guest Access', () => {
   test('should handle guest user attempting to view achievements', async ({ page }) => {
     // Navigate to achievements without authentication
     await page.goto('/achievements');
-    await page.waitForTimeout(1000);
 
     // Should redirect to login (achievements require auth in this app)
+    await page.waitForURL('**/login');
     expect(page.url()).toContain('/login');
   });
 
   test('should preserve achievements URL intent after redirect', async ({ page }) => {
     // Navigate to achievements
     await page.goto('/achievements');
-    await page.waitForTimeout(1000);
 
     // Should be redirected to login
+    await page.waitForURL('**/login');
     expect(page.url()).toContain('/login');
 
     // After authentication (in future), user should be redirected back to /achievements
@@ -86,14 +85,14 @@ test.describe('Achievements Page - Navigation', () => {
     await page.goto('/achievements');
 
     // Will redirect to login for non-authenticated users
-    await page.waitForTimeout(1000);
+    await page.waitForURL('**/login');
     expect(page.url()).toContain('/login');
   });
 
-  test('should show achievements in bottom navigation after authentication', async ({ page }) => {
-    // TODO: Requires authentication
+  test.skip('should show achievements in bottom navigation after authentication', async ({ page }) => {
+    // Requires authentication
     // After login, bottom nav should have achievements icon/link
-    // This is a placeholder for future authenticated testing
+    // Implemented in authenticated tests (achievements-authenticated.spec.ts)
   });
 });
 

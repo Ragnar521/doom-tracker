@@ -10,22 +10,6 @@ export const TEST_USER = {
 };
 
 /**
- * Enable Firebase Emulator mode
- *
- * Sets a flag in localStorage that tells the app to connect to
- * Firebase Emulators instead of production.
- *
- * Must be called BEFORE navigating to any page.
- *
- * @param page - Playwright page object
- */
-export async function enableEmulatorMode(page: Page) {
-  await page.addInitScript(() => {
-    localStorage.setItem('USE_FIREBASE_EMULATOR', 'true');
-  });
-}
-
-/**
  * Sign in a test user using Firebase Emulator
  *
  * Creates the user if it doesn't exist, then signs in.
@@ -120,42 +104,78 @@ export async function signInTestUser(page: Page) {
 /**
  * Setup mock week data for testing
  *
- * Creates sample workout data in localStorage.
+ * Creates sample workout data using Firestore Emulator.
+ * Uses dynamic dates relative to current date to avoid staleness.
+ *
+ * NOTE: Currently writes to localStorage for backward compatibility.
+ * TODO: Migrate to Firestore Emulator Admin SDK for proper data seeding.
+ *
  * Call this AFTER being authenticated.
  *
  * @param page - Playwright page object
  */
 export async function setupMockWeekData(page: Page) {
   await page.evaluate(() => {
-    // Current week (2026-W09) with 4 workouts
+    // Calculate week IDs dynamically to avoid hardcoded dates
+    const getWeekId = (date: Date): string => {
+      const d = new Date(date);
+      d.setHours(0, 0, 0, 0);
+      d.setDate(d.getDate() + 4 - (d.getDay() || 7));
+      const yearStart = new Date(d.getFullYear(), 0, 1);
+      const weekNo = Math.ceil((((d.getTime() - yearStart.getTime()) / 86400000) + 1) / 7);
+      return `${d.getFullYear()}-W${String(weekNo).padStart(2, '0')}`;
+    };
+
+    const getMonday = (date: Date): string => {
+      const d = new Date(date);
+      const day = d.getDay();
+      const diff = d.getDate() - day + (day === 0 ? -6 : 1);
+      return new Date(d.setDate(diff)).toISOString().split('T')[0];
+    };
+
+    const now = new Date();
+    const currentWeekId = getWeekId(now);
+    const currentMonday = getMonday(now);
+
+    const oneWeekAgo = new Date(now);
+    oneWeekAgo.setDate(now.getDate() - 7);
+    const prevWeekId = getWeekId(oneWeekAgo);
+    const prevMonday = getMonday(oneWeekAgo);
+
+    const twoWeeksAgo = new Date(now);
+    twoWeeksAgo.setDate(now.getDate() - 14);
+    const oldWeekId = getWeekId(twoWeeksAgo);
+    const oldMonday = getMonday(twoWeeksAgo);
+
+    // Current week with 4 workouts
     const week1 = {
-      startDate: '2026-02-24',
+      startDate: currentMonday,
       workouts: [true, true, false, true, true, false, false], // 4 workouts
       status: 'normal',
     };
 
     // Previous week with 3 workouts
     const week2 = {
-      startDate: '2026-02-17',
+      startDate: prevMonday,
       workouts: [true, false, true, false, true, false, false], // 3 workouts
       status: 'normal',
     };
 
     // Two weeks ago with 5 workouts (God Mode)
     const week3 = {
-      startDate: '2026-02-10',
+      startDate: oldMonday,
       workouts: [true, true, true, true, true, false, false], // 5 workouts
       status: 'normal',
     };
 
-    localStorage.setItem('reps_week_2026-W09', JSON.stringify(week1));
-    localStorage.setItem('reps_week_2026-W08', JSON.stringify(week2));
-    localStorage.setItem('reps_week_2026-W07', JSON.stringify(week3));
+    localStorage.setItem(`reps_week_${currentWeekId}`, JSON.stringify(week1));
+    localStorage.setItem(`reps_week_${prevWeekId}`, JSON.stringify(week2));
+    localStorage.setItem(`reps_week_${oldWeekId}`, JSON.stringify(week3));
 
-    // Mock achievements
+    // Mock achievements with dynamic dates
     const achievements = [
-      { id: 'first_blood', unlockedAt: '2026-02-10T10:00:00.000Z' },
-      { id: 'week_warrior', unlockedAt: '2026-02-24T15:30:00.000Z' },
+      { id: 'first_blood', unlockedAt: twoWeeksAgo.toISOString() },
+      { id: 'week_warrior', unlockedAt: now.toISOString() },
     ];
 
     localStorage.setItem('reps_achievements', JSON.stringify(achievements));

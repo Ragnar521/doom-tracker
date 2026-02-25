@@ -1,14 +1,35 @@
-import { execSync, spawn } from 'child_process';
+import { spawn } from 'child_process';
+import { promisify } from 'util';
+
+const sleep = promisify(setTimeout);
 
 /**
- * Get Java 21 home path
+ * Check if a port is responding
  */
-function getJava21Home(): string {
+async function isPortResponding(port: number): Promise<boolean> {
   try {
-    const javaHome = execSync('/usr/libexec/java_home -v 21', { encoding: 'utf-8' }).trim();
-    return javaHome;
+    const { execSync } = await import('child_process');
+    // Use curl to check if port is responding (works on macOS and Linux)
+    execSync(`curl -s http://localhost:${port} > /dev/null 2>&1`, { timeout: 1000 });
+    return true;
   } catch {
-    throw new Error('Java 21 not found. Please install: brew install openjdk@21');
+    return false;
+  }
+}
+
+/**
+ * Kill process on port (cross-platform)
+ */
+async function killPort(port: number): Promise<void> {
+  try {
+    const { execSync } = await import('child_process');
+    if (process.platform === 'win32') {
+      execSync(`netstat -ano | findstr :${port} | findstr LISTENING`, { stdio: 'ignore' });
+    } else {
+      execSync(`lsof -ti:${port} | xargs kill -9 2>/dev/null || true`, { stdio: 'ignore' });
+    }
+  } catch {
+    // Ignore errors - port might not be in use
   }
 }
 
@@ -16,57 +37,48 @@ function getJava21Home(): string {
  * Start Firebase Emulators for testing
  *
  * This starts Auth and Firestore emulators in the background.
+ * Trusts JAVA_HOME from environment (set by CI or user).
+ *
  * Call this in globalSetup.
  */
-export function startEmulators() {
+export async function startEmulators(): Promise<void> {
   console.log('Starting Firebase Emulators...');
 
   try {
-    // Kill any existing emulator processes
-    try {
-      execSync('pkill -f "firebase.*emulators" || true', { stdio: 'ignore' });
-      execSync('lsof -ti:9099 | xargs kill -9 || true', { stdio: 'ignore' });
-      execSync('lsof -ti:8080 | xargs kill -9 || true', { stdio: 'ignore' });
-    } catch {
-      // Ignore errors if no processes to kill
-    }
+    // Kill any existing processes on emulator ports
+    await Promise.all([
+      killPort(9099), // Auth
+      killPort(8080), // Firestore
+      killPort(4000), // UI
+    ]);
 
-    // Get Java 21 home
-    const javaHome = getJava21Home();
-    console.log(`Using Java from: ${javaHome}`);
-
-    // Start emulators in background with Java 21
+    // Start emulators in background
+    // Trust JAVA_HOME from environment (CI sets this via setup-java action)
     const emulatorProcess = spawn('npx', ['firebase', 'emulators:start', '--only', 'auth,firestore'], {
       detached: true,
       stdio: 'ignore',
-      env: {
-        ...process.env,
-        JAVA_HOME: javaHome,
-        PATH: `${javaHome}/bin:${process.env.PATH}`,
-      },
+      env: process.env,
     });
 
     emulatorProcess.unref();
 
-    // Wait for emulators to be ready
+    // Wait for BOTH emulators to be ready
     console.log('Waiting for emulators to start...');
-    let attempts = 0;
     const maxAttempts = 30;
 
-    while (attempts < maxAttempts) {
-      try {
-        // Check if auth emulator is responding
-        execSync('curl -s http://localhost:9099 > /dev/null 2>&1', { stdio: 'ignore' });
+    for (let attempt = 0; attempt < maxAttempts; attempt++) {
+      const authReady = await isPortResponding(9099);
+      const firestoreReady = await isPortResponding(8080);
+
+      if (authReady && firestoreReady) {
         console.log('✅ Firebase Emulators ready!');
         console.log('   - Auth Emulator: http://localhost:9099');
         console.log('   - Firestore Emulator: http://localhost:8080');
         console.log('   - Emulator UI: http://localhost:4000');
         return;
-      } catch {
-        attempts++;
-        // Wait 1 second between attempts
-        execSync('sleep 1');
       }
+
+      await sleep(1000); // Async sleep, non-blocking
     }
 
     throw new Error('Firebase Emulators failed to start after 30 seconds');
@@ -81,15 +93,26 @@ export function startEmulators() {
  *
  * Call this in globalTeardown.
  */
-export function stopEmulators() {
+export async function stopEmulators(): Promise<void> {
   console.log('Stopping Firebase Emulators...');
 
   try {
-    // Kill emulator processes
-    execSync('pkill -f "firebase.*emulators" || true', { stdio: 'ignore' });
-    execSync('lsof -ti:9099 | xargs kill -9 || true', { stdio: 'ignore' });
-    execSync('lsof -ti:8080 | xargs kill -9 || true', { stdio: 'ignore' });
-    execSync('lsof -ti:4000 | xargs kill -9 || true', { stdio: 'ignore' });
+    const { execSync } = await import('child_process');
+
+    // Kill emulator processes (cross-platform)
+    if (process.platform === 'win32') {
+      execSync('taskkill /F /IM java.exe /FI "WINDOWTITLE eq firebase*" 2>nul || true', { stdio: 'ignore' });
+    } else {
+      execSync('pkill -f "firebase.*emulators" 2>/dev/null || true', { stdio: 'ignore' });
+    }
+
+    // Kill ports as backup
+    await Promise.all([
+      killPort(9099),
+      killPort(8080),
+      killPort(4000),
+    ]);
+
     console.log('✅ Firebase Emulators stopped');
   } catch (error) {
     console.error('Error stopping emulators:', error);

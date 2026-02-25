@@ -69,5 +69,10 @@ export default defineConfig({
     url: 'http://localhost:5173',
     reuseExistingServer: !process.env.CI, // Reuse existing server in dev
     timeout: 120 * 1000, // 2 minutes to start
+    env: {
+      // Load test environment variables
+      // This enables Firebase Emulator mode via VITE_USE_EMULATOR
+      ...process.env,
+    },
   },
 });

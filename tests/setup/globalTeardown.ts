@@ -6,8 +6,7 @@ import { stopEmulators } from '../utils/firebaseEmulator.js';
  * Stops Firebase Emulators.
  */
 async function globalTeardown() {
-  // Stop Firebase Emulators
-  stopEmulators();
+  await stopEmulators();
 }
 
 export default globalTeardown;
