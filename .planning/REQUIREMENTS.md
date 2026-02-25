@@ -60,11 +60,11 @@ Requirements for the enhanced analytics milestone. Each maps to roadmap phases.
 - [ ] **TREND-03**: Trend indicators show up arrow (↑) when performance improves
 - [ ] **TREND-04**: Trend indicators show down arrow (↓) when performance declines
 - [ ] **TREND-05**: Trend indicators show right arrow (→) when performance is stable
-- [ ] **TREND-06**: Trend indicators display percentage change (e.g., "+15%")
-- [ ] **TREND-07**: User sees comparison vs personal all-time average
-- [ ] **TREND-08**: Trend calculations exclude sick/vacation weeks
-- [ ] **TREND-09**: Trend calculations are memoized to prevent performance issues
-- [ ] **TREND-10**: Consistency percentage stat shows reliability (e.g., "67% of weeks")
+- [x] **TREND-06**: Trend indicators display percentage change (e.g., "+15%")
+- [x] **TREND-07**: User sees comparison vs personal all-time average
+- [x] **TREND-08**: Trend calculations exclude sick/vacation weeks
+- [x] **TREND-09**: Trend calculations are memoized to prevent performance issues
+- [x] **TREND-10**: Consistency percentage stat shows reliability (e.g., "67% of weeks")
 
 ### Performance & Polish
 
@@ -154,11 +154,11 @@ Which phases cover which requirements. Updated during roadmap creation.
 | TREND-03 | Phase 3 | Pending |
 | TREND-04 | Phase 3 | Pending |
 | TREND-05 | Phase 3 | Pending |
-| TREND-06 | Phase 3 | Pending |
-| TREND-07 | Phase 3 | Pending |
-| TREND-08 | Phase 3 | Pending |
-| TREND-09 | Phase 3 | Pending |
-| TREND-10 | Phase 3 | Pending |
+| TREND-06 | Phase 3 | Complete |
+| TREND-07 | Phase 3 | Complete |
+| TREND-08 | Phase 3 | Complete |
+| TREND-09 | Phase 3 | Complete |
+| TREND-10 | Phase 3 | Complete |
 | PERF-01 | Phase 2 | Complete |
 | PERF-02 | Phase 2 | Complete |
 | PERF-03 | Phase 2 | Complete |

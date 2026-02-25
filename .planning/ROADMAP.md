@@ -69,7 +69,7 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 03-01-PLAN.md — Trend Calculation Infrastructure (trendUtils + period stats extensions + global average hook)
+- [x] 03-01-PLAN.md — Trend Calculation Infrastructure (trendUtils + period stats extensions + global average hook)
 - [ ] 03-02-PLAN.md — Trend UI Integration (TrendIndicator component + timeline updates + Dashboard stats)
 
 ### Phase 4: Accessibility & Polish
@@ -95,6 +95,6 @@ Phases execute in numeric order: 1 → 2 → 3 → 4
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Health Bar Color Foundation | 0/1 | Not started | - |
-| 2. Expandable Timeline & Summaries | 6/5 | Complete   | 2026-02-25 |
-| 3. Trend Indicators & Comparisons | 0/2 | Not started | - |
+| 2. Expandable Timeline & Summaries | 5/5 | Complete   | 2026-02-25 |
+| 3. Trend Indicators & Comparisons | 1/2 | In Progress | - |
 | 4. Accessibility & Polish | 0/TBD | Not started | - |
