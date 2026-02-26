@@ -67,12 +67,11 @@ Plans:
   5. Guest users' XP migrates correctly when signing in (recalculated from Firestore history, LocalStorage XP discarded)
   6. XP persists in Firestore stats/current document for authenticated users
   7. useXP hook prevents infinite loops through proper memoization and primitive dependencies
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 05-01: TBD
-- [ ] 05-02: TBD
-- [ ] 05-03: TBD
+- [ ] 05-01-PLAN.md — useXP hook with Firestore persistence and retroactive XP calculation (2 tasks)
+- [ ] 05-02-PLAN.md — Workout toggle XP delta and achievement XP bonus integration (2 tasks)
 
 ### Phase 6: UI & Celebrations (Visual Components & Level-Up)
 **Goal**: Create XP bar, rank displays, and level-up celebration animations
@@ -121,6 +120,6 @@ Phases execute in numeric order: 4 → 5 → 6 → 7
 | 2. Expandable Timeline & Summaries | v1.0 | 5/5 | Complete | 2026-02-25 |
 | 3. Trend Indicators & Comparisons | v1.0 | 2/2 | Complete | 2026-02-25 |
 | 4. Foundation | v1.1 | 1/2 | In progress | - |
-| 5. Data Layer | v1.1 | 0/3 | Not started | - |
+| 5. Data Layer | v1.1 | 0/2 | Not started | - |
 | 6. UI & Celebrations | v1.1 | 0/3 | Not started | - |
 | 7. Integration & Polish | v1.1 | 0/2 | Not started | - |
