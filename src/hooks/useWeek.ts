@@ -3,6 +3,7 @@ import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { useAuth } from '../contexts/AuthContext';
 import { formatWeekStartDate, getCurrentWeekId } from '../lib/weekUtils';
+import { calculateWeeklyXP } from '../lib/xpFormulas';
 
 export type WeekStatus = 'normal' | 'sick' | 'vacation';
 
@@ -22,7 +23,13 @@ const defaultWeekData: WeekData = {
   updatedAt: null,
 };
 
-export function useWeek(weekId: string = getCurrentWeekId()) {
+interface UseWeekOptions {
+  onXPDelta?: (delta: number) => void;
+  onXPRecalculate?: () => void;
+  currentStreak?: number;
+}
+
+export function useWeek(weekId: string = getCurrentWeekId(), options: UseWeekOptions = {}) {
   const { user } = useAuth();
   const [data, setData] = useState<WeekData>(defaultWeekData);
   const [loading, setLoading] = useState(true);
@@ -100,6 +107,17 @@ export function useWeek(weekId: string = getCurrentWeekId()) {
     const newWorkouts = [...data.workouts];
     newWorkouts[dayIndex] = !newWorkouts[dayIndex];
 
+    // Calculate XP delta BEFORE updating state
+    if (options.onXPDelta && options.currentStreak !== undefined) {
+      const oldCount = data.workouts.filter(Boolean).length;
+      const newCount = newWorkouts.filter(Boolean).length;
+      const oldXP = calculateWeeklyXP(oldCount, options.currentStreak, data.status);
+      const newXP = calculateWeeklyXP(newCount, options.currentStreak, data.status);
+      const delta = newXP - oldXP;
+      // Fire callback (can be negative if removing workout)
+      options.onXPDelta(delta);
+    }
+
     const newData: WeekData = {
       ...data,
       workouts: newWorkouts,
@@ -108,7 +126,7 @@ export function useWeek(weekId: string = getCurrentWeekId()) {
 
     setData(newData);
     await saveData(newData);
-  }, [data, saveData]);
+  }, [data, saveData, options]);
 
   // Set week status
   const setStatus = useCallback(async (status: WeekStatus) => {
@@ -120,7 +138,12 @@ export function useWeek(weekId: string = getCurrentWeekId()) {
 
     setData(newData);
     await saveData(newData);
-  }, [data, saveData]);
+
+    // Status change affects entire week's XP — trigger full recalc
+    if (options.onXPRecalculate) {
+      options.onXPRecalculate();
+    }
+  }, [data, saveData, options]);
 
   // Count completed workouts
   const workoutCount = data.workouts.filter(Boolean).length;
