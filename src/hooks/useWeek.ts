@@ -126,7 +126,7 @@ export function useWeek(weekId: string = getCurrentWeekId(), options: UseWeekOpt
 
     setData(newData);
     await saveData(newData);
-  }, [data, saveData, options.onXPDelta, options.currentStreak]);
+  }, [data, saveData, options]);
 
   // Set week status
   const setStatus = useCallback(async (status: WeekStatus) => {
@@ -143,7 +143,7 @@ export function useWeek(weekId: string = getCurrentWeekId(), options: UseWeekOpt
     if (options.onXPRecalculate) {
       options.onXPRecalculate();
     }
-  }, [data, saveData, options.onXPRecalculate]);
+  }, [data, saveData, options]);
 
   // Count completed workouts
   const workoutCount = data.workouts.filter(Boolean).length;

@@ -143,7 +143,7 @@ export function useAchievements(options: UseAchievementsOptions = {}) {
       }
     }
     setNewlyUnlocked([]);
-  }, [newlyUnlocked, unlockAchievement, options.onXPGrant]);
+  }, [newlyUnlocked, unlockAchievement, options]);
 
   // Dismiss single achievement notification
   const dismissAchievement = useCallback(async (achievementId: string) => {
@@ -159,7 +159,7 @@ export function useAchievements(options: UseAchievementsOptions = {}) {
       }
     }
     setNewlyUnlocked(prev => prev.filter(a => a.id !== achievementId));
-  }, [unlockAchievement, options.onXPGrant]);
+  }, [unlockAchievement, options]);
 
   // Get all achievements with unlock status
   const getAllAchievements = useCallback(() => {
