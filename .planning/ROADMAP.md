@@ -49,11 +49,11 @@ Enhanced Rep & Tear's analytics capabilities by fixing the confusing color schem
   3. Streak bonus multiplier applies to weekly XP (1.5x for 4+ weeks, 2x for 12+ weeks)
   4. TypeScript types exist for XPData, Rank, and LevelUp structures
   5. Firestore security rules allow authenticated users to read/write XP field in stats/current document
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 04-01: TBD
-- [ ] 04-02: TBD
+- [ ] 04-01-PLAN.md — TypeScript types and 15 DOOM military rank definitions
+- [ ] 04-02-PLAN.md — XP formula functions (non-linear scaling + streak multipliers)
 
 ### Phase 5: Data Layer (XP Calculation Logic & Firestore Integration)
 **Goal**: Implement XP calculation engine and persistent storage with retroactive XP support
