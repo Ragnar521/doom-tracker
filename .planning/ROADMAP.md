@@ -85,12 +85,11 @@ Plans:
   5. User can tap XP bar to see XP breakdown modal (base workout XP, streak bonus, achievement bonuses)
   6. "Probability to hit target" section is removed from Tracker page
   7. Level-up animation uses two-step fill (100% → pause → reset to new level) to avoid jarring jumps
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 06-01: TBD
-- [ ] 06-02: TBD
-- [ ] 06-03: TBD
+- [ ] 06-01-PLAN.md — XP progress bar, LevelUpToast, CSS animations, and Tracker page integration (2 tasks)
+- [ ] 06-02-PLAN.md — XP breakdown bottom sheet modal with "This Week" / "All Time" tabs (2 tasks)
 
 ### Phase 7: Integration & Polish (Friend Visibility, Testing, Optimization)
 **Goal**: Integrate XP system with Squad features, validate performance, and optimize for production
@@ -121,5 +120,5 @@ Phases execute in numeric order: 4 → 5 → 6 → 7
 | 3. Trend Indicators & Comparisons | v1.0 | 2/2 | Complete | 2026-02-25 |
 | 4. Foundation | v1.1 | 1/2 | In progress | - |
 | 5. Data Layer | v1.1 | 0/2 | Not started | - |
-| 6. UI & Celebrations | v1.1 | 0/3 | Not started | - |
+| 6. UI & Celebrations | v1.1 | 0/2 | Not started | - |
 | 7. Integration & Polish | v1.1 | 0/2 | Not started | - |
