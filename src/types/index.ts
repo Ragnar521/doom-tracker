@@ -38,3 +38,43 @@ export interface FriendStats {
 export interface Friend extends FriendProfile {
   stats: FriendStats | null;
 }
+
+/**
+ * Rank definition for DOOM military progression
+ */
+export interface Rank {
+  id: number;
+  name: string;
+  xpThreshold: number;
+  color: string;      // Tailwind color class (e.g., 'text-gray-400')
+  tagline: string;    // DOOM-flavored description
+}
+
+/**
+ * XP data stored in Firestore stats/current document (Phase 5)
+ */
+export interface XPData {
+  totalXP: number;           // Lifetime XP accumulation
+  currentRankId: number;     // Current rank (1-15)
+  lastRankUpAt?: Date;       // Timestamp of most recent rank-up
+}
+
+/**
+ * Level-up event for notifications (Phase 6)
+ */
+export interface LevelUpEvent {
+  previousRank: Rank;
+  newRank: Rank;
+  totalXP: number;
+  timestamp: Date;
+}
+
+/**
+ * Weekly XP breakdown for tooltip display (Phase 6)
+ */
+export interface WeeklyXPBreakdown {
+  baseXP: number;
+  streakMultiplier: number;
+  totalXP: number;
+  achievementBonus?: number;  // Added in Phase 5
+}
