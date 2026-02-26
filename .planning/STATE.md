@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: XP & Levels
 status: unknown
-last_updated: "2026-02-26T08:55:00.637Z"
+last_updated: "2026-02-26T09:00:09.115Z"
 progress:
   total_phases: 5
-  completed_phases: 3
+  completed_phases: 4
   total_plans: 7
-  completed_plans: 11
+  completed_plans: 12
 ---
 
 # Project State
@@ -51,6 +51,7 @@ Progress: [█████░░░░░] 50% (Plan 1/2 of Phase 5 complete)
 - v1.1 Phase 4 complete (2 plans, 4 tasks, 222s)
 - v1.1 Phase 5 in progress (1/2 plans, 2 tasks, 118s)
 - Trend: Consistent velocity on data layer work
+| Phase 05 P02 | 110 | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -75,6 +76,9 @@ Recent decisions affecting current work:
 - [Phase 05-01]: Guest users excluded from XP system (no LocalStorage XP, Firestore-only)
 - [Phase 05-01]: Failed retroactive calculations don't persist partial results (retry on next load)
 - [Phase 05-01]: useMemo uses primitive dependencies to prevent infinite render loops
+- [Phase 05-02]: XP delta calculated BEFORE Firestore write for optimistic UI update
+- [Phase 05-02]: Options object pattern maintains backward compatibility (no breaking changes)
+- [Phase 05-02]: Achievement XP grants after 800ms delay for dramatic effect (toast first, XP second)
 
 ### Pending Todos
 

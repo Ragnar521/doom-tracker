@@ -10,7 +10,7 @@ Requirements for XP & Levels milestone. Each maps to roadmap phases.
 ### XP System
 
 - [x] **XP-01**: User earns XP from each workout week based on non-linear scaling (1=5, 2=15, 3=30, 4=50, 5=80, 6-7=100 XP)
-- [ ] **XP-02**: User earns bonus XP when unlocking achievements (+100 XP per achievement)
+- [x] **XP-02**: User earns bonus XP when unlocking achievements (+100 XP per achievement)
 - [x] **XP-03**: User earns small streak bonus on weekly XP when maintaining active streak
 - [x] **XP-04**: User's XP persists in Firestore (authenticated) or LocalStorage (guest)
 - [x] **XP-05**: Existing users receive retroactive XP calculated from all historical workout data on first load
@@ -60,7 +60,7 @@ Requirements for XP & Levels milestone. Each maps to roadmap phases.
 | Requirement | Phase | Status |
 |-------------|-------|--------|
 | XP-01 | Phase 4 | Complete |
-| XP-02 | Phase 5 | Pending |
+| XP-02 | Phase 5 | Complete |
 | XP-03 | Phase 4 | Complete |
 | XP-04 | Phase 5 | Complete |
 | XP-05 | Phase 5 | Complete |
