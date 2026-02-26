@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import type { Rank, LevelUpEvent } from '../types';
 
 interface XPBarProps {
@@ -9,7 +9,7 @@ interface XPBarProps {
   levelUpEvent: LevelUpEvent | null;
 }
 
-export default function XPBar({ currentRank, nextRank, totalXP, onClick, levelUpEvent }: XPBarProps) {
+export default function XPBar({ currentRank, nextRank, totalXP, onClick }: XPBarProps) {
   const [animatedFill, setAnimatedFill] = useState(0);
   const [disableTransition, setDisableTransition] = useState(false);
   const prevRankIdRef = useRef(currentRank.id);
@@ -29,8 +29,8 @@ export default function XPBar({ currentRank, nextRank, totalXP, onClick, levelUp
     return abbreviations[rankName] || rankName;
   };
 
-  // Calculate fill percentage
-  const calculateFillPercentage = (): number => {
+  // Calculate fill percentage - memoized to prevent infinite loops
+  const calculateFillPercentage = useCallback((): number => {
     if (!nextRank) {
       // Max rank (Doom Slayer)
       return 100;
@@ -41,7 +41,7 @@ export default function XPBar({ currentRank, nextRank, totalXP, onClick, levelUp
     const percentage = (xpInCurrentRank / xpNeededForNextRank) * 100;
 
     return Math.max(0, Math.min(100, percentage));
-  };
+  }, [totalXP, currentRank.xpThreshold, nextRank]);
 
   // Two-step fill animation on level-up
   useEffect(() => {
@@ -50,6 +50,7 @@ export default function XPBar({ currentRank, nextRank, totalXP, onClick, levelUp
     // Check if rank increased (level-up)
     if (currentRankId > prevRankIdRef.current) {
       // Step 1: Fill to 100% with transition
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setAnimatedFill(100);
 
       // Step 2: After 800ms, reset to new rank percentage without transition
@@ -76,7 +77,7 @@ export default function XPBar({ currentRank, nextRank, totalXP, onClick, levelUp
       setAnimatedFill(calculateFillPercentage());
       prevRankIdRef.current = currentRankId;
     }
-  }, [currentRank.id, totalXP, nextRank]);
+  }, [currentRank.id, totalXP, nextRank, calculateFillPercentage]);
 
   // Calculate minimum fill width (8% when XP > rank threshold, 0% otherwise)
   const fillWidth = totalXP > currentRank.xpThreshold ? Math.max(8, animatedFill) : animatedFill;

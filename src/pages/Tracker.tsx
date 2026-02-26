@@ -5,16 +5,46 @@ import WeekNavigation from '../components/WeekNavigation';
 import StatsPanel from '../components/StatsPanel';
 import BoostButton from '../components/BoostButton';
 import LoadingSpinner from '../components/LoadingSpinner';
+import XPBar from '../components/XPBar';
+import LevelUpToast from '../components/LevelUpToast';
 import { useWeek } from '../hooks/useWeek';
 import { useStats } from '../hooks/useStats';
+import { useXP } from '../hooks/useXP';
+import { useAllWeeks } from '../hooks/useAllWeeks';
+import { useAchievementContext } from '../contexts/AchievementContext';
 import { getCurrentWeekId } from '../lib/weekUtils';
 
 export default function Tracker() {
   const [selectedWeekId, setSelectedWeekId] = useState(getCurrentWeekId());
-  const { data: weekData, loading: weekLoading, toggleDay, setStatus, workoutCount } = useWeek(selectedWeekId);
-  const { stats, loading: statsLoading, recalculateStats } = useStats();
-
   const [showOuch, setShowOuch] = useState(false);
+
+  // Load all weeks data for XP calculation
+  const { weeks, stats: allWeeksStats, loading: allWeeksLoading } = useAllWeeks();
+  const { unlockedCount } = useAchievementContext();
+
+  // Initialize XP hook
+  const {
+    totalXP,
+    currentRank,
+    nextRank,
+    levelUpEvent,
+    addXP,
+    recalculateXP,
+    dismissLevelUp,
+    loading: xpLoading,
+  } = useXP(weeks, allWeeksStats.currentStreak, unlockedCount, allWeeksLoading);
+
+  // Initialize week hook with XP callbacks
+  const { data: weekData, loading: weekLoading, toggleDay, setStatus, workoutCount } = useWeek(
+    selectedWeekId,
+    {
+      onXPDelta: addXP,
+      onXPRecalculate: recalculateXP,
+      currentStreak: allWeeksStats.currentStreak,
+    }
+  );
+
+  const { stats, loading: statsLoading, recalculateStats } = useStats();
 
   // Recalculate stats on mount to ensure streak is up to date
   useEffect(() => {
@@ -37,49 +67,7 @@ export default function Tracker() {
     await recalculateStats();
   };
 
-  // Calculate progress percentage
-  const progressPercent = Math.min(100, (workoutCount / 7) * 100);
-
-  // Calculate probability to hit target (3 workouts minimum)
-  const calculateProbability = (): number => {
-    const TARGET = 3;
-    const remainingNeeded = Math.max(0, TARGET - workoutCount);
-
-    // Find current day index (0 = Monday, 6 = Sunday)
-    const today = new Date().getDay();
-    const currentDayIndex = today === 0 ? 6 : today - 1; // Convert Sunday from 0 to 6
-
-    // Calculate remaining days (including today)
-    const remainingDays = 7 - currentDayIndex;
-
-    // Already hit target
-    if (workoutCount >= TARGET) {
-      return 100;
-    }
-
-    // No days left
-    if (remainingDays === 0) {
-      return workoutCount >= TARGET ? 100 : 10;
-    }
-
-    // Not enough days left to reach target
-    if (remainingDays < remainingNeeded) {
-      return Math.max(10, 20); // Still some hope, but very low
-    }
-
-    // Calculate probability based on remaining days vs needed workouts
-    const ratio = remainingDays / remainingNeeded;
-    const baseProb = Math.min(95, 50 + (ratio * 15));
-
-    // Bonus for workouts already completed
-    const completionBonus = (workoutCount / TARGET) * 30;
-
-    return Math.round(Math.min(95, baseProb + completionBonus));
-  };
-
-  const targetPercent = calculateProbability();
-
-  if (weekLoading || statsLoading) {
+  if (weekLoading || statsLoading || allWeeksLoading) {
     return <LoadingSpinner size="lg" text="LOADING BATTLE DATA..." />;
   }
 
@@ -104,38 +92,27 @@ export default function Tracker() {
         onToggleDay={handleToggleDay}
       />
 
+      {/* XP Progress Bar */}
+      {!xpLoading && (
+        <XPBar
+          currentRank={currentRank}
+          nextRank={nextRank}
+          totalXP={totalXP}
+          onClick={() => {}} // TODO: XP breakdown modal in future plan
+          levelUpEvent={levelUpEvent}
+        />
+      )}
+
       {/* Stats */}
       <StatsPanel stats={stats} />
 
-      {/* Progress Bar */}
-      <div className="doom-panel p-3">
-        <div className="flex justify-between items-center mb-2">
-          <span className="text-gray-500 text-[8px]">PROBABILITY TO HIT TARGET</span>
-          <span className="text-doom-green text-[10px] font-bold">
-            {targetPercent}%
-          </span>
-        </div>
-        <div className="progress-bar h-3 rounded overflow-hidden">
-          <div
-            className="progress-fill h-full transition-all duration-300"
-            style={{ width: `${progressPercent}%` }}
-          />
-        </div>
-        <div className="flex justify-between mt-1 text-[7px]">
-          <span className={workoutCount >= 3 ? 'text-doom-green' : 'text-gray-600'}>
-            MIN (3) {workoutCount >= 3 && '✓'}
-          </span>
-          <span className={workoutCount >= 4 ? 'text-doom-gold' : 'text-gray-600'}>
-            IDEAL (4) {workoutCount >= 4 && '✓'}
-          </span>
-          <span className={workoutCount >= 5 ? 'text-doom-red' : 'text-gray-600'}>
-            BONUS (5+) {workoutCount >= 5 && '✓'}
-          </span>
-        </div>
-      </div>
-
       {/* Boost Button */}
       <BoostButton />
+
+      {/* Level-up Toast */}
+      {levelUpEvent && (
+        <LevelUpToast event={levelUpEvent} onDismiss={dismissLevelUp} />
+      )}
     </div>
   );
 }
