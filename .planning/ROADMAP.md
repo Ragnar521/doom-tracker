@@ -105,7 +105,7 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 07-01-PLAN.md — Rank denormalization, friend rank display, XP debouncing, skeleton loading (2 tasks)
+- [x] 07-01-PLAN.md — Rank denormalization, friend rank display, XP debouncing, skeleton loading (2 tasks, 342s)
 - [ ] 07-02-PLAN.md — XP system E2E tests with Playwright (2 tasks)
 
 ## Progress
@@ -118,7 +118,7 @@ Phases execute in numeric order: 4 → 5 → 6 → 7
 | 1. Health Bar Color Foundation | v1.0 | 1/1 | Complete | 2026-02-25 |
 | 2. Expandable Timeline & Summaries | v1.0 | 5/5 | Complete | 2026-02-25 |
 | 3. Trend Indicators & Comparisons | v1.0 | 2/2 | Complete | 2026-02-25 |
-| 4. Foundation | v1.1 | 1/2 | In progress | - |
-| 5. Data Layer | v1.1 | 0/2 | Not started | - |
-| 6. UI & Celebrations | v1.1 | 0/2 | Not started | - |
-| 7. Integration & Polish | v1.1 | 0/2 | Not started | - |
+| 4. Foundation | v1.1 | 2/2 | Complete | 2026-02-26 |
+| 5. Data Layer | v1.1 | 2/2 | Complete | 2026-02-26 |
+| 6. UI & Celebrations | v1.1 | 2/2 | Complete | 2026-02-26 |
+| 7. Integration & Polish | v1.1 | 1/2 | In progress | - |
