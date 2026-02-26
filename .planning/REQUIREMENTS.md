@@ -17,7 +17,7 @@ Requirements for XP & Levels milestone. Each maps to roadmap phases.
 
 ### Rank Progression
 
-- [ ] **RANK-01**: User has a DOOM military rank derived from total XP (15 ranks from Private to Doom Slayer)
+- [x] **RANK-01**: User has a DOOM military rank derived from total XP (15 ranks from Private to Doom Slayer)
 - [ ] **RANK-02**: User sees rank-up celebration (toast + confetti) when reaching a new rank
 - [ ] **RANK-03**: Rank-up celebrations are suppressed during retroactive XP grant (no notification spam)
 
@@ -64,7 +64,7 @@ Requirements for XP & Levels milestone. Each maps to roadmap phases.
 | XP-03 | Phase 4 | Pending |
 | XP-04 | Phase 5 | Pending |
 | XP-05 | Phase 5 | Pending |
-| RANK-01 | Phase 4 | Pending |
+| RANK-01 | Phase 4 | Complete (04-01) |
 | RANK-02 | Phase 6 | Pending |
 | RANK-03 | Phase 5 | Pending |
 | UI-01 | Phase 6 | Pending |

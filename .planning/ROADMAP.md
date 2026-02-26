@@ -52,7 +52,7 @@ Enhanced Rep & Tear's analytics capabilities by fixing the confusing color schem
 **Plans**: 2 plans
 
 Plans:
-- [ ] 04-01-PLAN.md — TypeScript types and 15 DOOM military rank definitions
+- [x] 04-01-PLAN.md — TypeScript types and 15 DOOM military rank definitions (2 tasks, 91s)
 - [ ] 04-02-PLAN.md — XP formula functions (non-linear scaling + streak multipliers)
 
 ### Phase 5: Data Layer (XP Calculation Logic & Firestore Integration)
@@ -120,7 +120,7 @@ Phases execute in numeric order: 4 → 5 → 6 → 7
 | 1. Health Bar Color Foundation | v1.0 | 1/1 | Complete | 2026-02-25 |
 | 2. Expandable Timeline & Summaries | v1.0 | 5/5 | Complete | 2026-02-25 |
 | 3. Trend Indicators & Comparisons | v1.0 | 2/2 | Complete | 2026-02-25 |
-| 4. Foundation | v1.1 | 0/2 | Not started | - |
+| 4. Foundation | v1.1 | 1/2 | In progress | - |
 | 5. Data Layer | v1.1 | 0/3 | Not started | - |
 | 6. UI & Celebrations | v1.1 | 0/3 | Not started | - |
 | 7. Integration & Polish | v1.1 | 0/2 | Not started | - |
