@@ -32,9 +32,9 @@ Enhanced Rep & Tear's analytics capabilities by fixing the confusing color schem
 
 **Milestone Goal:** Add XP and military rank progression system that rewards workouts, streaks, and achievements with DOOM-themed leveling.
 
-- [ ] **Phase 4: Foundation** - Data structures and XP formulas
-- [ ] **Phase 5: Data Layer** - XP calculation logic and Firestore integration
-- [ ] **Phase 6: UI & Celebrations** - Visual components and level-up animations
+- [x] **Phase 4: Foundation** - Data structures and XP formulas
+- [x] **Phase 5: Data Layer** - XP calculation logic and Firestore integration
+- [x] **Phase 6: UI & Celebrations** - Visual components and level-up animations
 - [ ] **Phase 7: Integration & Polish** - Friend visibility, testing, and optimization
 
 ## Phase Details
@@ -53,7 +53,7 @@ Enhanced Rep & Tear's analytics capabilities by fixing the confusing color schem
 
 Plans:
 - [x] 04-01-PLAN.md — TypeScript types and 15 DOOM military rank definitions (2 tasks, 91s)
-- [ ] 04-02-PLAN.md — XP formula functions (non-linear scaling + streak multipliers)
+- [x] 04-02-PLAN.md — XP formula functions (non-linear scaling + streak multipliers) (2 tasks, 131s)
 
 ### Phase 5: Data Layer (XP Calculation Logic & Firestore Integration)
 **Goal**: Implement XP calculation engine and persistent storage with retroactive XP support
@@ -70,8 +70,8 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 05-01-PLAN.md — useXP hook with Firestore persistence and retroactive XP calculation (2 tasks)
-- [ ] 05-02-PLAN.md — Workout toggle XP delta and achievement XP bonus integration (2 tasks)
+- [x] 05-01-PLAN.md — useXP hook with Firestore persistence and retroactive XP calculation (2 tasks, 118s)
+- [x] 05-02-PLAN.md — Workout toggle XP delta and achievement XP bonus integration (2 tasks, 186s)
 
 ### Phase 6: UI & Celebrations (Visual Components & Level-Up)
 **Goal**: Create XP bar, rank displays, and level-up celebration animations
@@ -88,8 +88,8 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 06-01-PLAN.md — XP progress bar, LevelUpToast, CSS animations, and Tracker page integration (2 tasks)
-- [ ] 06-02-PLAN.md — XP breakdown bottom sheet modal with "This Week" / "All Time" tabs (2 tasks)
+- [x] 06-01-PLAN.md — XP progress bar, LevelUpToast, CSS animations, and Tracker page integration (2 tasks, 194s)
+- [x] 06-02-PLAN.md — XP breakdown bottom sheet modal with "This Week" / "All Time" tabs (2 tasks, 160s)
 
 ### Phase 7: Integration & Polish (Friend Visibility, Testing, Optimization)
 **Goal**: Integrate XP system with Squad features, validate performance, and optimize for production

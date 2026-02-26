@@ -26,7 +26,7 @@ Requirements for XP & Levels milestone. Each maps to roadmap phases.
 - [x] **UI-01**: User sees XP progress bar and current rank on the Tracker page
 - [x] **UI-02**: XP bar shows animated fill when XP increases
 - [x] **UI-03**: XP bar displays numerical progress (current XP / XP needed for next rank)
-- [ ] **UI-04**: User can tap XP bar to see XP breakdown (base workout XP + streak bonus + achievement bonus)
+- [x] **UI-04**: User can tap XP bar to see XP breakdown (base workout XP + streak bonus + achievement bonus)
 - [x] **UI-05**: "Probability to hit target" section is removed from Tracker page
 
 ## Future Requirements
@@ -70,7 +70,7 @@ Requirements for XP & Levels milestone. Each maps to roadmap phases.
 | UI-01 | Phase 6 | Complete |
 | UI-02 | Phase 6 | Complete |
 | UI-03 | Phase 6 | Complete |
-| UI-04 | Phase 6 | Pending |
+| UI-04 | Phase 6 | Complete |
 | UI-05 | Phase 6 | Complete |
 
 **Coverage:**
