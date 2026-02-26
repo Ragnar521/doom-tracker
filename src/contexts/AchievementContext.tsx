@@ -11,7 +11,12 @@ interface AchievementContextType {
 
 const AchievementContext = createContext<AchievementContextType | null>(null);
 
-export function AchievementProvider({ children }: { children: ReactNode }) {
+interface AchievementProviderProps {
+  children: ReactNode;
+  onXPGrant?: (amount: number) => Promise<void>;
+}
+
+export function AchievementProvider({ children, onXPGrant }: AchievementProviderProps) {
   const {
     achievements,
     unlockedCount,
@@ -19,7 +24,7 @@ export function AchievementProvider({ children }: { children: ReactNode }) {
     newlyUnlocked,
     loading,
     dismissAchievement,
-  } = useAchievements();
+  } = useAchievements({ onXPGrant });
 
   return (
     <AchievementContext.Provider value={{ achievements, unlockedCount, totalCount, loading }}>
