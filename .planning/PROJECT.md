@@ -36,7 +36,16 @@ Users can visualize and understand their complete workout history with clear, me
 
 ### Active
 
-(Requirements for next milestone - TBD)
+**Current Milestone: v1.1 XP & Levels**
+
+**Goal:** Add an XP and military rank progression system that rewards workouts, streaks, and achievements.
+
+**Target features:**
+- XP system (earn XP from workouts, streaks, achievements)
+- DOOM military ranks (Marine → Doomguy progression)
+- XP bar and rank display on Tracker page
+- Level-up celebrations (toast + confetti)
+- Remove "Probability to hit target" from Tracker
 
 ### Out of Scope
 
@@ -100,4 +109,4 @@ Users can visualize and understand their complete workout history with clear, me
 | Defer Phase 4 to tech debt | Focus on core analytics value, accessibility can be enhanced later | ⚠️ Revisit — Plan Phase 4 in next milestone |
 
 ---
-*Last updated: 2026-02-26 after v1.0 milestone archival*
+*Last updated: 2026-02-26 after v1.1 milestone started*
