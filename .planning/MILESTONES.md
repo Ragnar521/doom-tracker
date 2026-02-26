@@ -30,3 +30,26 @@
 
 ---
 
+
+## v1.1 XP & Levels (Shipped: 2026-02-26)
+
+**Phases completed:** 4 phases (4-7), 8 plans, 16 tasks
+**Timeline:** Feb 26, 2026 (same-day execution sprint)
+**Code changes:** 17 files modified (+1,577 lines, -86 lines)
+**Total codebase:** 7,303 lines TypeScript
+**Git range:** 4494530 → ea38a85
+
+**Key accomplishments:**
+- XP System Foundation — Defined 15 DOOM military ranks (Private → Doom Slayer) with exponential XP curve and non-linear workout scaling (1=5 XP, 6-7=100 XP)
+- XP Calculation Engine — useXP hook with Firestore persistence, retroactive XP calculation for existing users, and streak multipliers (1.5x-2.5x)
+- Workout XP Integration — XP delta callbacks on workout toggle with achievement XP bonuses (+100 XP per unlock with 800ms dramatic delay)
+- XP Progress Bar — Animated XP bar on Tracker page with rank badge, responsive abbreviations, and two-step level-up fill animation
+- XP Breakdown Modal — Bottom sheet with "This Week" / "All Time" tabs showing base workout XP, streak bonus, and achievement bonuses
+- Level-Up Celebrations — Animated rank-up toast with DOOM theming, priority over achievement toasts
+- Squad Rank Integration — Friend ranks visible on leaderboard with denormalized profile data and 750ms debounced Firestore writes
+- E2E Test Coverage — Playwright test suite for XP system UI with dedicated helper functions
+
+**Requirements coverage:** 13/13 satisfied (100%)
+
+---
+
