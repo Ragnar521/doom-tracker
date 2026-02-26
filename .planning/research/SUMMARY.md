@@ -1,309 +1,307 @@
 # Project Research Summary
 
-**Project:** Enhanced Analytics Dashboard for Rep & Tear
-**Domain:** Fitness tracking app analytics with historical data visualization
-**Researched:** 2026-02-25
+**Project:** Rep & Tear - XP & Levels System
+**Domain:** Gamified fitness progression with military rank theming
+**Researched:** 2026-02-26
 **Confidence:** HIGH
 
 ## Executive Summary
 
-Rep & Tear needs enhanced analytics to support long-term user engagement. The current 12-week limit frustrates users with 6+ months of data, and missing monthly/yearly summaries puts the app behind competitors like Fitbit and Apple Health. Research shows this is a critical retention issue—users who can't visualize their full journey are 40-60% more likely to abandon fitness apps.
+The XP & Levels system for Rep & Tear will add military rank progression (Private → Doom Slayer) to the existing DOOM-themed workout tracker. Based on comprehensive research, **no new dependencies are required** — the existing React 19.2 + TypeScript + Tailwind CSS stack provides all necessary capabilities. CSS transitions handle XP bar animations (0KB overhead), existing toast/confetti components deliver level-up celebrations, and Firestore's current data structure can store XP/rank data without schema changes.
 
-The good news: the existing stack is already optimal. React 19.2 + Firebase + Tailwind can handle everything needed without heavy dependencies. The core pattern—memoized aggregation in `useAllWeeks` hook—scales to 100+ weeks with minimal changes. Key additions are lazy loading for timeline expansion (prevents performance degradation) and fixing the color scheme to match health bar paradigm (green=full health, red=critical) instead of confusing traffic lights.
+The recommended approach is a **polynomial progression curve** (level^1.5) that balances early accessibility with long-term engagement, awarding XP from workouts (base), streaks (multiplier), and achievements (bonuses). Critical architectural decision: store XP in the existing `users/{uid}/stats/current` document (not a new collection) to avoid Firestore hotspotting and leverage existing read patterns. The system must calculate retroactive XP from historical workouts on first load but **suppress celebration spam** by tracking when the XP system was activated.
 
-Critical risks center on performance and costs. Loading all historical data at once will spike Firebase reads and cause mobile jank. The mitigation strategy is clear: implement lazy loading from Phase 1, use collapsed-by-default timeline sections, and pre-aggregate monthly summaries. Color accessibility also needs attention—8% of males have red-green colorblindness, so patterns/textures must supplement color coding. The architecture research reveals these are preventable pitfalls, not inherent complexity.
+Key risks center on **React useEffect infinite loops** during XP recalculation (mitigate with memoization and primitive dependencies), **XP inflation** from multiple sources (solve with documented XP budget and rate limiting), and **LocalStorage/Firestore desync** during guest migration (resolve by recalculating from workout history, never trusting LocalStorage XP). Progress bar animation requires careful state management to avoid "teleporting" instead of smooth fills during level-ups. With proper memoization, batched updates, and client-side rank calculation, the system scales efficiently to 10K+ users.
 
 ## Key Findings
 
 ### Recommended Stack
 
-The existing tech stack (React 19.2, TypeScript 5.9, Firebase 12.7, Tailwind 3.4) is already ideal for analytics features. No major framework changes needed. Research validates the current memoization patterns in `useAllWeeks.ts` and identifies two optional libraries for power user scenarios.
+**Zero new dependencies required.** The existing stack already provides all capabilities needed for XP & Levels:
 
 **Core technologies:**
-- **React 19.2 + useMemo**: Already in use for aggregation—scales to 100+ weeks with proper dependency arrays
-- **Tailwind CSS utilities**: Pure CSS grid visualizations match DOOM aesthetic better than chart libraries (Recharts/D3.js add 100KB+ for no benefit)
-- **Firebase Firestore cursor pagination**: Built-in `startAfter()` support for loading timeline sections on-demand
+- **React 19.2**: State management, useEffect for XP recalculation, useMemo for performance — existing patterns from useStats/useAchievements apply directly
+- **TypeScript ~5.9**: Type safety for XPData interface, Rank enum definitions — prevents XP calculation bugs
+- **Tailwind CSS 3.4**: XP bar styling with CSS transitions (`transition: width 0.5s ease-in-out`) — 0KB overhead, 60fps smooth animation
+- **Firebase Firestore 12.7**: XP/level persistence in existing `users/{uid}/stats/current` document — no new collections, reuses auth-scoped security rules
+- **Existing components**: Toast/Confetti system reused for level-up celebrations — proven pattern from AchievementContext
 
-**Optional additions (only if needed):**
-- **TanStack Virtual ^3.10.0**: Headless virtualization for 200+ weeks (95% DOM reduction)—defer until user reports jank
-- **react-intersection-observer ^9.13.0**: Lazy load collapsed sections—useful for collapsible timeline but not essential
+**Rejected alternatives:**
+- Framer Motion (100KB+), React Spring (50KB+), Anime.js (30KB+) — CSS transitions are sufficient for progress bar fills
+- Material UI LinearProgress (300KB+ dependency) — Tailwind custom build is 0KB overhead
+- Separate Firestore collection — increases read costs, existing `stats/current` document works
 
-**What NOT to use:**
-- Chart libraries (Recharts, Chart.js, D3.js)—heavy bundles conflict with retro aesthetic
-- react-window—deprecated, TanStack Virtual is modern replacement
-- Pre-built timeline components (Flowbite, react-chrono)—Material Design conflicts with DOOM theme
+**Confidence:** HIGH — All capabilities verified in existing codebase (v1.6 already has confetti, toasts, Firestore patterns).
 
 ### Expected Features
 
-Research shows fitness app users have strong expectations shaped by market leaders (Fitbit, Apple Health, Strava). Missing these table stakes features makes the product feel incomplete.
-
 **Must have (table stakes):**
-- **Complete timeline view** — Users expect unlimited history access (current 12-week cap is critical pain point)
-- **Monthly/yearly summaries** — All competitors provide period aggregations; absence is glaring omission
-- **Trend indicators** — "↑ +3 vs last month" style comparisons are universal in fitness apps
-- **Health bar color scheme** — Green=high, yellow=medium, red=low matches user mental models (current traffic light colors cause confusion)
-- **Expandable/collapsible sections** — Mobile-first apps (78% of fitness usage) require this for UX
+- Visual XP bar with animated fill — users expect to see progress toward next level
+- Current rank display — users need status at a glance (rank badge + level number)
+- XP awarded for workouts — core loop: actions must yield tangible rewards
+- Level-up celebration — universal pattern: success must be celebrated (toast + confetti)
+- Clear XP-to-level formula — users need to understand "how much more" (show current/required XP)
+- Persistent progression — levels never reset, permanent achievement
+- Multiple rank tiers — 10-15 ranks minimum for longevity (single progression feels shallow)
+- Retroactive XP — existing workouts should count, respect user history
 
-**Should have (competitive advantage):**
-- **Consistency percentage** — "67% of weeks" complements streak counting (shows reliability vs. consecutive success)
-- **Trend vs personal average** — "Above your 4.2 avg" benchmarks show if current performance is exceptional or typical
-- **Unified progress score** — DoomGuy face state as single health metric aligns with Jefit's NSPI approach (simplifies decision-making)
+**Should have (competitive differentiators):**
+- DOOM military ranks — authentic theme (Marine → Doomguy progression) instead of generic levels
+- Face state XP scaling — God Mode weeks (5-7 workouts) earn more XP than minimum 3
+- Achievement XP bonuses — integrates with existing 18-achievement system
+- Streak XP multipliers — rewards consistency, amplifies existing streak tracking (1.5x for 4+ weeks, 2x for 12+)
+- Friend rank visibility — Squad members see each other's ranks on leaderboard
+- XP breakdown display — transparency builds trust ("50 XP from workouts, 25 XP streak bonus")
 
 **Defer (v2+):**
-- **Year-in-review feature** — Viral moment potential but only useful once per year (defer to year-end 2026)
-- **Data export (CSV/JSON)** — Power user feature with <5% usage; implement when actively requested
-- **Custom date ranges** — Over-engineering; fixed periods (week/month/year) cover 95% of use cases
+- Historical rank timeline — show rank-up events in Dashboard timeline (design heavy)
+- Secret elite ranks — hidden ranks beyond visible progression (requires balancing)
+- Comeback XP boost — extra XP for returning after missed weeks (complex detection logic)
+- Week status bonuses — sick/vacation weeks earn "survival XP" (edge case handling)
+
+**Confidence:** HIGH — Feature expectations validated against 8+ fitness gamification apps (LEVELING, SYSTEM Fitness, RepXP, Level Up) and UX research.
 
 ### Architecture Approach
 
-The existing component architecture is sound and follows React best practices. The recommended approach is evolutionary enhancement—extend current patterns rather than rebuild. Timeline expansion integrates cleanly as new components in `components/analytics/` directory without touching core tracking functionality.
+The XP system integrates via a **new custom hook (`useXP`)** following existing patterns from `useStats` and `useAchievements`. Store XP in the existing `users/{uid}/stats/current` Firestore document (alongside totalWorkouts/streaks) to avoid creating a new collection and leverage existing security rules. Rank is **computed client-side** from level (never stored in Firestore) to prevent data inconsistency.
 
 **Major components:**
-1. **Timeline component** — Expandable year/month sections with lazy loading, receives `weeks[]` prop from Dashboard (prevents duplicate Firestore queries)
-2. **TimelineYear/TimelineMonth** — Collapsible sections with memoized summaries, only render when expanded (mobile-friendly)
-3. **TrendIndicator component** — Pure component showing ↑↓ arrows with percentage, calculated in parent (avoids re-calculation on every render)
-4. **colorUtils.ts** — Centralized health bar color mapping (green→yellow→red based on workout count), ensures consistency across all visualizations
-5. **Enhanced useAllWeeks hook** — Add month/year grouping methods while preserving existing stats calculations (backward compatible)
+1. **XPContext (NEW)** — Global XP state provider, mirrors AchievementContext pattern with toast container for level-up celebrations
+2. **useXP hook (NEW)** — XP calculation engine, listens to workoutCount/streaks/achievements changes, calculates XP gain, checks for level-up, syncs to Firestore
+3. **XPBar component (NEW)** — Progress bar UI on Tracker page, replaces "Probability to hit target" section, shows rank badge + level + progress percentage
+4. **RankDisplay component (NEW)** — Military rank badge with icon, used in XPBar, Squad leaderboard, and Settings page
+5. **Level-up toast (NEW)** — Clones AchievementToast.tsx pattern, triggers confetti on rank-up
+6. **Tracker.tsx (MODIFIED)** — Adds XPBar below DoomGuy face, removes probability calculation section
 
-**Key patterns:**
-- **Memoized aggregation**: `useMemo` for expensive calculations (already proven in `useAllWeeks.ts` lines 86-218)
-- **Lazy loading**: Collapsed-by-default sections load data only when expanded (prevents DOM bloat)
-- **Derived state over effects**: Use `useMemo` for trends instead of `useEffect` chains (React 19 best practice)
-- **Single data source**: Dashboard loads weeks once via `useAllWeeks()`, passes down as props (no redundant queries)
+**Data flow:**
+```
+User toggles workout
+  ↓
+useWeek.toggleDay() (existing)
+  ↓
+useXP listens to workoutCount change (NEW)
+  ↓
+calculateXPGain(workouts, streaks, achievements) (NEW)
+  ↓
+addXP() → check level-up → update Firestore
+  ↓
+XPContext triggers toast + confetti (NEW)
+  ↓
+XPBar re-renders with smooth animation (NEW)
+```
+
+**Confidence:** HIGH — Architecture follows proven patterns from existing codebase (AchievementContext, useStats, toast system all working since v1.0).
 
 ### Critical Pitfalls
 
-**1. Loading all historical data at once** — Dashboard becomes unusable when users have 100+ weeks. Firebase reads spike, mobile devices lag or crash. Prevention: implement lazy loading in Phase 1 (not retrofit later). Use collapsed-by-default timeline, fetch year sections on-demand with cursor pagination. Add `limit(50)` safeguards to prevent runaway queries.
+1. **Retroactive XP notification spam** — Users with 6+ months of data see 20+ level-up toasts stacking on screen on first load. **Mitigation:** Store `xpSystemActivatedAt` timestamp, suppress celebrations for historical level-ups, show single summary toast: "XP System Activated! You're Level 12 based on 234 workouts". Address in Phase 1 (data structure) and Phase 3 (UI).
 
-**2. Confusing color scheme (traffic light vs health bar)** — Current yellow-for-goal creates cognitive dissonance. Users misinterpret progress because yellow universally means "warning." Prevention: adopt full health bar paradigm (green=5+ workouts, lime=3-4, yellow=1-2, red=0) matching DOOM health mechanic. Must fix in Phase 1 before users internalize wrong mental model.
+2. **XP inflation from multiple sources** — Workouts + streaks + achievements grant XP without balancing. Users can "XP farm" by rapid toggling, devaluing progression. **Mitigation:** Document XP budget in `lib/xpConfig.ts` (target: 1 level per 1-2 weeks = ~100-150 XP/week). Implement toggle spam detection (max 1 toggle per second per day). Balance example: 4 workouts (50 XP) + streak bonus (25 XP) + achievement (100 XP one-time) = ~75-175 XP/week. Address in Phase 1 (formula documentation) and Phase 2 (implementation).
 
-**3. Client-side trend calculation for large datasets** — Calculating monthly trends across 100+ weeks blocks main thread for 200-500ms, causing jank and battery drain. Prevention: pre-aggregate monthly summaries in Firestore documents (1 read vs 4-5 week reads), use `useMemo` with stable dependencies, consider Web Workers for multi-year analysis.
+3. **React useEffect infinite loop** — XP recalculation triggers state update → triggers useEffect again → infinite loop crashes app or exhausts Firestore quota. **Mitigation:** Memoize `stats` object with `useMemo([weeks])`, use primitive dependencies `[stats.totalWorkouts, weeks.length]` instead of objects, wrap `recalculateXP` in `useCallback`, use `useRef` to track calculation state. Address in Phase 2 (XP calculation logic) with mandatory code review and ESLint rules.
 
-**4. Non-collapsible timeline on mobile** — Expanded timeline with 104+ weeks creates infinite scroll nightmare, users get lost and can't find navigation. Prevention: default collapsed, sticky year headers, "collapse all" button, smart expansion (auto-close others when opening new section), 44px minimum touch targets for mobile.
+4. **LocalStorage vs Firestore desync** — Guest users accumulate XP in LocalStorage, sign in, and either lose progress (overwritten by empty Firestore) or keep inflated XP (edited in browser). **Mitigation:** On migration, discard LocalStorage XP entirely, recalculate from Firestore workout history (source of truth), clear LocalStorage after migration. Address in Phase 2 (migration logic) and Phase 4 (testing).
 
-**5. Forgetting sick/vacation weeks in trend calculations** — Naive trends show "down arrows" when user marked sick weeks, demotivating despite maintained performance. Existing streak logic correctly skips sick/vacation (useStats.ts lines 106-109, useAllWeeks.ts lines 159-163). Prevention: create centralized `shouldIncludeInStats(week)` utility, ensure ALL new calculations use it, add unit tests for every trend feature.
+5. **Progress bar animation edge cases** — Level-up causes bar to jump from 95% to 15% instantly (no celebration visual), rapid workout toggles cause stuttering. **Mitigation:** Implement two-step animation (fill to 100% → pause → reset to new level) using `requestAnimationFrame`, debounce progress updates to 60fps max, disable transitions for rapid updates. Address in Phase 3 (UI/celebrations).
+
+**Confidence:** HIGH — Pitfalls validated through React/Firebase expertise, web research on gamification mistakes, and direct codebase analysis (existing useStats/useAllWeeks patterns identified).
 
 ## Implications for Roadmap
 
-Based on research, suggested phase structure:
+Based on research, suggested **4-phase structure** with dependency-aware sequencing:
 
-### Phase 1: Foundation & Color Scheme (CRITICAL)
-**Rationale:** Color scheme and lazy loading architecture must be decided before any UI implementation. Changing color paradigm mid-project confuses users and requires updating all visualizations. Lazy loading architecture is harder to retrofit than build from scratch.
-
-**Delivers:**
-- Health bar color scheme (green=best, red=critical) with centralized utility
-- Lazy loading foundation (data grouping, cursor pagination patterns)
-- Month/year grouping utilities in `lib/weekUtils.ts`
-- Color accessibility (contrast checks, pattern planning)
-
-**Addresses:**
-- FEATURES: Health bar color scheme (table stakes)
-- PITFALLS: Confusing colors (#2), loading all data at once (#1 prevention)
-
-**Avoids:**
-- Pitfall #2 (inverse color logic) by fixing before users learn wrong paradigm
-- Pitfall #1 (performance issues) by architecting pagination from start
-- Pitfall #5 (sick/vacation handling) by creating shared utility early
-
-**Estimated:** 6-8 hours
-
----
-
-### Phase 2: Timeline UI & Expansion (CORE FEATURE)
-**Rationale:** Timeline view is the #1 user pain point (12-week limit). Implements table stakes feature that competitors all have. Builds on Phase 1 foundation (uses color utilities, lazy loading patterns).
+### Phase 1: Foundation (Data Structure & XP Formula)
+**Rationale:** Must establish data model and XP calculation rules before implementing logic. No dependencies — pure functions and type definitions can be built in parallel.
 
 **Delivers:**
-- Expandable timeline component with year/month collapsible sections
-- Lazy loading implementation (fetch on expand, not upfront)
-- Loading skeletons for perceived performance
-- Month/year summary aggregations
+- `src/lib/ranks.ts` — Rank definitions (10 ranks: Private → Doom Slayer), XP formulas (polynomial curve: level^1.5 × 100), pure functions for rank lookup
+- `src/types/index.ts` exports — XPData, Rank, LevelUp TypeScript types
+- Firestore security rules update — `users/{uid}/stats/current` allows XP field reads/writes
+- XP budget documentation — Target earning rate (100-150 XP/week), balancing across sources
 
-**Uses:**
-- TanStack Virtual (optional, only if 200+ weeks cause jank)
-- react-intersection-observer (for lazy loading triggers)
-- Tailwind utilities (no chart libraries)
+**Addresses features:**
+- Clear XP-to-level formula (table stakes)
+- Multiple rank tiers (table stakes)
+- DOOM military ranks (differentiator)
 
-**Implements:**
-- Timeline component architecture from ARCHITECTURE.md
-- Month boundary logic (ISO week Thursday rule)
-- Mobile-first collapsible pattern
+**Avoids pitfalls:**
+- XP inflation — documented formula prevents ad-hoc changes
+- Retroactive spam — data structure includes `xpSystemActivatedAt` from start
+- Firestore hotspotting — uses existing `stats/current` document
 
-**Addresses:**
-- FEATURES: Complete timeline view, monthly summaries (table stakes)
-- PITFALLS: Non-collapsible mobile UX (#4), missing loading states (#7)
+**Research flag:** SKIP RESEARCH — Formulas and data structures are well-documented, industry standard polynomial progression curves confirmed.
 
-**Avoids:**
-- Pitfall #4 (mobile scroll nightmare) with collapsed-by-default design
-- Pitfall #7 (blank loading screens) with skeleton components
-- Pitfall #8 (month boundaries) with ISO week-year standard
-
-**Estimated:** 10-14 hours
-
----
-
-### Phase 3: Trend Indicators & Comparisons (ENHANCEMENT)
-**Rationale:** Builds on timeline from Phase 2. Trend arrows are table stakes but require timeline data to exist first. Simple addition since data is already loaded.
+### Phase 2: Data Layer (XP Calculation Logic & Firestore Integration)
+**Rationale:** Requires Phase 1 types/formulas. Implements core business logic before UI. Critical phase for avoiding infinite loops and migration bugs.
 
 **Delivers:**
-- Trend indicator component (↑↓ arrows with percentages)
-- "vs previous period" comparisons for months/years
-- "vs personal average" benchmarks
-- Consistency percentage stat
+- `src/hooks/useXP.ts` — XP calculation hook, listens to workoutCount/streaks/achievements, calculates XP gain with memoization
+- Firestore integration — Reads/writes XP to `users/{uid}/stats/current`, uses transactions for level-up calculations
+- Retroactive XP calculation — Recalculates XP from all historical workouts on first load, silent mode for historical level-ups
+- Guest migration logic — Discards LocalStorage XP, recalculates from Firestore workout history
+- XP budget enforcement — Toggle spam detection (rate limiting), one-time achievement bonuses
 
-**Uses:**
-- Pure React components (no libraries)
-- `useMemo` for trend calculations
-- Existing week data from useAllWeeks
+**Addresses features:**
+- XP awarded for workouts (table stakes)
+- Persistent progression (table stakes)
+- Retroactive XP (table stakes)
+- Face state XP scaling (differentiator)
+- Achievement XP bonuses (differentiator)
+- Streak XP multipliers (differentiator)
 
-**Addresses:**
-- FEATURES: Trend indicators, comparative benchmarks (table stakes + competitive)
-- PITFALLS: Client-side calculation performance (#3)
+**Avoids pitfalls:**
+- useEffect infinite loop — useMemo, useCallback, primitive dependencies, code review
+- LocalStorage desync — recalculation from workout history
+- XP inflation — documented budget, rate limiting
 
-**Avoids:**
-- Pitfall #3 (slow calculations) by memoizing in parent components
-- Pitfall #5 (sick/vacation handling) by using shared filter utility
+**Research flag:** SKIP RESEARCH — React hooks patterns already proven in useStats/useAchievements, Firestore integration patterns established.
 
-**Estimated:** 6-8 hours
-
----
-
-### Phase 4: Polish & Accessibility (QUALITY)
-**Rationale:** Core functionality exists, now ensure it works for all users. Accessibility is non-negotiable (8% colorblind rate, WCAG compliance).
+### Phase 3: UI & Celebrations (Visual Components & Level-Up)
+**Rationale:** Requires Phase 2 XP calculation working. Focuses on user-facing polish and animations. Critical for UX (progress bar smoothness, celebration timing).
 
 **Delivers:**
-- Pattern/texture overlays for colorblind support
-- High-contrast mode (CSS media query)
-- Keyboard navigation for collapsible sections
-- Empty state handling (welcome back messages)
-- Performance testing with 200+ weeks mock data
+- `src/contexts/XPContext.tsx` — Context provider, wraps app, manages level-up toast queue
+- `src/components/XPBar.tsx` — Progress bar UI, CSS transition animations, shows rank badge + level + XP progress
+- `src/components/RankIcon.tsx` — Military rank badge display
+- `src/components/XPToast.tsx` — Level-up celebration toast (clones AchievementToast.tsx)
+- `src/components/XPToastContainer.tsx` — Toast queue management
+- `src/pages/Tracker.tsx` modification — Add XPBar below DoomGuy face, remove probability section
+- Progress bar animations — Two-step level-up animation (fill → reset), debounced updates, `requestAnimationFrame` timing
 
-**Addresses:**
-- PITFALLS: Color accessibility (#6), empty states (#10)
-- Mobile performance optimization
+**Addresses features:**
+- Visual XP bar (table stakes)
+- Current rank display (table stakes)
+- Level-up celebration (table stakes)
+- Animated XP bar fill (table stakes)
+- XP breakdown display (differentiator)
 
-**Avoids:**
-- Pitfall #6 (accessibility issues) with patterns + contrast ratios
-- Pitfall #10 (demotivating empty states) with positive messaging
+**Avoids pitfalls:**
+- Retroactive notification spam — checks `xpSystemActivatedAt`, shows single summary toast
+- Progress bar edge cases — two-step animation, debouncing, smooth transitions
 
-**Estimated:** 6-8 hours
+**Research flag:** SKIP RESEARCH — Component patterns proven (AchievementToast, Confetti already working), CSS animation best practices well-documented.
 
----
+### Phase 4: Integration & Polish (Friend Visibility, Testing, Optimization)
+**Rationale:** Requires Phases 1-3 complete. Integrates XP system with existing features (Squad, Dashboard) and validates performance.
+
+**Delivers:**
+- Friend rank visibility — Add rank badges to Squad leaderboard, denormalize XP to `users/{uid}/profile/info` for friend queries
+- Performance optimization — Memoization audit, batched Firestore updates, debounced recalculations
+- E2E testing — Playwright tests for XP gain, level-up, retroactive calculation, guest migration
+- Mobile testing — Verify XP bar animations on low-end devices (iPhone SE, Android emulator)
+- XP rebalancing — Adjust formulas based on real usage data if needed
+
+**Addresses features:**
+- Friend rank visibility (differentiator)
+
+**Avoids pitfalls:**
+- All pitfalls validated through testing
+
+**Research flag:** SKIP RESEARCH — Integration points well-understood, testing patterns established (Playwright setup complete in v1.6).
 
 ### Phase Ordering Rationale
 
-**Why this sequence:**
-1. **Phase 1 first:** Color scheme and data architecture are foundational—changing later breaks user mental models and requires component rewrites
-2. **Phase 2 next:** Timeline view is highest user pain point and prerequisite for trends
-3. **Phase 3 builds on 2:** Trend calculations need timeline data to exist
-4. **Phase 4 last:** Polish layer after core functionality works
+**Why this order:**
+- **Phase 1 first:** Data structures and formulas are dependencies for all other work, no implementation complexity
+- **Phase 2 before UI:** Business logic must be correct before building visual layer, easier to test data layer in isolation
+- **Phase 3 after data layer:** UI components consume XP state from Phase 2, celebrations depend on level-up detection
+- **Phase 4 last:** Integration requires complete XP system working, testing validates end-to-end flows
 
 **Dependency chain:**
-```
-Phase 1 (Foundation)
-    ↓ provides color utilities + lazy loading patterns
-Phase 2 (Timeline)
-    ↓ provides month/year grouped data
-Phase 3 (Trends)
-    ↓ provides complete feature set
-Phase 4 (Polish)
-    → accessibility + performance optimization
-```
+- Phase 1 (types/formulas) → Phase 2 (useXP hook) → Phase 3 (XPContext + UI components) → Phase 4 (integration)
+- No parallel work possible between phases due to tight coupling
+- However, within each phase, tasks can be parallelized (e.g., Phase 1: types + formulas + Firestore rules simultaneously)
 
 **How this avoids pitfalls:**
-- Early color scheme decision prevents Pitfall #2 (user confusion from mid-stream changes)
-- Lazy loading from Phase 1 prevents Pitfall #1 (performance degradation)
-- Collapsed-by-default in Phase 2 prevents Pitfall #4 (mobile scroll issues)
-- Memoization in Phase 3 prevents Pitfall #3 (calculation jank)
-- Sick/vacation utility in Phase 1 prevents Pitfall #5 spreading to new features
+- Infinite loops caught in Phase 2 before UI built (easier to debug)
+- XP inflation prevented by Phase 1 budget documentation enforced in Phase 2
+- Notification spam suppressed by Phase 1 data structure used in Phase 3
+- Migration bugs tested in Phase 4 after complete system working
 
 ### Research Flags
 
-**Phases with standard patterns (skip deep research):**
-- **Phase 1:** Color scheme and React memoization are well-documented, existing codebase has proven patterns
-- **Phase 2:** Collapsible components and Firestore pagination are established patterns
-- **Phase 3:** Trend calculations are simple math, no external complexity
-- **Phase 4:** WCAG accessibility guidelines are comprehensive, testing tools exist
+**Phases likely needing deeper research:**
+- **NONE** — All phases use well-documented patterns from existing codebase (React hooks, Firestore, CSS animations, toast system). XP formulas validated against game design industry standards.
 
-**Phases needing validation during implementation:**
-- **Phase 2:** Month boundary logic should be tested with Week 1, Week 52, Week 53 edge cases (unit tests)
-- **Phase 4:** Colorblind testing needs real user feedback or emulation tools (not just design assumption)
+**Phases with standard patterns (skip research-phase):**
+- **Phase 1:** Data modeling follows existing Firestore patterns, polynomial progression curves are industry standard
+- **Phase 2:** React hooks patterns proven in useStats/useAchievements, Firestore integration established
+- **Phase 3:** Component patterns cloned from AchievementContext/Toast system, CSS animations well-documented
+- **Phase 4:** Integration points known (Squad system already exists), Playwright testing framework established
 
-**No phases require `/gsd:research-phase`** — all patterns are proven in existing codebase or well-documented in sources.
+**Critical implementation notes:**
+- **Phase 2:** Mandatory code review for dependency arrays in useEffect (infinite loop prevention)
+- **Phase 3:** Manual testing on multiple browsers for progress bar animation smoothness
+- **Phase 4:** Load testing with 100+ weeks of historical data to validate performance
 
 ## Confidence Assessment
 
 | Area | Confidence | Notes |
 |------|------------|-------|
-| Stack | HIGH | Existing tech stack verified as optimal. TanStack Virtual and react-intersection-observer are optional, not required. No framework changes needed. |
-| Features | HIGH | Comprehensive competitor analysis (Fitbit, Apple Health, Strava, MyFitnessPal) confirms table stakes vs differentiators. Market data (78% mobile usage, 40-60% churn rate) validates priorities. |
-| Architecture | HIGH | Based directly on existing production codebase patterns. `useAllWeeks.ts` memoization approach is proven. Suggested components follow established Rep & Tear conventions. |
-| Pitfalls | HIGH | Analyzed existing code (Dashboard.tsx, useAllWeeks.ts, useStats.ts) to identify current patterns. Pitfalls derived from Firebase cost models, React performance best practices, and accessibility standards. |
+| Stack | **HIGH** | Zero new dependencies required, all capabilities verified in existing codebase. CSS transitions already used for god-mode glow, confetti system proven since v1.0, Firestore patterns established. |
+| Features | **HIGH** | Feature expectations validated against 8+ fitness gamification apps, UX patterns researched from industry sources. Table stakes vs differentiators clearly defined. |
+| Architecture | **HIGH** | Architecture mirrors existing patterns (AchievementContext, useStats, toast system). Data structure reuses existing `stats/current` document. Client-side rank calculation prevents data inconsistency. |
+| Pitfalls | **HIGH** | Pitfalls validated through React/Firebase expertise, web research on gamification mistakes, direct codebase analysis. Mitigation strategies proven (memoization, transactions, two-step animations). |
 
-**Overall confidence:** HIGH
-
-All research grounded in:
-1. Existing codebase analysis (not theoretical)
-2. 2026 official documentation (React 19, Firebase, Tailwind)
-3. Competitor feature analysis (market leaders)
-4. Domain expertise (fitness app patterns, Firebase optimization)
+**Overall confidence:** **HIGH**
 
 ### Gaps to Address
 
-**Month boundary edge cases:** Research identified ISO week Thursday rule for determining month assignment, but needs validation in implementation. Edge case testing required for:
-- Week 1 spanning December-January
-- Week 52/53 at year boundary
-- Leap years with 53 weeks
+**Minor gaps requiring validation during implementation:**
 
-**How to handle:** Add comprehensive unit tests in Phase 2 covering 2024-2030 edge cases. Verify totals sum correctly (monthly totals = yearly total).
+1. **XP formula balancing** — Theoretical calculation suggests 1 level per 1-2 weeks, but user behavior may vary. Mitigation: Monitor real usage data in Phase 4, prepared to adjust multipliers. Formula is configurable in `lib/ranks.ts` without code changes.
 
-**Colorblind pattern design:** Research confirms patterns/textures needed but doesn't specify which patterns. Requires design decision during Phase 4.
+2. **Rank icon design** — Research confirmed military rank names (Private → Doom Slayer) but didn't specify visual design. Mitigation: Use text-based ranks initially (e.g., "[SGT]"), defer custom icons to v2+ if needed. XP system works without custom graphics.
 
-**How to handle:** Test with browser colorblind emulation (Chrome DevTools), use established patterns (diagonal stripes=critical, dots=warning, solid=success, sparkles=godmode).
+3. **Mobile animation performance** — CSS transitions should work on low-end devices, but stuttering possible. Mitigation: Test on iPhone SE / Android emulator in Phase 4, add fallback to disable animations if `prefers-reduced-motion` enabled.
 
-**Firebase cost monitoring:** Research shows lazy loading prevents cost explosion but needs ongoing monitoring.
+4. **Firestore quota impact** — Adding XP writes increases Firestore usage, but batched updates should keep within free tier (50k reads, 20k writes/day). Mitigation: Monitor Firebase console in Phase 4, implement debouncing (5-second batching) if approaching limits.
 
-**How to handle:** Set up Firebase billing alerts at $5, $20, $50 thresholds before launch. Monitor reads/user ratio in analytics (target: <20 reads/session).
+**All gaps are addressable during implementation — none block starting Phase 1.**
 
 ## Sources
 
 ### Primary (HIGH confidence)
 
 **Stack Research:**
-- [Firestore Query Best Practices 2026](https://estuary.dev/blog/firestore-query-best-practices/) — Cursor pagination, query optimization
-- [React Performance Optimization 2026](https://oneuptime.com/blog/post/2026-02-20-react-performance-optimization/view) — useMemo patterns, React 19 best practices
-- [TanStack Virtual Guide](https://conzit.com/post/understanding-tanstack-virtual-a-key-to-react-performance) — Virtualization patterns, performance benchmarks
-- [UI Color Palette 2026](https://www.interaction-design.org/literature/article/ui-color-palette) — Color psychology, health app patterns
+- [GameDesign Math: RPG Level-based Progression](https://www.davideaversa.it/blog/gamedesign-math-rpg-level-based-progression/) — Polynomial progression curves
+- [Firestore Best Practices](https://firebase.google.com/docs/firestore/best-practices) — Data structure recommendations
+- [CSS Transitions Interactive Guide](https://www.joshwcomeau.com/animation/css-transitions/) — Animation performance
 
 **Feature Research:**
-- [2026 Digital Fitness Ecosystem Report](https://www.feed.fm/2026-digital-fitness-ecosystem-report) — Market trends, 78% AI adaptive, 22% real-time
-- [Best Workout Apps for 2026](https://www.jefit.com/wp/guide/best-workout-apps-for-2026-top-options-tested-and-reviewed-by-pro/) — Jefit NSPI scoring, competitor features
-- [How to Track Workouts Guide](https://www.hevyapp.com/how-to-track-workouts/) — Time periods, calendar views, best practices
-- [Fitness App Market Statistics](https://www.wellnesscreatives.com/fitness-app-market/) — $28.7bn market, 14.3% growth rate
+- [LEVELING: Fitness App](https://appleveling.com/en/) — XP system UX patterns
+- [SYSTEM: Fitness Leveling](https://play.google.com/store/apps/details?id=com.avillalva.systemfitnessleveling) — Rank progression examples
+- [Gamification For Fitness Apps](https://www.nudgenow.com/blogs/gamify-your-fitness-apps) — Feature expectations
+- [Yukai Chou - Top 10 Gamification in Fitness](https://yukaichou.com/gamification-analysis/top-10-gamification-in-fitness/) — Best practices
 
 **Architecture Research:**
-- Existing codebase: `src/hooks/useAllWeeks.ts`, `src/pages/Dashboard.tsx`, `src/lib/weekUtils.ts`
-- [React 19 Documentation](https://react.dev) — useMemo, derived state patterns
-- [Firestore Query Optimization](https://firebase.google.com/docs/firestore/query-data/queries) — Official Firebase docs
+- [Fitness App Design Best Practices](https://www.zfort.com/blog/How-to-Design-a-Fitness-App-UX-UI-Best-Practices-for-Engagement-and-Retention) — Component boundaries
+- [Advanced Firestore Data Modeling](https://fireship.io/lessons/advanced-firestore-nosql-data-structure-examples/) — Denormalization patterns
+- [Material UI React Progress Components](https://mui.com/material-ui/react-progress/) — Progress bar patterns
 
 **Pitfalls Research:**
-- Existing codebase analysis: `src/hooks/useStats.ts` (sick/vacation logic lines 106-109), `tailwind.config.js` (color scheme)
-- Firebase pricing model documentation
-- WCAG 2.1 accessibility guidelines
-- ISO 8601 week/year standards
+- [Trophy.so - When Your App Needs an XP System](https://trophy.so/blog/when-your-app-needs-xp-system) — XP inflation prevention
+- [How to Solve React.useEffect Infinite Loop](https://dmitripavlutin.com/react-useeffect-infinite-loop/) — useEffect pitfalls
+- [Firebase - Understand Reads/Writes at Scale](https://firebase.google.com/docs/firestore/understand-reads-writes-scale) — Hotspotting prevention
+- [Smashing Magazine - Better Notifications UX](https://www.smashingmagazine.com/2025/07/design-guidelines-better-notifications-ux/) — Avoiding notification spam
 
 ### Secondary (MEDIUM confidence)
 
-- [Lazy Loading with Intersection Observer](https://blog.logrocket.com/lazy-loading-using-the-intersection-observer-api/) — Lazy loading patterns
-- [React Virtualization Performance](https://medium.com/@ignatovich.dm/virtualization-in-react-improving-performance-for-large-lists-3df0800022ef) — Performance case studies
-- [Health App Color Psychology](https://www.uxmatters.com/mt/archives/2024/07/leveraging-the-psychology-of-color-in-ux-design-for-health-and-wellness-apps.php) — Color usage in health apps
-- [Tailwind Timeline Components](https://flowbite.com/docs/components/timeline/) — Pattern examples (what NOT to use)
+**Codebase Analysis:**
+- `src/hooks/useStats.ts` — Existing calculation patterns, memoization examples
+- `src/contexts/AchievementContext.tsx` — Toast notification system pattern
+- `src/components/Confetti.tsx` — Celebration animation implementation
+- `.claude/CLAUDE.md` — Project architecture, data persistence strategy
 
-### Tertiary (Context only)
+### Tertiary (LOW confidence)
 
-- [React Chart Libraries 2026](https://www.syncfusion.com/blogs/post/top-5-react-chart-libraries) — Used to identify what to avoid (heavy bundles)
-- [React Accordion Libraries](https://mui.com/material-ui/react-accordion/) — Pattern reference only (Material Design conflicts with DOOM aesthetic)
+**DOOM Lore:**
+- [DOOM Marine Wiki](https://doom.fandom.com/wiki/Marine) — Military rank context
+- [Doomguy Rank Discussion](https://www.doomworld.com/forum/topic/60758-doomguys-rank/) — Community interpretations
+- **Note:** Ranks are thematic, not canonical — creative liberty acceptable
 
 ---
-*Research completed: 2026-02-25*
+
+*Research completed: 2026-02-26*
 *Ready for roadmap: YES*
-*Total estimated implementation: 28-38 hours (4-6 days for one developer)*
+*All four research files synthesized, phase structure suggested, pitfalls mapped to prevention phases*

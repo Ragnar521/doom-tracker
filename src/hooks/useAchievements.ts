@@ -12,7 +12,11 @@ import {
 
 const STORAGE_KEY = 'doom-tracker-achievements';
 
-export function useAchievements() {
+interface UseAchievementsOptions {
+  onXPGrant?: (amount: number) => Promise<void>;
+}
+
+export function useAchievements(options: UseAchievementsOptions = {}) {
   const { user } = useAuth();
   const { stats, weeks, loading: weeksLoading } = useAllWeeks();
   const [unlockedIds, setUnlockedIds] = useState<Set<string>>(new Set());
@@ -130,18 +134,32 @@ export function useAchievements() {
   const confirmNewAchievements = useCallback(async () => {
     for (const achievement of newlyUnlocked) {
       await unlockAchievement(achievement);
+
+      // Grant XP bonus after unlock
+      if (options.onXPGrant) {
+        // Small stagger between multiple achievements
+        await new Promise(resolve => setTimeout(resolve, 800));
+        await options.onXPGrant(100);
+      }
     }
     setNewlyUnlocked([]);
-  }, [newlyUnlocked, unlockAchievement]);
+  }, [newlyUnlocked, unlockAchievement, options]);
 
   // Dismiss single achievement notification
   const dismissAchievement = useCallback(async (achievementId: string) => {
     const achievement = ACHIEVEMENTS.find(a => a.id === achievementId);
     if (achievement) {
       await unlockAchievement(achievement);
+
+      // Grant XP bonus after short delay for dramatic effect
+      // Achievement toast appears first, then XP increments after a beat
+      if (options.onXPGrant) {
+        await new Promise(resolve => setTimeout(resolve, 800));
+        await options.onXPGrant(100);
+      }
     }
     setNewlyUnlocked(prev => prev.filter(a => a.id !== achievementId));
-  }, [unlockAchievement]);
+  }, [unlockAchievement, options]);
 
   // Get all achievements with unlock status
   const getAllAchievements = useCallback(() => {

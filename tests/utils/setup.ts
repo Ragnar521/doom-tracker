@@ -97,3 +97,59 @@ export async function getWorkoutCount(page: Page): Promise<number> {
 
   return count;
 }
+
+/**
+ * Get current XP value from the XP bar text.
+ * Parses the "X,XXX / Y,YYY XP" format and returns current XP as number.
+ */
+export async function getCurrentXP(page: Page): Promise<number> {
+  // Look for XP text in the format "X,XXX / Y,YYY XP"
+  const xpText = await page.locator('text=/\\d+[,\\d]* \\/ \\d+[,\\d]* XP/').textContent();
+
+  if (!xpText) {
+    throw new Error('XP text not found on page');
+  }
+
+  // Extract first number before "/" (current XP)
+  const match = xpText.match(/^([\d,]+)\s*\//);
+  if (!match) {
+    throw new Error(`Could not parse XP from text: ${xpText}`);
+  }
+
+  // Remove commas and parse as number
+  return parseInt(match[1].replace(/,/g, ''), 10);
+}
+
+/**
+ * Get current rank name from the XP bar.
+ * Returns the full rank name (desktop) or abbreviated (mobile).
+ */
+export async function getCurrentRank(page: Page): Promise<string> {
+  // Look for rank name in the XP bar area
+  // The rank is displayed in the first line of the doom-panel containing XP text
+  const rankElement = page.locator('.doom-panel').filter({ hasText: /XP/ }).locator('div').first();
+  const rankText = await rankElement.textContent();
+
+  if (!rankText) {
+    throw new Error('Rank name not found in XP bar');
+  }
+
+  return rankText.trim();
+}
+
+/**
+ * Wait for level-up toast to appear with expected rank name.
+ * Times out after 6 seconds if toast doesn't appear.
+ */
+export async function waitForLevelUpToast(page: Page): Promise<void> {
+  await page.locator('text=RANK PROMOTION').waitFor({ state: 'visible', timeout: 6000 });
+}
+
+/**
+ * Check if XP bar is visible on the page.
+ */
+export async function isXPBarVisible(page: Page): Promise<boolean> {
+  // Check for XP text pattern in a doom-panel
+  const xpBar = page.locator('.doom-panel').filter({ hasText: /XP/ });
+  return await xpBar.isVisible().catch(() => false);
+}
