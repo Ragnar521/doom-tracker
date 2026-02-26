@@ -1,594 +1,492 @@
-# Architecture Research
+# Architecture Patterns: XP & Levels System
 
-**Domain:** Enhanced Analytics Dashboard (React + TypeScript + Firebase)
-**Researched:** 2026-02-25
-**Confidence:** HIGH
+**Domain:** Workout tracker with gamification (XP/rank progression)
+**Researched:** 2026-02-26
 
-## Standard Architecture
+## Recommended Architecture
 
 ### System Overview
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│                    Page Layer (Routes)                       │
-│  Dashboard.tsx, Tracker.tsx, Achievements.tsx, etc.          │
-├─────────────────────────────────────────────────────────────┤
-│                    Component Layer                           │
-│  ┌──────────────┐  ┌───────────────┐  ┌────────────────┐   │
-│  │ WeekTracker  │  │ StatsPanel    │  │ DoomFace       │   │
-│  │ Timeline     │  │ SummaryCards  │  │ TrendIndicator │   │
-│  └──────┬───────┘  └───────┬───────┘  └────────┬───────┘   │
-│         │                  │                    │           │
-├─────────┴──────────────────┴────────────────────┴───────────┤
-│                    Hooks Layer (Data)                        │
-│  ┌──────────────┐  ┌─────────────┐  ┌──────────────┐       │
-│  │ useAllWeeks  │  │ useStats    │  │ useWeek      │       │
-│  │ (aggregated) │  │ (legacy)    │  │ (single)     │       │
-│  └──────┬───────┘  └─────┬───────┘  └──────┬───────┘       │
-│         │                │                  │               │
-├─────────┴────────────────┴──────────────────┴───────────────┤
-│                    Context Layer                             │
-│  ┌────────────┐  ┌─────────────────┐  ┌────────────┐       │
-│  │ AuthContext│  │ AchievementCtx  │  │ BoostCtx   │       │
-│  └──────┬─────┘  └────────┬────────┘  └─────┬──────┘       │
-│         │                 │                  │              │
-├─────────┴─────────────────┴──────────────────┴──────────────┤
-│                    Storage Layer                             │
-│  ┌────────────────────┐           ┌──────────────────┐      │
-│  │ Firebase Firestore │           │ LocalStorage     │      │
-│  │ (authenticated)    │           │ (guest mode)     │      │
-│  └────────────────────┘           └──────────────────┘      │
-└─────────────────────────────────────────────────────────────┘
-```
-
-### Component Responsibilities
-
-| Component | Responsibility | Typical Implementation |
-|-----------|----------------|------------------------|
-| Dashboard Page | Overall layout & stats coordination | Calls `useAllWeeks()`, renders StatCards + grids |
-| Timeline Component | Expandable historical view (new) | Lazy loads year/month sections, collapsible |
-| SummaryCard | Period aggregations (month/year) | Pure component, receives pre-calculated stats |
-| TrendIndicator | Comparison arrows/badges (new) | Calculates % change from previous period/average |
-| WeekGrid | Grid visualization (existing) | 12-week color-coded squares (being enhanced) |
-| DayHeatmap | Day frequency visualization (existing) | 7-column grid showing favorite workout days |
-| useAllWeeks Hook | Loads + aggregates all weeks | Firebase query OR LocalStorage scan, memoized stats |
-| useStats Hook | Legacy stats manager | Single-document stats (may deprecate in favor of useAllWeeks) |
-| useWeek Hook | Single week CRUD | Used by Tracker page, not Dashboard |
-
-## Recommended Project Structure
+The XP & Levels system integrates into existing Rep & Tear architecture by:
+1. Adding XP calculation logic as a **new custom hook** (`useXP`)
+2. Storing XP/rank data in **new Firestore subcollection** (`users/{uid}/xp/current`)
+3. Creating **new UI components** for XP bar and level-up celebrations
+4. **Modifying Tracker page** to display XP bar (removing probability calculation)
+5. Reusing existing **toast/confetti system** for level-up celebrations
 
 ```
-src/
-├── pages/
-│   └── Dashboard.tsx               # Main analytics page (enhanced)
-├── components/
-│   ├── analytics/                  # NEW: Analytics-specific components
-│   │   ├── Timeline.tsx            # Expandable year/month sections
-│   │   ├── TimelineYear.tsx        # Collapsible year section
-│   │   ├── TimelineMonth.tsx       # Month summary card with week grid
-│   │   ├── SummaryCard.tsx         # Reusable stat card (period summary)
-│   │   └── TrendIndicator.tsx      # Up/down arrow with % change
-│   ├── WeekGrid.tsx                # Enhanced 12-week grid (existing, improve colors)
-│   ├── DayHeatmap.tsx              # Day frequency grid (existing)
-│   ├── StatCard.tsx                # Existing stat card (may merge with SummaryCard)
-│   └── LoadingSpinner.tsx          # Loading states
-├── hooks/
-│   ├── useAllWeeks.ts              # ENHANCE: Add timeline data methods
-│   ├── useStats.ts                 # LEGACY: Consider deprecating
-│   ├── useWeek.ts                  # Single week (unchanged)
-│   └── useTimeline.ts              # NEW: Timeline-specific data + lazy loading
-├── lib/
-│   ├── weekUtils.ts                # ENHANCE: Add month/year grouping utils
-│   ├── colorUtils.ts               # NEW: Health bar color scheme logic
-│   └── trendUtils.ts               # NEW: Trend calculation helpers
-└── types/
-    └── index.ts                    # ENHANCE: Add timeline/summary types
+User completes workout
+    ↓
+useWeek.toggleDay() (EXISTING)
+    ↓
+useXP.calculateXPGain() (NEW)
+    ↓
+Firestore users/{uid}/xp/current (NEW)
+    ↓
+useXP detects level-up (NEW)
+    ↓
+XPContext triggers toast + confetti (NEW, pattern from AchievementContext)
+    ↓
+XPBar component re-renders (NEW)
 ```
 
-### Structure Rationale
+### Component Boundaries
 
-- **components/analytics/:** Groups new timeline components, keeps Dashboard less cluttered
-- **useTimeline hook:** Separates lazy-loading logic from useAllWeeks (SRP)
-- **colorUtils.ts:** Centralized color scheme logic for consistency (green=best, red=low)
-- **trendUtils.ts:** Reusable trend calculation (vs previous period, vs average)
-- **Keep existing components:** WeekGrid, DayHeatmap, StatCard work well, just enhance
+| Component | Responsibility | Communicates With |
+|-----------|---------------|-------------------|
+| **XPContext** (NEW) | Global XP state, level-up events | useXP hook, XPToastContainer |
+| **useXP** (NEW) | XP calculation, rank determination, Firestore sync | AuthContext, useWeek, useStats, useAchievements |
+| **XPBar** (NEW) | Display current XP, level, progress bar | XPContext |
+| **XPToast** (NEW) | Level-up celebration notification | XPContext |
+| **XPToastContainer** (NEW) | Manage level-up toast queue | XPContext |
+| **RankDisplay** (NEW) | Show current rank with icon | XPContext |
+| **Tracker.tsx** (MODIFIED) | Add XPBar, remove probability section | useXP |
 
-## Architectural Patterns
+### Data Flow
 
-### Pattern 1: Memoized Aggregation in Custom Hooks
+**XP Earning Flow:**
+```typescript
+// 1. User toggles workout (EXISTING)
+toggleDay(dayIndex)
 
-**What:** Use `useMemo` to calculate expensive stats from week data arrays
+// 2. XP hook listens for workout count changes (NEW)
+useEffect(() => {
+  const newXP = calculateXPGain(workoutCount, currentStreak, achievements)
+  addXP(newXP)
+}, [workoutCount, currentStreak, achievements])
 
-**When to use:** When aggregating 100+ weeks of data (current Dashboard already does this)
+// 3. Check for level-up (NEW)
+if (currentXP >= xpForNextLevel) {
+  levelUp()
+  triggerLevelUpCelebration()
+}
 
-**Trade-offs:**
-- **Pros:** Prevents re-calculation on every render, smooth UX
-- **Cons:** Holds data in memory, but acceptable for <1000 weeks (~20 years)
+// 4. Save to Firestore (NEW)
+setDoc(doc(db, 'users', uid, 'xp', 'current'), {
+  currentXP,
+  totalXP,
+  level,
+  rank,
+  updatedAt: serverTimestamp()
+})
+```
 
+**Level-Up Celebration Flow:**
+```typescript
+// XPContext (mirrors AchievementContext pattern)
+const [newLevelUps, setNewLevelUps] = useState<LevelUp[]>([])
+
+// Trigger level-up
+const levelUp = (newLevel, newRank) => {
+  setNewLevelUps(prev => [...prev, { level: newLevel, rank: newRank }])
+}
+
+// XPToastContainer (mirrors AchievementToastContainer)
+// Shows toast + confetti, auto-dismisses after 4s
+<XPToastContainer levelUps={newLevelUps} onDismiss={dismissLevelUp} />
+```
+
+## Patterns to Follow
+
+### Pattern 1: XP Calculation Hook
+**What:** Custom hook manages XP state, calculations, Firestore sync
+**When:** Following existing pattern (useStats, useAchievements)
 **Example:**
 ```typescript
-// hooks/useAllWeeks.ts (existing pattern, already optimal)
-const stats = useMemo<DashboardStats>(() => {
-  if (weeks.length === 0) return defaultStats;
+// src/hooks/useXP.ts
+export interface XPData {
+  currentXP: number;      // XP in current level (0 to xpForNextLevel)
+  totalXP: number;        // Lifetime XP
+  level: number;          // Current level (1-50)
+  rank: Rank;             // Current rank (calculated from level)
+  updatedAt: Date | null;
+}
 
-  const totalWorkouts = weeks.reduce((sum, w) => sum + w.workoutCount, 0);
-  const dayFrequency = [0, 0, 0, 0, 0, 0, 0];
-  weeks.forEach((w) => {
-    w.workouts.forEach((completed, idx) => {
-      if (completed) dayFrequency[idx]++;
-    });
-  });
+export function useXP() {
+  const { user } = useAuth()
+  const { workoutCount } = useWeek()
+  const { stats } = useStats()
+  const { unlockedCount } = useAchievementContext()
 
-  return { totalWorkouts, dayFrequency, /* ... */ };
-}, [weeks]);
+  const [xpData, setXPData] = useState<XPData>(defaultXPData)
+  const [loading, setLoading] = useState(true)
+
+  // Load from Firestore or localStorage
+  useEffect(() => {
+    loadXPData()
+  }, [user])
+
+  // Calculate XP gain from workouts
+  const calculateXPGain = useCallback(() => {
+    const baseXP = workoutCount * 10
+    const streakBonus = stats.currentStreak * 5
+    const achievementBonus = unlockedCount * 25
+    return baseXP + streakBonus + achievementBonus
+  }, [workoutCount, stats.currentStreak, unlockedCount])
+
+  // Add XP and check for level-up
+  const addXP = useCallback(async (xp: number) => {
+    // Implementation
+  }, [])
+
+  return { xpData, loading, addXP, calculateXPGain }
+}
 ```
 
-### Pattern 2: Lazy Loading with Collapsible Sections
-
-**What:** Don't render all timeline data at once, expand year/month sections on demand
-
-**When to use:** Timeline views with potentially 100+ weeks (new feature)
-
-**Trade-offs:**
-- **Pros:** Fast initial render, mobile-friendly, reduces DOM nodes
-- **Cons:** Requires state management for collapsed/expanded sections
-
+### Pattern 2: Context Provider with Toast Container
+**What:** Context manages XP state globally, toast container handles celebrations
+**When:** Reuse existing AchievementContext pattern
 **Example:**
 ```typescript
-// components/analytics/Timeline.tsx (proposed)
-function Timeline({ weeks }: { weeks: WeekRecord[] }) {
-  const [expandedYears, setExpandedYears] = useState<Set<number>>(
-    new Set([new Date().getFullYear()]) // Current year expanded by default
-  );
-
-  const yearGroups = useMemo(() => groupWeeksByYear(weeks), [weeks]);
+// src/contexts/XPContext.tsx
+export function XPProvider({ children }: { children: ReactNode }) {
+  const { xpData, loading, addXP, calculateXPGain } = useXP()
+  const [newLevelUps, setNewLevelUps] = useState<LevelUp[]>([])
 
   return (
-    <div>
-      {Object.entries(yearGroups).map(([year, yearWeeks]) => (
-        <TimelineYear
-          key={year}
-          year={parseInt(year)}
-          weeks={yearWeeks}
-          expanded={expandedYears.has(parseInt(year))}
-          onToggle={() => toggleYear(parseInt(year))}
+    <XPContext.Provider value={{ xpData, loading, addXP, calculateXPGain }}>
+      {children}
+      <XPToastContainer levelUps={newLevelUps} onDismiss={dismissLevelUp} />
+    </XPContext.Provider>
+  )
+}
+```
+
+### Pattern 3: Client-Side Rank Calculation
+**What:** Rank is derived from level using pure function (not stored separately)
+**When:** Always calculate on read, never store in Firestore
+**Example:**
+```typescript
+// src/lib/ranks.ts
+export type Rank =
+  | 'MARINE'           // Levels 1-5
+  | 'CORPORAL'         // Levels 6-10
+  | 'SERGEANT'         // Levels 11-15
+  | 'LIEUTENANT'       // Levels 16-20
+  | 'CAPTAIN'          // Levels 21-25
+  | 'MAJOR'            // Levels 26-30
+  | 'COLONEL'          // Levels 31-35
+  | 'COMMANDER'        // Levels 36-40
+  | 'DOOMGUY'          // Levels 41-45
+  | 'DOOM SLAYER'      // Levels 46-50
+
+export function getLevelForRank(rank: Rank): number {
+  const levels = { MARINE: 1, CORPORAL: 6, SERGEANT: 11, ... }
+  return levels[rank]
+}
+
+export function getRankFromLevel(level: number): Rank {
+  if (level <= 5) return 'MARINE'
+  if (level <= 10) return 'CORPORAL'
+  // ... etc
+  return 'DOOM SLAYER'
+}
+
+export function getXPForLevel(level: number): number {
+  // Exponential curve: level^2 * 100
+  // Level 1 → 100 XP, Level 10 → 10,000 XP, Level 50 → 250,000 XP
+  return Math.pow(level, 2) * 100
+}
+```
+
+### Pattern 4: XP Bar Component Integration
+**What:** XP bar replaces probability section on Tracker page
+**When:** Same location, similar visual style (doom-panel with progress bar)
+**Example:**
+```typescript
+// src/components/XPBar.tsx
+export default function XPBar() {
+  const { xpData } = useXPContext()
+
+  const progressPercent = (xpData.currentXP / getXPForLevel(xpData.level + 1)) * 100
+
+  return (
+    <div className="doom-panel p-3">
+      <div className="flex justify-between items-center mb-2">
+        <div className="flex items-center gap-2">
+          <RankIcon rank={xpData.rank} />
+          <span className="text-doom-gold text-[10px] font-bold">{xpData.rank}</span>
+        </div>
+        <span className="text-gray-500 text-[8px]">
+          LEVEL {xpData.level}
+        </span>
+      </div>
+
+      <div className="xp-bar h-3 rounded overflow-hidden bg-gray-800">
+        <div
+          className="h-full bg-gradient-to-r from-doom-gold to-yellow-600 transition-all duration-500"
+          style={{ width: `${progressPercent}%` }}
         />
-      ))}
+      </div>
+
+      <div className="flex justify-between mt-1 text-[8px] text-gray-500">
+        <span>{xpData.currentXP.toLocaleString()} XP</span>
+        <span>{getXPForLevel(xpData.level + 1).toLocaleString()} XP</span>
+      </div>
     </div>
-  );
+  )
 }
 ```
 
-### Pattern 3: Derived State for Trend Calculations
-
-**What:** Calculate trends (vs previous period, vs average) from existing aggregated data
-
-**When to use:** Showing comparison indicators without additional database queries
-
-**Trade-offs:**
-- **Pros:** No extra Firestore reads, instant calculation
-- **Cons:** Requires careful null/edge case handling (first month has no previous)
-
+### Pattern 5: Level-Up Toast (Reuse Achievement Pattern)
+**What:** Toast appears at top center, auto-dismisses, confetti animation
+**When:** Identical to achievement unlocks (proven pattern)
 **Example:**
 ```typescript
-// lib/trendUtils.ts (proposed)
-export function calculateTrend(
-  current: number,
-  comparison: number | null
-): { percentage: number; direction: 'up' | 'down' | 'neutral' } {
-  if (comparison === null || comparison === 0) {
-    return { percentage: 0, direction: 'neutral' };
-  }
-
-  const percentage = ((current - comparison) / comparison) * 100;
-  return {
-    percentage: Math.abs(percentage),
-    direction: percentage > 0 ? 'up' : percentage < 0 ? 'down' : 'neutral',
-  };
-}
-
-// Usage in component
-const monthlyTrend = calculateTrend(
-  currentMonthWorkouts,
-  previousMonthWorkouts
-);
-```
-
-### Pattern 4: Health Bar Color Scheme (Inverted Traffic Light)
-
-**What:** Green = high workouts, Yellow = medium, Red = low (matches DOOM health mechanic)
-
-**When to use:** All week visualizations (replace existing traffic light scheme)
-
-**Trade-offs:**
-- **Pros:** More intuitive, aligns with game aesthetic, clear at a glance
-- **Cons:** Breaking change, requires user education (add legend)
-
-**Example:**
-```typescript
-// lib/colorUtils.ts (proposed, replaces existing logic in Dashboard.tsx)
-export function getHealthBarColor(count: number, maxCount: number = 7): string {
-  const percentage = (count / maxCount) * 100;
-
-  if (percentage >= 71) return 'bg-doom-green';    // 5-7 workouts
-  if (percentage >= 57) return 'bg-green-600';     // 4 workouts
-  if (percentage >= 43) return 'bg-yellow-500';    // 3 workouts
-  if (percentage >= 14) return 'bg-orange-600';    // 1-2 workouts
-  return 'bg-doom-red';                            // 0 workouts
-}
-
-// Special statuses override color
-export function getWeekColor(week: WeekRecord): string {
-  if (week.status === 'sick' || week.status === 'vacation') {
-    return 'bg-gray-600'; // Gray for non-normal weeks
-  }
-  return getHealthBarColor(week.workoutCount);
-}
-```
-
-## Data Flow
-
-### Request Flow (Existing, Optimized)
-
-```
-User Opens Dashboard
-    ↓
-Dashboard.tsx → useAllWeeks() → Check AuthContext
-    ↓                               ↓
-    ├─── Authenticated? ────→ Firestore query (orderBy startDate desc)
-    │                             ↓
-    │                        getDocs() returns all week docs
-    │                             ↓
-    └─── Guest Mode? ───────→ LocalStorage scan (keys: doom-tracker-week-*)
-                                  ↓
-                             Both paths converge
-                                  ↓
-                             Transform to WeekRecord[]
-                                  ↓
-                             useMemo calculates stats (totalWorkouts, streaks, etc.)
-                                  ↓
-                             Component renders with memoized data
-```
-
-### Timeline Data Flow (New Feature)
-
-```
-User Clicks "View Full History" Button
-    ↓
-Timeline Component Mounts
-    ↓
-Receives weeks[] from useAllWeeks (already loaded)
-    ↓
-useMemo groups weeks by year → Map<year, WeekRecord[]>
-    ↓
-useMemo groups weeks by month → Map<monthKey, MonthSummary>
-    ↓
-Render collapsed year sections (only current year expanded)
-    ↓
-User Clicks Year Header
-    ↓
-Toggle expandedYears state (no re-fetch needed)
-    ↓
-Month sections render (lazy, only if year expanded)
-    ↓
-Calculate month summaries on-demand (useMemo per month)
-```
-
-### State Management (Existing Pattern, Extended)
-
-```
-[Firestore/LocalStorage]
-    ↓ (load on mount)
-[useAllWeeks Hook]
-    ↓ (returns weeks[], stats, loading)
-[Dashboard Component]
-    ↓ (passes data to children)
-┌───┴─────────────────────────────┐
-│                                 │
-[WeekGrid]                    [Timeline]
-    ↓                             ↓
-Display recent 12           Group by year/month
-                                  ↓
-                            [TimelineYear]
-                                  ↓
-                            [TimelineMonth]
-                                  ↓
-                            Display month summary
-```
-
-### Key Data Flows
-
-1. **Initial Load:** Single Firestore query fetches ALL weeks, memoized aggregation happens once
-2. **Timeline Expansion:** Pure UI state change, no data refetch
-3. **Trend Calculations:** Derived from already-loaded week data (no extra queries)
-4. **Color Mapping:** Pure function transforms workout count → color class
-
-## Scaling Considerations
-
-| Scale | Architecture Adjustments |
-|-------|--------------------------|
-| 0-100 weeks (~2 years) | Current architecture is perfect, no changes needed |
-| 100-500 weeks (~10 years) | Add pagination to Timeline (load year-by-year), keep 12-week summary |
-| 500+ weeks (20+ years) | Consider lazy loading in useAllWeeks (fetch only current year + summary stats), backend aggregation for trends |
-
-### Scaling Priorities
-
-1. **First bottleneck:** Timeline DOM size with 500+ weeks open
-   - **Fix:** Virtual scrolling or year-based lazy loading (only load expanded years)
-   - **When:** At 200+ weeks (4+ years), or ~2000+ DOM nodes
-
-2. **Second bottleneck:** Firestore read costs (100+ week documents)
-   - **Fix:** Add aggregated stats document (monthly/yearly summaries pre-calculated)
-   - **When:** At 1000+ users with 100+ weeks each (currently free tier is fine)
-
-3. **Mobile performance:** Large dataset calculations on low-end devices
-   - **Fix:** Move trend calculations to Web Worker (non-blocking)
-   - **When:** User reports of lag (unlikely with current data size)
-
-**Current Reality:** With 12 weeks displayed by default and timeline collapsed, performance is excellent for 0-200 weeks (0-4 years). Most users won't hit scaling issues for years.
-
-## Anti-Patterns
-
-### Anti-Pattern 1: Fetching Week Data Inside Timeline Component
-
-**What people do:** Call useAllWeeks() inside Timeline component separately from Dashboard
-
-**Why it's wrong:** Duplicates Firestore query, wastes reads, causes race conditions
-
-**Do this instead:** Pass `weeks[]` prop from Dashboard (single source of truth)
-
-**Example:**
-```typescript
-// ❌ BAD: Redundant data fetching
-function Timeline() {
-  const { weeks } = useAllWeeks(); // Second query!
-  return <div>{/* ... */}</div>;
-}
-
-// ✅ GOOD: Receive data as prop
-function Timeline({ weeks }: { weeks: WeekRecord[] }) {
-  const yearGroups = useMemo(() => groupWeeksByYear(weeks), [weeks]);
-  return <div>{/* ... */}</div>;
-}
-
-// Dashboard.tsx
-function Dashboard() {
-  const { weeks, stats, loading } = useAllWeeks(); // Single query
-  return (
-    <>
-      <WeekGrid weeks={stats.recentWeeks} />
-      <Timeline weeks={weeks} />
-    </>
-  );
-}
-```
-
-### Anti-Pattern 2: Re-calculating Trends on Every Render
-
-**What people do:** Calculate trend percentages inside component render without useMemo
-
-**Why it's wrong:** Unnecessary computation, causes jank on low-end devices
-
-**Do this instead:** Use useMemo or calculate once in parent
-
-**Example:**
-```typescript
-// ❌ BAD: Recalculates every render
-function TrendIndicator({ current, previous }: Props) {
-  const trend = calculateTrend(current, previous); // Runs every render!
-  return <span>{trend.percentage}%</span>;
-}
-
-// ✅ GOOD: Memoize or calculate in parent
-function TrendIndicator({ trend }: { trend: TrendData }) {
-  return <span>{trend.percentage}%</span>;
-}
-
-// Parent component
-function MonthSummary({ weeks }: Props) {
-  const trend = useMemo(
-    () => calculateTrend(currentMonth, previousMonth),
-    [currentMonth, previousMonth]
-  );
-  return <TrendIndicator trend={trend} />;
-}
-```
-
-### Anti-Pattern 3: Overusing useEffect for Derived State
-
-**What people do:** Use useEffect to update state based on props changes
-
-**Why it's wrong:** Causes double renders, increases complexity, React 19 best practices avoid this
-
-**Do this instead:** Use useMemo for derived calculations
-
-**Example:**
-```typescript
-// ❌ BAD: Unnecessary effect
-function Timeline({ weeks }: Props) {
-  const [yearGroups, setYearGroups] = useState({});
+// src/components/XPToast.tsx
+export default function XPToast({ levelUp, onDismiss }: XPToastProps) {
+  const [isVisible, setIsVisible] = useState(false)
+  const [showConfetti, setShowConfetti] = useState(false)
 
   useEffect(() => {
-    setYearGroups(groupWeeksByYear(weeks)); // Double render!
-  }, [weeks]);
+    setTimeout(() => {
+      setIsVisible(true)
+      setShowConfetti(true)
+    }, 100)
 
-  return <div>{/* ... */}</div>;
-}
+    const dismissTimer = setTimeout(() => {
+      onDismiss(levelUp.level)
+    }, 4000)
 
-// ✅ GOOD: Direct memoization
-function Timeline({ weeks }: Props) {
-  const yearGroups = useMemo(() => groupWeeksByYear(weeks), [weeks]);
-  return <div>{/* ... */}</div>;
+    return () => clearTimeout(dismissTimer)
+  }, [levelUp, onDismiss])
+
+  return (
+    <>
+      <Confetti trigger={showConfetti} />
+      <div className="fixed top-4 left-1/2 -translate-x-1/2 z-50 doom-panel p-4 border-2 border-doom-gold">
+        <div className="flex items-center gap-3">
+          <RankIcon rank={levelUp.rank} className="animate-bounce" />
+          <div>
+            <p className="text-doom-gold text-[10px] tracking-widest">RANK UP!</p>
+            <p className="text-white text-sm font-bold">LEVEL {levelUp.level}</p>
+            <p className="text-gray-400 text-[8px]">{levelUp.rank}</p>
+          </div>
+        </div>
+      </div>
+    </>
+  )
 }
 ```
 
-### Anti-Pattern 4: Inline Color Logic in JSX
+## Anti-Patterns to Avoid
 
-**What people do:** Complex ternary chains in className attributes
+### Anti-Pattern 1: Storing Computed Values
+**What:** Storing rank separately from level in Firestore
+**Why bad:** Creates data inconsistency risk, wastes storage
+**Instead:** Always compute rank from level on read
 
-**Why it's wrong:** Hard to maintain, inconsistent colors across components, untestable
-
-**Do this instead:** Centralized color utility functions
-
-**Example:**
 ```typescript
-// ❌ BAD: Inline color logic (current Dashboard.tsx pattern)
-<div className={
-  count >= 5 ? 'bg-doom-gold' :
-  count >= 4 ? 'bg-doom-green' :
-  count >= 3 ? 'bg-yellow-600' :
-  'bg-doom-red'
-}>
+// BAD
+interface XPData {
+  level: number
+  rank: Rank  // ❌ Duplicates derived data
+}
 
-// ✅ GOOD: Utility function
-import { getWeekColor } from '../lib/colorUtils';
-
-<div className={getWeekColor(weekRecord)}>
+// GOOD
+interface XPData {
+  level: number
+  // rank computed via getRankFromLevel(level)
+}
 ```
+
+### Anti-Pattern 2: Complex XP Formulas
+**What:** XP calculation depends on too many variables (time of day, day of week, etc.)
+**Why bad:** Confuses users, hard to understand progression
+**Instead:** Simple formula: workouts + streaks + achievements
+
+```typescript
+// BAD
+const xp = workoutCount * (isDayOfWeek('Monday') ? 15 : 10) +
+           (hourOfDay < 12 ? 5 : 0) +
+           (weatherIsRainy ? 20 : 0)  // ❌ Too complex
+
+// GOOD
+const xp = workoutCount * 10 +        // ✓ Clear base rate
+           stats.currentStreak * 5 +   // ✓ Rewards consistency
+           unlockedCount * 25          // ✓ Bonus for achievements
+```
+
+### Anti-Pattern 3: Separate Stats Document
+**What:** Creating `users/{uid}/stats/xp` instead of `users/{uid}/xp/current`
+**Why bad:** Conflicts with existing `stats/current` document (workout stats)
+**Instead:** Use dedicated `xp` subcollection
+
+```typescript
+// BAD
+users/{uid}/stats/current  // ❌ Existing workout stats
+users/{uid}/stats/xp       // ❌ Confusing namespace collision
+
+// GOOD
+users/{uid}/stats/current  // ✓ Workout stats
+users/{uid}/xp/current     // ✓ XP stats (separate concern)
+```
+
+### Anti-Pattern 4: XP Recalculation on Every Render
+**What:** Calling `calculateXPGain()` in component render
+**Why bad:** Performance issue, unnecessary Firestore writes
+**Instead:** Calculate only when workoutCount changes
+
+```typescript
+// BAD
+function XPBar() {
+  const xp = calculateXPGain()  // ❌ Runs on every render
+  return <div>{xp}</div>
+}
+
+// GOOD
+useEffect(() => {
+  const xp = calculateXPGain()  // ✓ Runs only when deps change
+  addXP(xp)
+}, [workoutCount, currentStreak])
+```
+
+### Anti-Pattern 5: Level-Down on Workout Removal
+**What:** Subtracting XP when user removes workout
+**Why bad:** Frustrating UX, punishes honest tracking
+**Instead:** XP is cumulative, never decreases
+
+```typescript
+// BAD
+const handleToggleDay = async (dayIndex: number) => {
+  const wasCompleted = weekData.workouts[dayIndex]
+  if (wasCompleted) {
+    subtractXP(10)  // ❌ Penalizes user
+  }
+}
+
+// GOOD
+const handleToggleDay = async (dayIndex: number) => {
+  // XP never decreases, only increases
+  // Removing workout just means future XP is lower
+}
+```
+
+## Scalability Considerations
+
+| Concern | At 100 users | At 10K users | At 1M users |
+|---------|--------------|--------------|-------------|
+| **Firestore reads** | 1 read per login (xp/current) | Same (1 doc per user) | Same (efficient) |
+| **Firestore writes** | 1 write per workout toggle | Same (batched updates) | Same (no N+1 queries) |
+| **XP calculation** | Client-side (instant) | Client-side (no backend) | Client-side (scales) |
+| **Rank lookup** | O(1) lookup table | O(1) lookup table | O(1) lookup table |
+| **Level-up detection** | Simple comparison | Simple comparison | Simple comparison |
+
+**Optimization Strategy:**
+- Client-side rank calculation (no Firestore query)
+- Single document write per workout session (batch XP updates)
+- Memoized XP calculations (useMemo in useXP hook)
+- No real-time listeners (load on mount, update on write)
 
 ## Integration Points
 
-### External Services
+### New Files to Create
 
-| Service | Integration Pattern | Notes |
-|---------|---------------------|-------|
-| Firebase Firestore | Direct SDK calls in hooks | Already implemented, single query per page load |
-| LocalStorage | Fallback for guest mode | Key pattern: `doom-tracker-week-{weekId}` |
-| React Router | Page navigation | Dashboard is at `/dashboard`, already protected |
+| File | Purpose | Depends On |
+|------|---------|------------|
+| `src/contexts/XPContext.tsx` | Global XP state provider | useXP hook |
+| `src/hooks/useXP.ts` | XP data management, Firestore sync | AuthContext, useWeek, useStats |
+| `src/lib/ranks.ts` | Rank definitions, XP formulas | None (pure functions) |
+| `src/components/XPBar.tsx` | XP progress bar UI | XPContext |
+| `src/components/RankIcon.tsx` | Rank badge/icon display | None |
+| `src/components/XPToast.tsx` | Level-up celebration toast | Confetti (existing) |
+| `src/components/XPToastContainer.tsx` | Manage level-up toast queue | XPToast |
 
-### Internal Boundaries
+### Files to Modify
 
-| Boundary | Communication | Notes |
-|----------|---------------|-------|
-| Dashboard ↔ Timeline | Props (weeks[]) | Single data source, no re-fetching |
-| Timeline ↔ TimelineYear | Props + callbacks | Year expansion state managed in Timeline |
-| TimelineYear ↔ TimelineMonth | Props | Month summaries calculated in TimelineMonth |
-| Dashboard ↔ useAllWeeks | Hook return value | Memoized stats, loading state, weeks array |
-| useAllWeeks ↔ Firebase | Firestore SDK | Single `getDocs()` query with `orderBy('startDate', 'desc')` |
-| colorUtils ↔ Components | Pure functions | Stateless, testable, consistent |
+| File | Changes | Reason |
+|------|---------|--------|
+| `src/App.tsx` | Wrap app in `<XPProvider>` | Provide XP context globally |
+| `src/pages/Tracker.tsx` | Add `<XPBar />`, remove probability section | Display XP progression |
+| `firestore.rules` | Add `xp/{docId}` rules | Secure XP data |
+| `src/types/index.ts` | Export XP types | Type definitions |
 
-## Performance Patterns
+### Files NOT to Modify
 
-### Memoization Strategy
+| File | Why Leave Unchanged |
+|------|---------------------|
+| `src/hooks/useWeek.ts` | XP calculation happens in useXP, not useWeek |
+| `src/hooks/useStats.ts` | Stats calculation is separate from XP |
+| `src/hooks/useAchievements.ts` | Achievements trigger XP bonus, but don't store XP |
+| `src/components/StatsPanel.tsx` | Stats panel shows streaks/workouts, not XP |
+| `src/lib/achievements.ts` | Achievement definitions unchanged |
 
-```typescript
-// Hook level (useAllWeeks.ts)
-const stats = useMemo(() => calculateStats(weeks), [weeks]);
+### Firestore Schema Changes
 
-// Component level (Timeline.tsx)
-const yearGroups = useMemo(() => groupByYear(weeks), [weeks]);
-const monthGroups = useMemo(() => groupByMonth(weeks), [weeks]);
-
-// Prop level (Timeline → TimelineYear)
-const yearSummary = useMemo(
-  () => calculateYearSummary(yearWeeks),
-  [yearWeeks]
-);
+**New Subcollection:**
+```
+users/{uid}/xp/current
+  {
+    currentXP: number,       // XP in current level (resets on level-up)
+    totalXP: number,         // Lifetime XP (never resets)
+    level: number,           // Current level (1-50)
+    updatedAt: Timestamp     // Last update timestamp
+  }
 ```
 
-### Conditional Rendering (Lazy Expansion)
-
-```typescript
-// Only render expanded sections
-{expandedYears.has(year) && (
-  <div className="year-content">
-    {months.map(month => <TimelineMonth key={month} {...props} />)}
-  </div>
-)}
+**Security Rules:**
+```javascript
+// firestore.rules (ADD THIS)
+match /users/{userId} {
+  match /xp/{docId} {
+    allow read, write: if request.auth != null && request.auth.uid == userId;
+  }
+}
 ```
 
-### Batch Updates (React 18+ Automatic)
-
+**LocalStorage (Guest Mode):**
 ```typescript
-// Multiple state updates are automatically batched in React 18+
-const handleYearToggle = (year: number) => {
-  setExpandedYears(prev => toggleSet(prev, year));
-  // If needed, other state updates here are batched
-};
+localStorage.setItem('doom-tracker-xp', JSON.stringify({
+  currentXP: 450,
+  totalXP: 12450,
+  level: 12,
+  updatedAt: '2026-02-26T...'
+}))
 ```
 
-## Build Order (Suggested Phases)
+## Build Order (Suggested Dependency-Aware Sequence)
 
-### Phase 1: Color Scheme Update (Low Risk, High Value)
-1. Create `lib/colorUtils.ts` with health bar logic
-2. Update Dashboard.tsx to use new colors
-3. Add color legend to Dashboard
-4. Test visual consistency
-**Dependencies:** None
-**Estimated:** 2-4 hours
+### Phase 1: Foundation (No Dependencies)
+1. **Create `src/lib/ranks.ts`** - Pure functions (rank lookup, XP formulas)
+2. **Create `src/types/index.ts`** exports - XPData, Rank, LevelUp types
+3. **Add Firestore rules** - Security for xp subcollection
 
-### Phase 2: Timeline Data Layer (Foundation)
-1. Enhance `lib/weekUtils.ts` with grouping functions
-   - `groupWeeksByYear(weeks): Map<year, WeekRecord[]>`
-   - `groupWeeksByMonth(weeks): Map<monthKey, MonthSummary>`
-2. Create `types/index.ts` interfaces (MonthSummary, YearSummary)
-3. Test grouping logic
-**Dependencies:** Phase 1 complete (uses color utils)
-**Estimated:** 3-5 hours
+### Phase 2: Data Layer (Depends on Phase 1)
+4. **Create `src/hooks/useXP.ts`** - XP management hook
+5. **Create `src/contexts/XPContext.tsx`** - Context provider (uses useXP)
+6. **Modify `src/App.tsx`** - Wrap in XPProvider
 
-### Phase 3: Timeline Components (UI Layer)
-1. Create `components/analytics/Timeline.tsx` (shell with expand/collapse)
-2. Create `components/analytics/TimelineYear.tsx` (collapsible section)
-3. Create `components/analytics/TimelineMonth.tsx` (month summary + week grid)
-4. Wire up to Dashboard.tsx
-**Dependencies:** Phase 2 complete (needs grouping functions)
-**Estimated:** 6-8 hours
+### Phase 3: UI Components (Depends on Phase 2)
+7. **Create `src/components/RankIcon.tsx`** - Icon display component
+8. **Create `src/components/XPBar.tsx`** - Progress bar (uses XPContext)
+9. **Create `src/components/XPToast.tsx`** - Level-up celebration
+10. **Create `src/components/XPToastContainer.tsx`** - Toast queue management
 
-### Phase 4: Trend Indicators (Enhancement)
-1. Create `lib/trendUtils.ts` with comparison functions
-2. Create `components/analytics/TrendIndicator.tsx`
-3. Integrate into MonthSummary and YearSummary displays
-4. Add trend calculations to month/year grouping
-**Dependencies:** Phase 3 complete (renders in Timeline components)
-**Estimated:** 4-6 hours
+### Phase 4: Integration (Depends on Phase 3)
+11. **Modify `src/pages/Tracker.tsx`** - Add XPBar, remove probability
+12. **Update `src/contexts/XPContext.tsx`** - Wire toast container
+13. **Test XP flow end-to-end** - Workout → XP gain → Level-up → Toast
 
-### Phase 5: Summary Cards (Polish)
-1. Create `components/analytics/SummaryCard.tsx` (reusable)
-2. Add monthly/yearly summary stats to Timeline headers
-3. Show "vs previous period" and "vs average" comparisons
-**Dependencies:** Phase 4 complete (uses TrendIndicator)
-**Estimated:** 3-4 hours
-
-### Phase 6: Mobile Polish & Performance
-1. Test collapsible sections on mobile viewports
-2. Add loading states for large datasets
-3. Test with 100+ weeks of mock data
-4. Optimize re-renders with React DevTools Profiler
-**Dependencies:** Phase 5 complete (full feature set)
-**Estimated:** 4-6 hours
-
-**Total Estimated Time:** 22-33 hours (3-5 days for one developer)
-
-## Testing Strategy
-
-### Unit Tests (Utilities)
-- `colorUtils.getHealthBarColor()` with edge cases (0, 7, negative)
-- `weekUtils.groupWeeksByYear()` with cross-year boundaries
-- `trendUtils.calculateTrend()` with null/zero handling
-
-### Integration Tests (Hooks)
-- `useAllWeeks()` with mock Firestore data (100+ weeks)
-- Timeline grouping with real-world week data
-- Memoization performance (verify recalc only when weeks[] changes)
-
-### E2E Tests (Playwright)
-- Dashboard loads with 12-week grid visible
-- Timeline expands/collapses years
-- Month summaries display correct workout counts
-- Trend indicators show up/down arrows correctly
-- Color legend matches displayed colors
+**Rationale:**
+- Phase 1: No dependencies, can be done in parallel
+- Phase 2: Needs Phase 1 types/functions
+- Phase 3: Needs Phase 2 context/hooks
+- Phase 4: Final integration after all components exist
 
 ## Sources
 
-- **Existing Codebase:** `/Users/radekmuzikant/Documents/doom-tracker/src/`
-  - `hooks/useAllWeeks.ts` - Memoized aggregation pattern
-  - `pages/Dashboard.tsx` - Current 12-week grid implementation
-  - `lib/weekUtils.ts` - ISO week ID calculations
-- **React Patterns:** [React 19 Documentation](https://react.dev) - useMemo, derived state
-- **Firebase Best Practices:** [Firestore Query Optimization](https://firebase.google.com/docs/firestore/query-data/queries)
-- **DOOM Aesthetic Reference:** `.claude/CLAUDE.md` - Color scheme, retro theme constraints
+**Fitness App Gamification Patterns:**
+- [Top Gamified Fitness Apps of 2025](https://www.workoutquestapp.com/top-gamified-fitness-apps-of-2025)
+- [Fitocracy Alternatives (2025)](https://the-titan-life.com/2025/09/04/fitocracy-alternatives-in-2025-the-best-apps-for-gamified-fitness/)
+- [Strava App Engagement Strategies](https://www.strivecloud.io/blog/app-engagement-strava)
+- [Top 10 Fitness Gamification Examples (2026)](https://yukaichou.com/gamification-examples/fitness-gamification-examples/)
 
----
-*Architecture research for: Enhanced Analytics Dashboard*
-*Researched: 2026-02-25*
-*Confidence: HIGH - Based on existing production codebase patterns*
+**DOOM Lore & Ranks:**
+- [DOOM Marine Wiki](https://doom.fandom.com/wiki/Marine)
+- [Doomguy Rank Discussion](https://www.doomworld.com/forum/topic/60758-doomguys-rank/)
+- [DOOM Slayer Wiki](https://doom.fandom.com/wiki/Doom_Slayer)
+
+**UI/UX Design Patterns:**
+- [Fitness App Design Best Practices](https://www.zfort.com/blog/How-to-Design-a-Fitness-App-UX-UI-Best-Practices-for-Engagement-and-Retention)
+- [Custom Progress Bar in React (2026)](https://thelinuxcode.com/how-i-build-a-custom-progress-bar-component-in-react-2026-edition/)
+- [Material UI React Progress Components](https://mui.com/material-ui/react-progress/)
