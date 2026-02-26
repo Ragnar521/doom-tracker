@@ -7,6 +7,7 @@ import BoostButton from '../components/BoostButton';
 import LoadingSpinner from '../components/LoadingSpinner';
 import XPBar from '../components/XPBar';
 import LevelUpToast from '../components/LevelUpToast';
+import XPBreakdownModal from '../components/XPBreakdownModal';
 import { useWeek } from '../hooks/useWeek';
 import { useStats } from '../hooks/useStats';
 import { useXP } from '../hooks/useXP';
@@ -17,6 +18,7 @@ import { getCurrentWeekId } from '../lib/weekUtils';
 export default function Tracker() {
   const [selectedWeekId, setSelectedWeekId] = useState(getCurrentWeekId());
   const [showOuch, setShowOuch] = useState(false);
+  const [showXPBreakdown, setShowXPBreakdown] = useState(false);
 
   // Load all weeks data for XP calculation
   const { weeks, stats: allWeeksStats, loading: allWeeksLoading } = useAllWeeks();
@@ -25,8 +27,10 @@ export default function Tracker() {
   // Initialize XP hook
   const {
     totalXP,
+    achievementXP,
     currentRank,
     nextRank,
+    xpToNextRank,
     levelUpEvent,
     addXP,
     recalculateXP,
@@ -98,7 +102,7 @@ export default function Tracker() {
           currentRank={currentRank}
           nextRank={nextRank}
           totalXP={totalXP}
-          onClick={() => {}} // TODO: XP breakdown modal in future plan
+          onClick={() => setShowXPBreakdown(true)}
           levelUpEvent={levelUpEvent}
         />
       )}
@@ -113,6 +117,20 @@ export default function Tracker() {
       {levelUpEvent && (
         <LevelUpToast event={levelUpEvent} onDismiss={dismissLevelUp} />
       )}
+
+      {/* XP Breakdown Modal */}
+      <XPBreakdownModal
+        isOpen={showXPBreakdown}
+        onClose={() => setShowXPBreakdown(false)}
+        workoutCount={workoutCount}
+        currentStreak={allWeeksStats.currentStreak}
+        weekStatus={weekData.status}
+        totalXP={totalXP}
+        achievementXP={achievementXP}
+        currentRank={currentRank}
+        nextRank={nextRank}
+        xpToNextRank={xpToNextRank}
+      />
     </div>
   );
 }

@@ -39,6 +39,8 @@ export default function XPBreakdownModal({
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden';
+      // Reset leaving state when modal opens (intentional for animation control)
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setIsLeaving(false);
       return () => {
         document.body.style.overflow = '';
