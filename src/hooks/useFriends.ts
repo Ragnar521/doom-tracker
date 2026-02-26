@@ -140,6 +140,8 @@ export function useFriends() {
             displayName: profile.displayName,
             photoURL: profile.photoURL,
             addedAt: friendData.addedAt?.toDate() || new Date(),
+            currentRankId: profile.currentRankId,
+            currentRankAbbrev: profile.currentRankAbbrev,
             stats,
           });
         }
@@ -271,6 +273,8 @@ export function useFriends() {
             displayName: profile.displayName,
             photoURL: profile.photoURL,
             addedAt: friendData.addedAt?.toDate() || new Date(),
+            currentRankId: profile.currentRankId,
+            currentRankAbbrev: profile.currentRankAbbrev,
             stats,
           });
         }

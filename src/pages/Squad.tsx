@@ -3,6 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useFriends } from '../hooks/useFriends';
 import { useWeek } from '../hooks/useWeek';
+import { useAllWeeks } from '../hooks/useAllWeeks';
+import { useXP } from '../hooks/useXP';
+import { useAchievementContext } from '../contexts/AchievementContext';
 import LoadingSpinner from '../components/LoadingSpinner';
 import Toast from '../components/Toast';
 import WeeklyLeaderboard from '../components/WeeklyLeaderboard';
@@ -16,6 +19,27 @@ function getFaceState(workoutCount: number): string {
   if (workoutCount === 3) return 'healthy';
   if (workoutCount === 4) return 'strong';
   return 'godmode';
+}
+
+function abbreviateRank(rankName: string): string {
+  const abbreviations: Record<string, string> = {
+    'Private': 'PVT',
+    'Corporal': 'CPL',
+    'Sergeant': 'SGT',
+    'Lieutenant': 'LT',
+    'Captain': 'CPT',
+    'Major': 'MAJ',
+    'Colonel': 'COL',
+    'Commander': 'CDR',
+    'Knight': 'KNT',
+    'Sentinel': 'SNL',
+    'Paladin': 'PDN',
+    'Warlord': 'WRL',
+    'Hellwalker': 'HLW',
+    'Slayer': 'SLR',
+    'Doom Slayer': 'DSL',
+  };
+  return abbreviations[rankName] || rankName;
 }
 
 const DAY_NAMES = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
@@ -146,6 +170,12 @@ export default function Squad() {
   const navigate = useNavigate();
   const { friendCode, friends, loading, addFriend, removeFriend } = useFriends();
   const { workoutCount } = useWeek(getCurrentWeekId());
+
+  // Get XP data for current user rank
+  const { weeks, stats: allWeeksStats, loading: allWeeksLoading } = useAllWeeks();
+  const { unlockedCount } = useAchievementContext();
+  const { currentRank, loading: xpLoading } = useXP(weeks, allWeeksStats.currentStreak, unlockedCount, allWeeksLoading);
+
   const [addFriendCode, setAddFriendCode] = useState('');
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
   const [isAdding, setIsAdding] = useState(false);
@@ -210,7 +240,7 @@ export default function Squad() {
     );
   }
 
-  if (loading) {
+  if (loading || allWeeksLoading || xpLoading) {
     return <LoadingSpinner size="lg" text="LOADING SQUAD..." />;
   }
 
@@ -274,6 +304,8 @@ export default function Squad() {
           currentUserPhoto={user.photoURL}
           currentUserWorkoutCount={workoutCount}
           currentUserFaceState={getFaceState(workoutCount)}
+          currentUserRankAbbrev={abbreviateRank(currentRank.name)}
+          currentUserRankId={currentRank.id}
         />
       )}
 

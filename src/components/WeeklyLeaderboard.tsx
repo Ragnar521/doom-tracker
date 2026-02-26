@@ -9,6 +9,8 @@ interface LeaderboardEntry {
   faceState: string;
   rank: number;
   isCurrentUser: boolean;
+  doomRankAbbrev?: string;
+  doomRankId?: number;
 }
 
 interface WeeklyLeaderboardProps {
@@ -18,6 +20,8 @@ interface WeeklyLeaderboardProps {
   currentUserPhoto: string | null;
   currentUserWorkoutCount: number;
   currentUserFaceState: string;
+  currentUserRankAbbrev?: string;
+  currentUserRankId?: number;
 }
 
 function RankBadge({ rank }: { rank: number }) {
@@ -75,6 +79,12 @@ function getFaceStateLabel(state: string) {
   return state.toUpperCase();
 }
 
+function getRankTierColor(rankId: number | undefined): string {
+  if (!rankId || rankId <= 2) return 'text-gray-400';     // Private, Corporal
+  if (rankId <= 6) return 'text-doom-green';               // Sergeant, Lieutenant, Captain, Major
+  return 'text-doom-gold';                                 // Colonel through Doom Slayer
+}
+
 export default function WeeklyLeaderboard({
   friends,
   currentUserId,
@@ -82,6 +92,8 @@ export default function WeeklyLeaderboard({
   currentUserPhoto,
   currentUserWorkoutCount,
   currentUserFaceState,
+  currentUserRankAbbrev,
+  currentUserRankId,
 }: WeeklyLeaderboardProps) {
   const leaderboard = useMemo<LeaderboardEntry[]>(() => {
     // Create entry for current user
@@ -93,6 +105,8 @@ export default function WeeklyLeaderboard({
       faceState: currentUserFaceState,
       rank: 0,
       isCurrentUser: true,
+      doomRankAbbrev: currentUserRankAbbrev,
+      doomRankId: currentUserRankId,
     };
 
     // Create entries for friends
@@ -106,6 +120,8 @@ export default function WeeklyLeaderboard({
         faceState: f.stats!.faceState,
         rank: 0,
         isCurrentUser: false,
+        doomRankAbbrev: f.currentRankAbbrev,
+        doomRankId: f.currentRankId,
       }));
 
     // Combine and sort
@@ -125,7 +141,7 @@ export default function WeeklyLeaderboard({
     });
 
     return allEntries;
-  }, [friends, currentUserId, currentUserName, currentUserPhoto, currentUserWorkoutCount, currentUserFaceState]);
+  }, [friends, currentUserId, currentUserName, currentUserPhoto, currentUserWorkoutCount, currentUserFaceState, currentUserRankAbbrev, currentUserRankId]);
 
   // Limit to top 10 for display
   const displayLeaderboard = leaderboard.slice(0, 10);
@@ -183,9 +199,14 @@ export default function WeeklyLeaderboard({
                   {entry.workoutCount}/7
                 </p>
               </div>
-              <p className={`text-[8px] font-bold ${getFaceStateColor(entry.faceState)}`}>
-                {getFaceStateLabel(entry.faceState)}
-              </p>
+              <div className="flex items-center gap-2">
+                <span className={`text-[9px] tracking-wider ${getRankTierColor(entry.doomRankId)}`}>
+                  {entry.doomRankAbbrev || 'RCT'}
+                </span>
+                <span className={`text-[8px] font-bold ${getFaceStateColor(entry.faceState)}`}>
+                  {getFaceStateLabel(entry.faceState)}
+                </span>
+              </div>
             </div>
           </div>
         ))}
