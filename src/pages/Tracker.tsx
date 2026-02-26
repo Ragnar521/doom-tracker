@@ -97,15 +97,14 @@ export default function Tracker() {
       />
 
       {/* XP Progress Bar */}
-      {!xpLoading && (
-        <XPBar
-          currentRank={currentRank}
-          nextRank={nextRank}
-          totalXP={totalXP}
-          onClick={() => setShowXPBreakdown(true)}
-          levelUpEvent={levelUpEvent}
-        />
-      )}
+      <XPBar
+        currentRank={currentRank}
+        nextRank={nextRank}
+        totalXP={totalXP}
+        onClick={() => setShowXPBreakdown(true)}
+        levelUpEvent={levelUpEvent}
+        loading={xpLoading}
+      />
 
       {/* Stats */}
       <StatsPanel stats={stats} />

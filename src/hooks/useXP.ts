@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
-import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { doc, getDoc, setDoc, writeBatch } from 'firebase/firestore';
 
 import { db } from '../lib/firebase';
 import { useAuth } from '../contexts/AuthContext';
@@ -8,6 +8,33 @@ import { getRankForXP, getNextRank, checkRankUp } from '../lib/ranks';
 
 import type { Rank, LevelUpEvent } from '../types';
 import type { WeekRecord } from './useAllWeeks';
+
+// Module-level debounce timer for XP persistence optimization
+let debounceTimer: ReturnType<typeof setTimeout> | null = null;
+
+/**
+ * Abbreviate military rank names for denormalization
+ */
+function abbreviateRank(rankName: string): string {
+  const abbreviations: Record<string, string> = {
+    'Private': 'PVT',
+    'Corporal': 'CPL',
+    'Sergeant': 'SGT',
+    'Lieutenant': 'LT',
+    'Captain': 'CPT',
+    'Major': 'MAJ',
+    'Colonel': 'COL',
+    'Commander': 'CDR',
+    'Knight': 'KNT',
+    'Sentinel': 'SNL',
+    'Paladin': 'PDN',
+    'Warlord': 'WRL',
+    'Hellwalker': 'HLW',
+    'Slayer': 'SLR',
+    'Doom Slayer': 'DSL',
+  };
+  return abbreviations[rankName] || rankName;
+}
 
 /**
  * XP state management hook with Firestore persistence and retroactive calculation.
@@ -104,10 +131,12 @@ export function useXP(
         // Determine rank
         const rank = getRankForXP(retroTotalXP);
 
-        // Persist to Firestore
-        const docRef = doc(db, 'users', user.uid, 'stats', 'current');
-        await setDoc(
-          docRef,
+        // Persist to Firestore with batch write (stats + profile denormalization)
+        const batch = writeBatch(db);
+
+        const statsRef = doc(db, 'users', user.uid, 'stats', 'current');
+        batch.set(
+          statsRef,
           {
             totalXP: retroTotalXP,
             currentRankId: rank.id,
@@ -115,6 +144,18 @@ export function useXP(
           },
           { merge: true }
         );
+
+        const profileRef = doc(db, 'users', user.uid, 'profile', 'info');
+        batch.set(
+          profileRef,
+          {
+            currentRankId: rank.id,
+            currentRankAbbrev: abbreviateRank(rank.name),
+          },
+          { merge: true }
+        );
+
+        await batch.commit();
 
         // Update local state
         setTotalXP(retroTotalXP);
@@ -132,9 +173,21 @@ export function useXP(
     calculateRetroactiveXP();
   }, [user, xpLoaded, weeks, weeksLoading, currentStreak, unlockedAchievementCount]);
 
+  // Effect 3: Cleanup debounce timer on unmount
+  useEffect(() => {
+    return () => {
+      // Flush pending debounced write immediately on unmount
+      if (debounceTimer) {
+        clearTimeout(debounceTimer);
+        debounceTimer = null;
+      }
+    };
+  }, []);
+
   /**
    * Add XP and update Firestore.
    * Detects rank-up and emits LevelUpEvent when not silent.
+   * Debounces Firestore writes to reduce quota usage.
    *
    * @param amount - XP amount to add
    * @param isSilent - If true, suppress level-up event (default: false)
@@ -145,32 +198,75 @@ export function useXP(
 
       const newTotalXP = totalXP + amount;
 
-      // Check for rank-up
+      // Check for rank-up (immediate, not debounced)
       const rankUpEvent = checkRankUp(totalXP, newTotalXP);
+      const didRankUp = rankUpEvent !== null;
+
       if (rankUpEvent && !isSilent) {
         setLevelUpEvent(rankUpEvent);
       }
 
-      // Update local state optimistically
+      // Update local state optimistically (immediate)
       setTotalXP(newTotalXP);
 
       // Calculate new rank
       const newRank = getRankForXP(newTotalXP);
 
-      // Persist to Firestore
-      try {
-        const docRef = doc(db, 'users', user.uid, 'stats', 'current');
-        await setDoc(
-          docRef,
-          {
-            totalXP: newTotalXP,
-            currentRankId: newRank.id,
-          },
-          { merge: true }
-        );
-      } catch (error) {
-        console.error('Error updating XP:', error);
+      // Debounced Firestore write
+      const writeToFirestore = async () => {
+        try {
+          if (didRankUp) {
+            // Rank changed: batch write to both stats/current and profile/info
+            const batch = writeBatch(db);
+
+            const statsRef = doc(db, 'users', user.uid, 'stats', 'current');
+            batch.set(
+              statsRef,
+              {
+                totalXP: newTotalXP,
+                currentRankId: newRank.id,
+              },
+              { merge: true }
+            );
+
+            const profileRef = doc(db, 'users', user.uid, 'profile', 'info');
+            batch.set(
+              profileRef,
+              {
+                currentRankId: newRank.id,
+                currentRankAbbrev: abbreviateRank(newRank.name),
+              },
+              { merge: true }
+            );
+
+            await batch.commit();
+          } else {
+            // No rank change: simple update to stats/current
+            const docRef = doc(db, 'users', user.uid, 'stats', 'current');
+            await setDoc(
+              docRef,
+              {
+                totalXP: newTotalXP,
+                currentRankId: newRank.id,
+              },
+              { merge: true }
+            );
+          }
+        } catch (error) {
+          console.error('Error updating XP:', error);
+        }
+      };
+
+      // Clear previous debounce timer
+      if (debounceTimer) {
+        clearTimeout(debounceTimer);
       }
+
+      // Set new debounce timer (750ms)
+      debounceTimer = setTimeout(() => {
+        writeToFirestore();
+        debounceTimer = null;
+      }, 750);
     },
     [user, totalXP]
   );
@@ -195,20 +291,50 @@ export function useXP(
       const achXP = unlockedAchievementCount * 100;
       const newTotalXP = workoutXP + achXP;
 
-      // Calculate new rank
+      // Calculate old rank for comparison
+      const oldRank = getRankForXP(totalXP);
       const newRank = getRankForXP(newTotalXP);
+      const rankChanged = oldRank.id !== newRank.id;
 
-      // Persist to Firestore
-      const docRef = doc(db, 'users', user.uid, 'stats', 'current');
-      await setDoc(
-        docRef,
-        {
-          totalXP: newTotalXP,
-          currentRankId: newRank.id,
-          achievementXP: achXP,
-        },
-        { merge: true }
-      );
+      // Persist to Firestore with batch write if rank changed
+      if (rankChanged) {
+        const batch = writeBatch(db);
+
+        const statsRef = doc(db, 'users', user.uid, 'stats', 'current');
+        batch.set(
+          statsRef,
+          {
+            totalXP: newTotalXP,
+            currentRankId: newRank.id,
+            achievementXP: achXP,
+          },
+          { merge: true }
+        );
+
+        const profileRef = doc(db, 'users', user.uid, 'profile', 'info');
+        batch.set(
+          profileRef,
+          {
+            currentRankId: newRank.id,
+            currentRankAbbrev: abbreviateRank(newRank.name),
+          },
+          { merge: true }
+        );
+
+        await batch.commit();
+      } else {
+        // No rank change: simple update
+        const docRef = doc(db, 'users', user.uid, 'stats', 'current');
+        await setDoc(
+          docRef,
+          {
+            totalXP: newTotalXP,
+            currentRankId: newRank.id,
+            achievementXP: achXP,
+          },
+          { merge: true }
+        );
+      }
 
       // Update local state
       setTotalXP(newTotalXP);
@@ -218,7 +344,7 @@ export function useXP(
     } catch (error) {
       console.error('Error recalculating XP:', error);
     }
-  }, [user, weeks, currentStreak, unlockedAchievementCount]);
+  }, [user, weeks, currentStreak, unlockedAchievementCount, totalXP]);
 
   /**
    * Dismiss current level-up event notification.

@@ -25,6 +25,9 @@ export interface FriendProfile {
   displayName: string;
   photoURL: string | null;
   addedAt: Date;
+  // Denormalized rank data (synced on rank change)
+  currentRankId?: number;
+  currentRankAbbrev?: string;
 }
 
 export interface FriendStats {

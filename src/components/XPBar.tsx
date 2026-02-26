@@ -7,9 +7,10 @@ interface XPBarProps {
   totalXP: number;
   onClick: () => void;
   levelUpEvent: LevelUpEvent | null;
+  loading?: boolean;
 }
 
-export default function XPBar({ currentRank, nextRank, totalXP, onClick }: XPBarProps) {
+export default function XPBar({ currentRank, nextRank, totalXP, onClick, loading }: XPBarProps) {
   const [animatedFill, setAnimatedFill] = useState(0);
   const [disableTransition, setDisableTransition] = useState(false);
   const prevRankIdRef = useRef(currentRank.id);
@@ -81,6 +82,31 @@ export default function XPBar({ currentRank, nextRank, totalXP, onClick }: XPBar
 
   // Calculate minimum fill width (8% when XP > rank threshold, 0% otherwise)
   const fillWidth = totalXP > currentRank.xpThreshold ? Math.max(8, animatedFill) : animatedFill;
+
+  // Skeleton loading state
+  if (loading) {
+    return (
+      <div className="doom-panel p-3">
+        {/* Rank name skeleton */}
+        <div className="flex justify-between items-center mb-2">
+          <div className="h-3 w-20 bg-gray-700 rounded animate-pulse"></div>
+        </div>
+
+        {/* XP bar skeleton */}
+        <div className="relative h-6 bg-gradient-to-b from-[#1a1a1a] to-[#0a0a0a] border-2 border-[#2a2a2a] rounded overflow-hidden">
+          {/* Pulsing fill */}
+          <div className="absolute inset-y-0 left-0 bg-gray-700 animate-pulse" style={{ width: '40%' }}></div>
+
+          {/* Text overlay */}
+          <div className="absolute inset-0 flex items-center justify-center">
+            <span className="text-gray-600 text-[9px] font-bold tracking-widest">
+              CALCULATING XP...
+            </span>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="doom-panel p-3 cursor-pointer" onClick={onClick}>
