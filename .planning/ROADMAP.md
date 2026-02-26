@@ -102,11 +102,11 @@ Plans:
   4. App performs smoothly with 100+ weeks of historical data during XP recalculation
   5. XP system works on low-end mobile devices (iPhone SE, Android emulator)
   6. Firebase read/write operations stay within free tier limits (batched updates, debouncing)
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 07-01: TBD
-- [ ] 07-02: TBD
+- [ ] 07-01-PLAN.md — Rank denormalization, friend rank display, XP debouncing, skeleton loading (2 tasks)
+- [ ] 07-02-PLAN.md — XP system E2E tests with Playwright (2 tasks)
 
 ## Progress
 
