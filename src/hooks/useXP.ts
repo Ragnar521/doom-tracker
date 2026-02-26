@@ -1,40 +1,13 @@
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { doc, getDoc, setDoc, writeBatch } from 'firebase/firestore';
 
 import { db } from '../lib/firebase';
 import { useAuth } from '../contexts/AuthContext';
 import { calculateWeeklyXP } from '../lib/xpFormulas';
-import { getRankForXP, getNextRank, checkRankUp } from '../lib/ranks';
+import { getRankForXP, getNextRank, checkRankUp, abbreviateRank } from '../lib/ranks';
 
 import type { Rank, LevelUpEvent } from '../types';
 import type { WeekRecord } from './useAllWeeks';
-
-// Module-level debounce timer for XP persistence optimization
-let debounceTimer: ReturnType<typeof setTimeout> | null = null;
-
-/**
- * Abbreviate military rank names for denormalization
- */
-function abbreviateRank(rankName: string): string {
-  const abbreviations: Record<string, string> = {
-    'Private': 'PVT',
-    'Corporal': 'CPL',
-    'Sergeant': 'SGT',
-    'Lieutenant': 'LT',
-    'Captain': 'CPT',
-    'Major': 'MAJ',
-    'Colonel': 'COL',
-    'Commander': 'CDR',
-    'Knight': 'KNT',
-    'Sentinel': 'SNL',
-    'Paladin': 'PDN',
-    'Warlord': 'WRL',
-    'Hellwalker': 'HLW',
-    'Slayer': 'SLR',
-    'Doom Slayer': 'DSL',
-  };
-  return abbreviations[rankName] || rankName;
-}
 
 /**
  * XP state management hook with Firestore persistence and retroactive calculation.
@@ -65,6 +38,7 @@ export function useXP(
   const [loading, setLoading] = useState<boolean>(true);
   const [levelUpEvent, setLevelUpEvent] = useState<LevelUpEvent | null>(null);
   const [xpLoaded, setXPLoaded] = useState<boolean>(false);
+  const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Effect 1: Load XP from Firestore on mount
   useEffect(() => {
@@ -176,10 +150,9 @@ export function useXP(
   // Effect 3: Cleanup debounce timer on unmount
   useEffect(() => {
     return () => {
-      // Flush pending debounced write immediately on unmount
-      if (debounceTimer) {
-        clearTimeout(debounceTimer);
-        debounceTimer = null;
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+        debounceTimerRef.current = null;
       }
     };
   }, []);
@@ -258,14 +231,14 @@ export function useXP(
       };
 
       // Clear previous debounce timer
-      if (debounceTimer) {
-        clearTimeout(debounceTimer);
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
       }
 
       // Set new debounce timer (750ms)
-      debounceTimer = setTimeout(() => {
+      debounceTimerRef.current = setTimeout(() => {
         writeToFirestore();
-        debounceTimer = null;
+        debounceTimerRef.current = null;
       }, 750);
     },
     [user, totalXP]

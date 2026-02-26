@@ -102,7 +102,6 @@ export default function Tracker() {
         nextRank={nextRank}
         totalXP={totalXP}
         onClick={() => setShowXPBreakdown(true)}
-        levelUpEvent={levelUpEvent}
         loading={xpLoading}
       />
 

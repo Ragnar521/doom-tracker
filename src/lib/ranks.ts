@@ -148,6 +148,30 @@ export function getXPToNextRank(totalXP: number, currentRank: Rank): number {
 }
 
 /**
+ * Abbreviate military rank names for compact display
+ */
+export function abbreviateRank(rankName: string): string {
+  const abbreviations: Record<string, string> = {
+    'Private': 'PVT',
+    'Corporal': 'CPL',
+    'Sergeant': 'SGT',
+    'Lieutenant': 'LT',
+    'Captain': 'CPT',
+    'Major': 'MAJ',
+    'Colonel': 'COL',
+    'Commander': 'CDR',
+    'Knight': 'KNT',
+    'Sentinel': 'SNL',
+    'Paladin': 'PDN',
+    'Warlord': 'WRL',
+    'Hellwalker': 'HLW',
+    'Slayer': 'SLR',
+    'Doom Slayer': 'DSL',
+  };
+  return abbreviations[rankName] || rankName;
+}
+
+/**
  * Check if XP increase resulted in a rank-up
  * Returns LevelUpEvent if rank changed, null otherwise
  */

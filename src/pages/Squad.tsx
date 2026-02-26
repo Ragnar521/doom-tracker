@@ -10,6 +10,7 @@ import LoadingSpinner from '../components/LoadingSpinner';
 import Toast from '../components/Toast';
 import WeeklyLeaderboard from '../components/WeeklyLeaderboard';
 import { getCurrentWeekId } from '../lib/weekUtils';
+import { abbreviateRank } from '../lib/ranks';
 import type { Friend } from '../types';
 
 function getFaceState(workoutCount: number): string {
@@ -19,27 +20,6 @@ function getFaceState(workoutCount: number): string {
   if (workoutCount === 3) return 'healthy';
   if (workoutCount === 4) return 'strong';
   return 'godmode';
-}
-
-function abbreviateRank(rankName: string): string {
-  const abbreviations: Record<string, string> = {
-    'Private': 'PVT',
-    'Corporal': 'CPL',
-    'Sergeant': 'SGT',
-    'Lieutenant': 'LT',
-    'Captain': 'CPT',
-    'Major': 'MAJ',
-    'Colonel': 'COL',
-    'Commander': 'CDR',
-    'Knight': 'KNT',
-    'Sentinel': 'SNL',
-    'Paladin': 'PDN',
-    'Warlord': 'WRL',
-    'Hellwalker': 'HLW',
-    'Slayer': 'SLR',
-    'Doom Slayer': 'DSL',
-  };
-  return abbreviations[rankName] || rankName;
 }
 
 const DAY_NAMES = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];

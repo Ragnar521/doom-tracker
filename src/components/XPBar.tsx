@@ -1,12 +1,12 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import type { Rank, LevelUpEvent } from '../types';
+import { abbreviateRank } from '../lib/ranks';
+import type { Rank } from '../types';
 
 interface XPBarProps {
   currentRank: Rank;
   nextRank: Rank | null;
   totalXP: number;
   onClick: () => void;
-  levelUpEvent: LevelUpEvent | null;
   loading?: boolean;
 }
 
@@ -14,21 +14,6 @@ export default function XPBar({ currentRank, nextRank, totalXP, onClick, loading
   const [animatedFill, setAnimatedFill] = useState(0);
   const [disableTransition, setDisableTransition] = useState(false);
   const prevRankIdRef = useRef(currentRank.id);
-
-  // Helper function to abbreviate military rank names on mobile
-  const abbreviateRank = (rankName: string): string => {
-    const abbreviations: Record<string, string> = {
-      'Private': 'PVT',
-      'Corporal': 'CPL',
-      'Sergeant': 'SGT',
-      'Lieutenant': 'LT',
-      'Captain': 'CPT',
-      'Major': 'MAJ',
-      'Colonel': 'COL',
-      'Commander': 'CDR',
-    };
-    return abbreviations[rankName] || rankName;
-  };
 
   // Calculate fill percentage - memoized to prevent infinite loops
   const calculateFillPercentage = useCallback((): number => {

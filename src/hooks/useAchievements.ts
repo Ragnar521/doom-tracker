@@ -143,7 +143,7 @@ export function useAchievements(options: UseAchievementsOptions = {}) {
       }
     }
     setNewlyUnlocked([]);
-  }, [newlyUnlocked, unlockAchievement, options]);
+  }, [newlyUnlocked, unlockAchievement, options.onXPGrant]);
 
   // Dismiss single achievement notification
   const dismissAchievement = useCallback(async (achievementId: string) => {
@@ -151,16 +151,15 @@ export function useAchievements(options: UseAchievementsOptions = {}) {
     if (achievement) {
       await unlockAchievement(achievement);
 
-      // Grant XP bonus after short delay for dramatic effect (per CONTEXT.md)
+      // Grant XP bonus after short delay for dramatic effect
       // Achievement toast appears first, then XP increments after a beat
       if (options.onXPGrant) {
-        setTimeout(async () => {
-          await options.onXPGrant!(100); // +100 XP per achievement, NOT silent (can trigger rank-up)
-        }, 800); // 800ms delay per RESEARCH.md recommendation
+        await new Promise(resolve => setTimeout(resolve, 800));
+        await options.onXPGrant(100);
       }
     }
     setNewlyUnlocked(prev => prev.filter(a => a.id !== achievementId));
-  }, [unlockAchievement, options]);
+  }, [unlockAchievement, options.onXPGrant]);
 
   // Get all achievements with unlock status
   const getAllAchievements = useCallback(() => {
