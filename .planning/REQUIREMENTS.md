@@ -9,17 +9,17 @@ Requirements for XP & Levels milestone. Each maps to roadmap phases.
 
 ### XP System
 
-- [ ] **XP-01**: User earns XP from each workout week based on non-linear scaling (1=5, 2=15, 3=30, 4=50, 5=80, 6-7=100 XP)
+- [x] **XP-01**: User earns XP from each workout week based on non-linear scaling (1=5, 2=15, 3=30, 4=50, 5=80, 6-7=100 XP)
 - [ ] **XP-02**: User earns bonus XP when unlocking achievements (+100 XP per achievement)
-- [ ] **XP-03**: User earns small streak bonus on weekly XP when maintaining active streak
-- [ ] **XP-04**: User's XP persists in Firestore (authenticated) or LocalStorage (guest)
-- [ ] **XP-05**: Existing users receive retroactive XP calculated from all historical workout data on first load
+- [x] **XP-03**: User earns small streak bonus on weekly XP when maintaining active streak
+- [x] **XP-04**: User's XP persists in Firestore (authenticated) or LocalStorage (guest)
+- [x] **XP-05**: Existing users receive retroactive XP calculated from all historical workout data on first load
 
 ### Rank Progression
 
 - [x] **RANK-01**: User has a DOOM military rank derived from total XP (15 ranks from Private to Doom Slayer)
 - [ ] **RANK-02**: User sees rank-up celebration (toast + confetti) when reaching a new rank
-- [ ] **RANK-03**: Rank-up celebrations are suppressed during retroactive XP grant (no notification spam)
+- [x] **RANK-03**: Rank-up celebrations are suppressed during retroactive XP grant (no notification spam)
 
 ### UI Display
 
@@ -59,14 +59,14 @@ Requirements for XP & Levels milestone. Each maps to roadmap phases.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| XP-01 | Phase 4 | Pending |
+| XP-01 | Phase 4 | Complete |
 | XP-02 | Phase 5 | Pending |
-| XP-03 | Phase 4 | Pending |
-| XP-04 | Phase 5 | Pending |
-| XP-05 | Phase 5 | Pending |
+| XP-03 | Phase 4 | Complete |
+| XP-04 | Phase 5 | Complete |
+| XP-05 | Phase 5 | Complete |
 | RANK-01 | Phase 4 | Complete (04-01) |
 | RANK-02 | Phase 6 | Pending |
-| RANK-03 | Phase 5 | Pending |
+| RANK-03 | Phase 5 | Complete |
 | UI-01 | Phase 6 | Pending |
 | UI-02 | Phase 6 | Pending |
 | UI-03 | Phase 6 | Pending |
