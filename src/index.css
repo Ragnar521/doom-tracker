@@ -585,6 +585,22 @@
     width: 200px;
     height: 200px;
   }
+
+  /* XP Bar Styles */
+  .xp-fill {
+    background: linear-gradient(90deg, #7a1a1a 0%, #b91c1c 60%, #dc2626 100%);
+    box-shadow: 0 0 10px rgba(185, 28, 28, 0.5);
+    transition: width 0.5s ease-out;
+  }
+
+  .xp-fill-no-transition {
+    transition: none !important;
+  }
+
+  .doom-slayer-xp-glow {
+    box-shadow: 0 0 15px rgba(212, 175, 55, 0.4), inset 0 0 10px rgba(212, 175, 55, 0.1);
+    border-color: #d4af37;
+  }
 }
 
 /* Responsive - Tablet */
