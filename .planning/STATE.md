@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: XP & Levels
 status: unknown
-last_updated: "2026-02-26T08:02:27.277Z"
+last_updated: "2026-02-26T08:08:04.710Z"
 progress:
   total_phases: 4
-  completed_phases: 2
+  completed_phases: 3
   total_plans: 5
-  completed_plans: 9
+  completed_plans: 10
 ---
 
 # Project State
@@ -23,11 +23,11 @@ See: .planning/PROJECT.md (updated 2026-02-26)
 ## Current Position
 
 Phase: 4 of 7 (Foundation - Data Structures & XP Formulas)
-Plan: 1 of 2 in current phase
-Status: In progress
-Last activity: 2026-02-26 — Completed 04-01-PLAN.md (XP Data Structures & Rank Definitions)
+Plan: 2 of 2 in current phase
+Status: Completed
+Last activity: 2026-02-26 — Completed 04-02-PLAN.md (XP Formula Implementation)
 
-Progress: [████░░░░░░] 40% (Plan 1/2 of Phase 4 complete)
+Progress: [████████░░] 100% (Plan 2/2 of Phase 4 complete)
 
 ## Performance Metrics
 
@@ -43,12 +43,12 @@ Progress: [████░░░░░░] 40% (Plan 1/2 of Phase 4 complete)
 | 1. Health Bar | 1 | v1.0 | - |
 | 2. Timeline | 5 | v1.0 | - |
 | 3. Trends | 2 | v1.0 | - |
-| 4. Foundation | 1 | 91s | 91s |
+| 4. Foundation | 2 | 222s | 111s |
 
 **Recent Trend:**
 - v1.0 complete (8 plans, 39 tasks)
-- v1.1 Phase 4 Plan 1 complete (2 tasks, 91s)
-- Trend: Excellent velocity on foundation work
+- v1.1 Phase 4 complete (2 plans, 4 tasks, 222s)
+- Trend: Excellent velocity on foundation work (111s avg/plan)
 
 ## Accumulated Context
 
@@ -65,6 +65,9 @@ Recent decisions affecting current work:
 - **Phase 4 Plan 1**: Exponential XP curve targeting 100,000 for max rank — Balanced for ~2 years at ideal pace
 - **Phase 4 Plan 1**: 15 DOOM military ranks with lore-accurate names — UAC marines → Night Sentinels → Argent warriors
 - **Phase 4 Plan 1**: Color progression gray → gold — Visual hierarchy matches progression intensity
+- [Phase 04-02]: Non-linear XP scaling with inflection at 3 workouts (minimum target)
+- [Phase 04-02]: Streak multiplier capped at 2.5x to prevent exponential growth
+- [Phase 04-02]: 2-year realistic estimate is ~15,000-20,000 XP (validates formula balance)
 
 ### Pending Todos
 
@@ -83,7 +86,7 @@ None yet (milestone just started).
 
 ## Session Continuity
 
-Last session: 2026-02-26 (Phase 4 Plan 1 execution)
-Stopped at: Completed 04-01-PLAN.md — XP types and rank definitions created
-Resume file: .planning/phases/04-foundation-data-structures-xp-formulas/04-01-SUMMARY.md
-Next: Execute Phase 4 Plan 2 (XP Formulas)
+Last session: 2026-02-26 (Phase 4 Plan 2 execution)
+Stopped at: Completed 04-02-PLAN.md — XP formula implementation complete
+Resume file: .planning/phases/04-foundation-data-structures-xp-formulas/04-02-SUMMARY.md
+Next: Phase 4 complete, ready for Phase 5 (Data Hooks)
