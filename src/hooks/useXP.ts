@@ -4,7 +4,7 @@ import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { useAuth } from '../contexts/AuthContext';
 import { calculateWeeklyXP } from '../lib/xpFormulas';
-import { getRankForXP, getNextRank, getXPToNextRank, checkRankUp } from '../lib/ranks';
+import { getRankForXP, getNextRank, checkRankUp } from '../lib/ranks';
 
 import type { Rank, LevelUpEvent } from '../types';
 import type { WeekRecord } from './useAllWeeks';
