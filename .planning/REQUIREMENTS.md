@@ -18,16 +18,16 @@ Requirements for XP & Levels milestone. Each maps to roadmap phases.
 ### Rank Progression
 
 - [x] **RANK-01**: User has a DOOM military rank derived from total XP (15 ranks from Private to Doom Slayer)
-- [ ] **RANK-02**: User sees rank-up celebration (toast + confetti) when reaching a new rank
+- [x] **RANK-02**: User sees rank-up celebration (toast + confetti) when reaching a new rank
 - [x] **RANK-03**: Rank-up celebrations are suppressed during retroactive XP grant (no notification spam)
 
 ### UI Display
 
-- [ ] **UI-01**: User sees XP progress bar and current rank on the Tracker page
-- [ ] **UI-02**: XP bar shows animated fill when XP increases
-- [ ] **UI-03**: XP bar displays numerical progress (current XP / XP needed for next rank)
+- [x] **UI-01**: User sees XP progress bar and current rank on the Tracker page
+- [x] **UI-02**: XP bar shows animated fill when XP increases
+- [x] **UI-03**: XP bar displays numerical progress (current XP / XP needed for next rank)
 - [ ] **UI-04**: User can tap XP bar to see XP breakdown (base workout XP + streak bonus + achievement bonus)
-- [ ] **UI-05**: "Probability to hit target" section is removed from Tracker page
+- [x] **UI-05**: "Probability to hit target" section is removed from Tracker page
 
 ## Future Requirements
 
@@ -65,13 +65,13 @@ Requirements for XP & Levels milestone. Each maps to roadmap phases.
 | XP-04 | Phase 5 | Complete |
 | XP-05 | Phase 5 | Complete |
 | RANK-01 | Phase 4 | Complete (04-01) |
-| RANK-02 | Phase 6 | Pending |
+| RANK-02 | Phase 6 | Complete |
 | RANK-03 | Phase 5 | Complete |
-| UI-01 | Phase 6 | Pending |
-| UI-02 | Phase 6 | Pending |
-| UI-03 | Phase 6 | Pending |
+| UI-01 | Phase 6 | Complete |
+| UI-02 | Phase 6 | Complete |
+| UI-03 | Phase 6 | Complete |
 | UI-04 | Phase 6 | Pending |
-| UI-05 | Phase 6 | Pending |
+| UI-05 | Phase 6 | Complete |
 
 **Coverage:**
 - v1.1 requirements: 13 total
