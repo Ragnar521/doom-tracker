@@ -39,11 +39,14 @@ export function useXP(
   const [levelUpEvent, setLevelUpEvent] = useState<LevelUpEvent | null>(null);
   const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Effect 1: Calculate XP from full history whenever weeks data is ready
-  // History is the source of truth — Firestore is only for persistence/sharing
+  // Effect 1: Calculate XP from full history whenever weeks data is ready.
+  // History is the source of truth — Firestore is only for persistence/sharing.
+  // NOTE: currentStreak is applied uniformly to all historical weeks (intentional).
+  // This means early weeks benefit from a streak earned later — a deliberate design
+  // choice that rewards long-term loyalty. Removing a workout can shift the streak
+  // multiplier across all weeks, causing total XP to change non-linearly.
   useEffect(() => {
     if (!user) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
       setLoading(false);
       return;
     }
@@ -101,7 +104,14 @@ export function useXP(
       }
     };
 
-    persistXP();
+    // Debounce Firestore write to avoid excessive writes during rapid toggling
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+    }
+    debounceTimerRef.current = setTimeout(() => {
+      persistXP();
+      debounceTimerRef.current = null;
+    }, 800);
   }, [user, weeks, weeksLoading, currentStreak, unlockedAchievementCount]);
 
   // Effect 3: Cleanup debounce timer on unmount
