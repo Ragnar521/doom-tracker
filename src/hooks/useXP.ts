@@ -35,7 +35,7 @@ export function useXP(
   // State
   const [totalXP, setTotalXP] = useState<number>(0);
   const [achievementXP, setAchievementXP] = useState<number>(0);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [loading, setLoading] = useState<boolean>(!!user);
   const [levelUpEvent, setLevelUpEvent] = useState<LevelUpEvent | null>(null);
   const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -46,10 +46,7 @@ export function useXP(
   // choice that rewards long-term loyalty. Removing a workout can shift the streak
   // multiplier across all weeks, causing total XP to change non-linearly.
   useEffect(() => {
-    if (!user) {
-      setLoading(false);
-      return;
-    }
+    if (!user) return;
     if (weeksLoading) return; // Wait for weeks to load
 
     // Calculate total workout XP from all historical weeks
