@@ -33,44 +33,39 @@ export function useXP(
   const { user } = useAuth();
 
   // State
-  const [totalXP, setTotalXP] = useState<number>(0);
-  const [achievementXP, setAchievementXP] = useState<number>(0);
-  const [loading, setLoading] = useState<boolean>(!!user);
   const [levelUpEvent, setLevelUpEvent] = useState<LevelUpEvent | null>(null);
   const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Effect 1: Calculate XP from full history whenever weeks data is ready.
-  // History is the source of truth — Firestore is only for persistence/sharing.
+  // Derive XP from full history (pure calculation, no side effects).
   // NOTE: currentStreak is applied uniformly to all historical weeks (intentional).
   // This means early weeks benefit from a streak earned later — a deliberate design
   // choice that rewards long-term loyalty. Removing a workout can shift the streak
   // multiplier across all weeks, causing total XP to change non-linearly.
-  useEffect(() => {
-    if (!user) return;
-    if (weeksLoading) return; // Wait for weeks to load
+  const { totalXP: calculatedTotalXP, achievementXP } = useMemo(() => {
+    if (!user || weeksLoading) return { totalXP: 0, achievementXP: 0 };
 
-    // Calculate total workout XP from all historical weeks
     let workoutXP = 0;
     weeks.forEach((week) => {
       const weekXP = calculateWeeklyXP(week.workoutCount, currentStreak, week.status);
       workoutXP += weekXP;
     });
 
-    // Calculate achievement XP
     const achXP = unlockedAchievementCount * 100;
+    return { totalXP: workoutXP + achXP, achievementXP: achXP };
+  }, [user, weeks, weeksLoading, currentStreak, unlockedAchievementCount]);
 
-    // Total XP
-    const newTotalXP = workoutXP + achXP;
+  // Track addXP bonus separately (optimistic UI updates from addXP calls)
+  const [bonusXP, setBonusXP] = useState<number>(0);
+  const totalXP = calculatedTotalXP + bonusXP;
+  const loading = !!user && weeksLoading;
 
-    // Update local state
-    setTotalXP(newTotalXP);
-    setAchievementXP(achXP);
-    setLoading(false);
+  // Effect: Persist XP to Firestore (debounced, silent — no level-up events on load)
+  useEffect(() => {
+    if (!user || weeksLoading) return;
 
-    // Persist to Firestore (silent, no level-up events on load)
     const persistXP = async () => {
       try {
-        const rank = getRankForXP(newTotalXP);
+        const rank = getRankForXP(totalXP);
 
         const batch = writeBatch(db);
 
@@ -78,9 +73,9 @@ export function useXP(
         batch.set(
           statsRef,
           {
-            totalXP: newTotalXP,
+            totalXP,
             currentRankId: rank.id,
-            achievementXP: achXP,
+            achievementXP,
           },
           { merge: true }
         );
@@ -109,7 +104,7 @@ export function useXP(
       persistXP();
       debounceTimerRef.current = null;
     }, 800);
-  }, [user, weeks, weeksLoading, currentStreak, unlockedAchievementCount]);
+  }, [user, weeksLoading, totalXP, achievementXP]);
 
   // Effect 3: Cleanup debounce timer on unmount
   useEffect(() => {
@@ -144,7 +139,7 @@ export function useXP(
       }
 
       // Update local state optimistically (immediate)
-      setTotalXP(newTotalXP);
+      setBonusXP((prev) => prev + amount);
 
       // Calculate new rank
       const newRank = getRankForXP(newTotalXP);
@@ -273,9 +268,8 @@ export function useXP(
         );
       }
 
-      // Update local state
-      setTotalXP(newTotalXP);
-      setAchievementXP(achXP);
+      // Reset bonus since recalculation covers everything
+      setBonusXP(0);
 
       console.log(`XP recalculated: ${newTotalXP} XP (Rank: ${newRank.name})`);
     } catch (error) {
