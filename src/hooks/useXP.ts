@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
-import { doc, getDoc, setDoc, writeBatch } from 'firebase/firestore';
+import { doc, setDoc, writeBatch } from 'firebase/firestore';
 
 import { db } from '../lib/firebase';
 import { useAuth } from '../contexts/AuthContext';
@@ -37,82 +37,48 @@ export function useXP(
   const [achievementXP, setAchievementXP] = useState<number>(0);
   const [loading, setLoading] = useState<boolean>(true);
   const [levelUpEvent, setLevelUpEvent] = useState<LevelUpEvent | null>(null);
-  const [xpLoaded, setXPLoaded] = useState<boolean>(false);
   const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Effect 1: Load XP from Firestore on mount
+  // Effect 1: Calculate XP from full history whenever weeks data is ready
+  // History is the source of truth — Firestore is only for persistence/sharing
   useEffect(() => {
-    const loadXP = async () => {
-      if (!user) {
-        // Guest mode: no XP
-        setLoading(false);
-        return;
-      }
+    if (!user) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setLoading(false);
+      return;
+    }
+    if (weeksLoading) return; // Wait for weeks to load
 
+    // Calculate total workout XP from all historical weeks
+    let workoutXP = 0;
+    weeks.forEach((week) => {
+      const weekXP = calculateWeeklyXP(week.workoutCount, currentStreak, week.status);
+      workoutXP += weekXP;
+    });
+
+    // Calculate achievement XP
+    const achXP = unlockedAchievementCount * 100;
+
+    // Total XP
+    const newTotalXP = workoutXP + achXP;
+
+    // Update local state
+    setTotalXP(newTotalXP);
+    setAchievementXP(achXP);
+    setLoading(false);
+
+    // Persist to Firestore (silent, no level-up events on load)
+    const persistXP = async () => {
       try {
-        const docRef = doc(db, 'users', user.uid, 'stats', 'current');
-        const docSnap = await getDoc(docRef);
+        const rank = getRankForXP(newTotalXP);
 
-        if (docSnap.exists()) {
-          const data = docSnap.data();
-
-          // Check if XP data exists (totalXP field is defined)
-          if (data.totalXP !== undefined) {
-            setTotalXP(data.totalXP);
-            setAchievementXP(data.achievementXP || 0);
-            setXPLoaded(true);
-            setLoading(false);
-            return;
-          }
-        }
-
-        // XP data doesn't exist - will trigger retroactive calc in Effect 2
-        setXPLoaded(false);
-        setLoading(false);
-      } catch (error) {
-        console.error('Error loading XP from Firestore:', error);
-        setLoading(false);
-      }
-    };
-
-    loadXP();
-  }, [user]);
-
-  // Effect 2: Retroactive XP calculation
-  useEffect(() => {
-    // Guard conditions
-    if (!user) return; // Guest mode
-    if (xpLoaded) return; // XP already loaded from Firestore
-    if (weeksLoading) return; // Weeks haven't loaded yet
-    if (weeks.length === 0 && !weeksLoading) return; // Brand new user, no history
-
-    const calculateRetroactiveXP = async () => {
-      try {
-        // Calculate total workout XP from all historical weeks
-        let workoutXP = 0;
-        weeks.forEach((week) => {
-          // Use current streak for all historical weeks (simplified, more rewarding)
-          const weekXP = calculateWeeklyXP(week.workoutCount, currentStreak, week.status);
-          workoutXP += weekXP;
-        });
-
-        // Calculate achievement XP
-        const achXP = unlockedAchievementCount * 100;
-
-        // Total XP
-        const retroTotalXP = workoutXP + achXP;
-
-        // Determine rank
-        const rank = getRankForXP(retroTotalXP);
-
-        // Persist to Firestore with batch write (stats + profile denormalization)
         const batch = writeBatch(db);
 
         const statsRef = doc(db, 'users', user.uid, 'stats', 'current');
         batch.set(
           statsRef,
           {
-            totalXP: retroTotalXP,
+            totalXP: newTotalXP,
             currentRankId: rank.id,
             achievementXP: achXP,
           },
@@ -130,22 +96,13 @@ export function useXP(
         );
 
         await batch.commit();
-
-        // Update local state
-        setTotalXP(retroTotalXP);
-        setAchievementXP(achXP);
-        setXPLoaded(true);
-
-        // NO level-up event during retroactive calculation (silent mode)
-        console.log(`Retroactive XP granted: ${retroTotalXP} XP (Rank: ${rank.name})`);
       } catch (error) {
-        console.error('Error calculating retroactive XP:', error);
-        // Don't persist partial results, don't set xpLoaded - retry on next load
+        console.error('Error persisting XP to Firestore:', error);
       }
     };
 
-    calculateRetroactiveXP();
-  }, [user, xpLoaded, weeks, weeksLoading, currentStreak, unlockedAchievementCount]);
+    persistXP();
+  }, [user, weeks, weeksLoading, currentStreak, unlockedAchievementCount]);
 
   // Effect 3: Cleanup debounce timer on unmount
   useEffect(() => {
