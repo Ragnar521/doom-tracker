@@ -51,7 +51,16 @@ Users can visualize and understand their complete workout history with clear, me
 
 ### Active
 
-(No active milestone — run `/gsd:new-milestone` to define next)
+## Current Milestone: v1.2 Rank Showcase
+
+**Goal:** Display all 15 DOOM military ranks on the Achievements (Glory) page with current rank highlighted.
+
+**Target features:**
+- List all 15 ranks with name and XP threshold
+- Current rank highlighted with glow effect
+- Earned ranks fully visible, unearned ranks dimmed/grayed
+- Placed above achievements section
+- DOOM retro aesthetic consistent with existing UI
 
 ### Out of Scope
 
@@ -131,4 +140,4 @@ Users can visualize and understand their complete workout history with clear, me
 | Batch rank denormalization on rank change only | Avoids unnecessary writes on every XP update | ✓ Good |
 
 ---
-*Last updated: 2026-02-26 after v1.1 milestone*
+*Last updated: 2026-03-26 after v1.2 milestone start*
