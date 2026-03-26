@@ -59,9 +59,10 @@ Display all 15 DOOM military ranks on the Achievements (Glory) page with current
 
 - [ ] **Phase 8: Rank Showcase** - Display all 15 ranks with visual progression on Achievements page
 
-**Plans:** 1 plan
+**Plans:** 2 plans
 
 Plans:
+- [ ] 08-00-PLAN.md — Wave 0 test infrastructure (E2E stubs + helpers)
 - [ ] 08-01-PLAN.md — RankShowcase component + Achievements page integration
 
 **Targeting:**
@@ -84,7 +85,7 @@ Plans:
 | 5. Data Layer | v1.1 | 2/2 | Complete | 2026-02-26 |
 | 6. UI & Celebrations | v1.1 | 2/2 | Complete | 2026-02-26 |
 | 7. Integration & Polish | v1.1 | 2/2 | Complete | 2026-02-26 |
-| 8. Rank Showcase | v1.2 | 0/1 | Not started | - |
+| 8. Rank Showcase | v1.2 | 0/2 | Not started | - |
 
 ---
 
