@@ -59,13 +59,17 @@ Display all 15 DOOM military ranks on the Achievements (Glory) page with current
 
 - [ ] **Phase 8: Rank Showcase** - Display all 15 ranks with visual progression on Achievements page
 
+**Plans:** 1 plan
+
+Plans:
+- [ ] 08-01-PLAN.md — RankShowcase component + Achievements page integration
+
 **Targeting:**
 - List all 15 ranks with name, tagline, and XP threshold
 - Current rank highlighted with gold border and glow effect
 - Earned ranks fully visible, unearned ranks dimmed and grayed
 - Progress indicator showing XP to next rank
 - Guest user handling with "SIGN IN TO UNLOCK" message
-- Auto-scroll to current rank on mobile
 
 </details>
 
@@ -80,7 +84,7 @@ Display all 15 DOOM military ranks on the Achievements (Glory) page with current
 | 5. Data Layer | v1.1 | 2/2 | Complete | 2026-02-26 |
 | 6. UI & Celebrations | v1.1 | 2/2 | Complete | 2026-02-26 |
 | 7. Integration & Polish | v1.1 | 2/2 | Complete | 2026-02-26 |
-| 8. Rank Showcase | v1.2 | 0/TBD | Not started | - |
+| 8. Rank Showcase | v1.2 | 0/1 | Not started | - |
 
 ---
 
@@ -102,8 +106,6 @@ Display all 15 DOOM military ranks on the Achievements (Glory) page with current
 5. Progress indicator shows "+XXX XP to [Next Rank]" below current rank (or "MAX RANK ACHIEVED" for Doom Slayer)
 6. Guest users (not signed in) see "SIGN IN TO UNLOCK RANK PROGRESSION" message instead of rank showcase
 7. On mobile devices, current rank auto-scrolls into view on page load for immediate context
-
-**Plans:** TBD
 
 ---
 
