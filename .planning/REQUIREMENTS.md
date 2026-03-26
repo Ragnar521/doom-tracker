@@ -9,13 +9,13 @@ Requirements for Rank Showcase milestone. Each maps to roadmap phases.
 
 ### Rank Display
 
-- [ ] **RANK-01**: User can see all 15 DOOM military ranks listed on the Achievements page
-- [ ] **RANK-02**: Each rank shows its name, tagline, and XP threshold
-- [ ] **RANK-03**: User's current rank is highlighted with gold border and glow effect
-- [ ] **RANK-04**: Earned ranks appear at full opacity, unearned ranks are dimmed and grayed out
-- [ ] **RANK-05**: Rank list appears above the achievements section
-- [ ] **RANK-06**: User can see progress to next rank ("+XXX XP to [Next Rank]")
-- [ ] **RANK-07**: Guest users see no rank showcase (XP is authenticated-only)
+- [x] **RANK-01**: User can see all 15 DOOM military ranks listed on the Achievements page
+- [x] **RANK-02**: Each rank shows its name, tagline, and XP threshold
+- [x] **RANK-03**: User's current rank is highlighted with gold border and glow effect
+- [x] **RANK-04**: Earned ranks appear at full opacity, unearned ranks are dimmed and grayed out
+- [x] **RANK-05**: Rank list appears above the achievements section
+- [x] **RANK-06**: User can see progress to next rank ("+XXX XP to [Next Rank]")
+- [x] **RANK-07**: Guest users see no rank showcase (XP is authenticated-only)
 
 ## Future Requirements
 
@@ -42,13 +42,13 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| RANK-01 | Phase 8 | Pending |
-| RANK-02 | Phase 8 | Pending |
-| RANK-03 | Phase 8 | Pending |
-| RANK-04 | Phase 8 | Pending |
-| RANK-05 | Phase 8 | Pending |
-| RANK-06 | Phase 8 | Pending |
-| RANK-07 | Phase 8 | Pending |
+| RANK-01 | Phase 8 | Complete |
+| RANK-02 | Phase 8 | Complete |
+| RANK-03 | Phase 8 | Complete |
+| RANK-04 | Phase 8 | Complete |
+| RANK-05 | Phase 8 | Complete |
+| RANK-06 | Phase 8 | Complete |
+| RANK-07 | Phase 8 | Complete |
 
 **Coverage:**
 - v1.2 requirements: 7 total
