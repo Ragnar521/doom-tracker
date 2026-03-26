@@ -1,492 +1,572 @@
-# Architecture Patterns: XP & Levels System
+# Architecture Research
 
-**Domain:** Workout tracker with gamification (XP/rank progression)
-**Researched:** 2026-02-26
+**Domain:** Rank Showcase Integration (Achievements Page Enhancement)
+**Researched:** 2026-03-26
+**Confidence:** HIGH
 
-## Recommended Architecture
+## Integration Overview
 
-### System Overview
-
-The XP & Levels system integrates into existing Rep & Tear architecture by:
-1. Adding XP calculation logic as a **new custom hook** (`useXP`)
-2. Storing XP/rank data in **new Firestore subcollection** (`users/{uid}/xp/current`)
-3. Creating **new UI components** for XP bar and level-up celebrations
-4. **Modifying Tracker page** to display XP bar (removing probability calculation)
-5. Reusing existing **toast/confetti system** for level-up celebrations
+### Existing Architecture (Achievements Page)
 
 ```
-User completes workout
-    ↓
-useWeek.toggleDay() (EXISTING)
-    ↓
-useXP.calculateXPGain() (NEW)
-    ↓
-Firestore users/{uid}/xp/current (NEW)
-    ↓
-useXP detects level-up (NEW)
-    ↓
-XPContext triggers toast + confetti (NEW, pattern from AchievementContext)
-    ↓
-XPBar component re-renders (NEW)
+┌─────────────────────────────────────────────────────────────┐
+│                    Achievements.tsx (Page)                   │
+├─────────────────────────────────────────────────────────────┤
+│  ┌─────────────────────────────────────────────────────┐    │
+│  │  Header Panel (doom-panel)                          │    │
+│  │  - Title, count, loading state                       │    │
+│  └─────────────────────────────────────────────────────┘    │
+│                                                              │
+│  ┌─────────────────────────────────────────────────────┐    │
+│  │  Category Sections (doom-panel × 4)                  │    │
+│  │  - STREAK, PERFORMANCE, SPECIAL, HIDDEN              │    │
+│  │  - AchievementCard components                        │    │
+│  └─────────────────────────────────────────────────────┘    │
+├─────────────────────────────────────────────────────────────┤
+│                    Data Layer                                │
+├─────────────────────────────────────────────────────────────┤
+│  ┌──────────────────┐  ┌──────────────────┐                 │
+│  │ useAchievements  │  │ AchievementContext│                 │
+│  │ (hook)           │  │ (provider)        │                 │
+│  └──────────────────┘  └──────────────────┘                 │
+└─────────────────────────────────────────────────────────────┘
 ```
 
-### Component Boundaries
+### New Architecture (with Rank Showcase)
 
-| Component | Responsibility | Communicates With |
-|-----------|---------------|-------------------|
-| **XPContext** (NEW) | Global XP state, level-up events | useXP hook, XPToastContainer |
-| **useXP** (NEW) | XP calculation, rank determination, Firestore sync | AuthContext, useWeek, useStats, useAchievements |
-| **XPBar** (NEW) | Display current XP, level, progress bar | XPContext |
-| **XPToast** (NEW) | Level-up celebration notification | XPContext |
-| **XPToastContainer** (NEW) | Manage level-up toast queue | XPContext |
-| **RankDisplay** (NEW) | Show current rank with icon | XPContext |
-| **Tracker.tsx** (MODIFIED) | Add XPBar, remove probability section | useXP |
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    Achievements.tsx (Page)                   │
+├─────────────────────────────────────────────────────────────┤
+│  ┌─────────────────────────────────────────────────────┐    │
+│  │  Header Panel (doom-panel)                          │    │
+│  │  - Title: "GLORY" or "ACHIEVEMENTS"                  │    │
+│  └─────────────────────────────────────────────────────┘    │
+│                                                              │
+│  ┌─────────────────────────────────────────────────────┐    │
+│  │  RankShowcase Component (NEW)                        │    │
+│  │  - All 15 ranks in grid                              │    │
+│  │  - Current rank highlighted                          │    │
+│  │  - Earned/unearned states                            │    │
+│  └─────────────────────────────────────────────────────┘    │
+│                                                              │
+│  ┌─────────────────────────────────────────────────────┐    │
+│  │  Achievement Categories (existing)                   │    │
+│  │  - STREAK, PERFORMANCE, SPECIAL, HIDDEN              │    │
+│  └─────────────────────────────────────────────────────┘    │
+├─────────────────────────────────────────────────────────────┤
+│                    Data Layer                                │
+├─────────────────────────────────────────────────────────────┤
+│  ┌──────────────────┐  ┌──────────────────┐                 │
+│  │ useXP            │  │ useAchievements  │                 │
+│  │ (from App.tsx)   │  │ (existing hook)  │                 │
+│  └──────────────────┘  └──────────────────┘                 │
+│           │                       │                          │
+│           ↓                       ↓                          │
+│  ┌──────────────────┐  ┌──────────────────┐                 │
+│  │ RANKS array      │  │ AchievementContext│                 │
+│  │ (lib/ranks.ts)   │  │ (existing)        │                 │
+│  └──────────────────┘  └──────────────────┘                 │
+└─────────────────────────────────────────────────────────────┘
+```
 
-### Data Flow
+## Component Design
 
-**XP Earning Flow:**
+### New Component: RankShowcase.tsx
+
+**Location:** `src/components/RankShowcase.tsx`
+
+**Responsibility:** Display all 15 DOOM military ranks with visual distinction between earned/unearned and current rank highlight.
+
+**Props Interface:**
 ```typescript
-// 1. User toggles workout (EXISTING)
-toggleDay(dayIndex)
-
-// 2. XP hook listens for workout count changes (NEW)
-useEffect(() => {
-  const newXP = calculateXPGain(workoutCount, currentStreak, achievements)
-  addXP(newXP)
-}, [workoutCount, currentStreak, achievements])
-
-// 3. Check for level-up (NEW)
-if (currentXP >= xpForNextLevel) {
-  levelUp()
-  triggerLevelUpCelebration()
-}
-
-// 4. Save to Firestore (NEW)
-setDoc(doc(db, 'users', uid, 'xp', 'current'), {
-  currentXP,
-  totalXP,
-  level,
-  rank,
-  updatedAt: serverTimestamp()
-})
-```
-
-**Level-Up Celebration Flow:**
-```typescript
-// XPContext (mirrors AchievementContext pattern)
-const [newLevelUps, setNewLevelUps] = useState<LevelUp[]>([])
-
-// Trigger level-up
-const levelUp = (newLevel, newRank) => {
-  setNewLevelUps(prev => [...prev, { level: newLevel, rank: newRank }])
-}
-
-// XPToastContainer (mirrors AchievementToastContainer)
-// Shows toast + confetti, auto-dismisses after 4s
-<XPToastContainer levelUps={newLevelUps} onDismiss={dismissLevelUp} />
-```
-
-## Patterns to Follow
-
-### Pattern 1: XP Calculation Hook
-**What:** Custom hook manages XP state, calculations, Firestore sync
-**When:** Following existing pattern (useStats, useAchievements)
-**Example:**
-```typescript
-// src/hooks/useXP.ts
-export interface XPData {
-  currentXP: number;      // XP in current level (0 to xpForNextLevel)
-  totalXP: number;        // Lifetime XP
-  level: number;          // Current level (1-50)
-  rank: Rank;             // Current rank (calculated from level)
-  updatedAt: Date | null;
-}
-
-export function useXP() {
-  const { user } = useAuth()
-  const { workoutCount } = useWeek()
-  const { stats } = useStats()
-  const { unlockedCount } = useAchievementContext()
-
-  const [xpData, setXPData] = useState<XPData>(defaultXPData)
-  const [loading, setLoading] = useState(true)
-
-  // Load from Firestore or localStorage
-  useEffect(() => {
-    loadXPData()
-  }, [user])
-
-  // Calculate XP gain from workouts
-  const calculateXPGain = useCallback(() => {
-    const baseXP = workoutCount * 10
-    const streakBonus = stats.currentStreak * 5
-    const achievementBonus = unlockedCount * 25
-    return baseXP + streakBonus + achievementBonus
-  }, [workoutCount, stats.currentStreak, unlockedCount])
-
-  // Add XP and check for level-up
-  const addXP = useCallback(async (xp: number) => {
-    // Implementation
-  }, [])
-
-  return { xpData, loading, addXP, calculateXPGain }
+interface RankShowcaseProps {
+  currentRank: Rank;
+  totalXP: number;
+  loading?: boolean;
 }
 ```
 
-### Pattern 2: Context Provider with Toast Container
-**What:** Context manages XP state globally, toast container handles celebrations
-**When:** Reuse existing AchievementContext pattern
-**Example:**
+**Component Structure:**
 ```typescript
-// src/contexts/XPContext.tsx
-export function XPProvider({ children }: { children: ReactNode }) {
-  const { xpData, loading, addXP, calculateXPGain } = useXP()
-  const [newLevelUps, setNewLevelUps] = useState<LevelUp[]>([])
+export default function RankShowcase({ currentRank, totalXP, loading }: RankShowcaseProps) {
+  // 3a. Import RANKS from lib/ranks.ts
+  // 3b. No local state needed (all derived from props)
+  // 3c. Calculate earned/unearned status for each rank
+  // 3d. Render grid layout with rank cards
+}
+```
+
+**Key Features:**
+- **Grid Layout:** Responsive grid (2 cols mobile, 3 cols tablet, 5 cols desktop)
+- **Rank States:**
+  - **Current:** Highlighted with glow effect (similar to god-mode-glow)
+  - **Earned:** Full opacity, full color
+  - **Unearned:** Dimmed (opacity: 0.4), desaturated (filter: grayscale(0.5))
+- **Card Content:**
+  - Rank name (abbreviated on mobile, full on desktop)
+  - XP threshold
+  - Color-coded text (matches rank.color from RANKS array)
+  - Optional: tagline on hover/desktop
+- **Loading State:** Skeleton placeholders (similar to XPBar loading)
+
+### Child Component: RankCard (inline or separate)
+
+**Recommendation:** Inline within RankShowcase.tsx (similar to AchievementCard pattern)
+
+**Props Interface:**
+```typescript
+interface RankCardProps {
+  rank: Rank;
+  isCurrent: boolean;
+  isEarned: boolean;
+}
+```
+
+**Styling Strategy:**
+- Reuse `.doom-panel` for base card
+- New class: `.rank-card` for specific styling
+- Conditional classes:
+  - `.rank-current` → applies glow animation
+  - `.rank-earned` → full visibility
+  - `.rank-locked` → dimmed/grayscale (reuse `.achievement-card.locked` pattern)
+
+## Data Flow
+
+### XP Data Propagation
+
+```
+App.tsx (XP Data Source)
+    │
+    │ useXP hook provides:
+    │ - totalXP: number
+    │ - currentRank: Rank
+    │ - loading: boolean
+    │
+    ↓
+Achievements.tsx (Page)
+    │
+    │ Props passed to RankShowcase:
+    │ - currentRank
+    │ - totalXP
+    │ - loading
+    │
+    ↓
+RankShowcase Component
+    │
+    │ Derives:
+    │ - isEarned = rank.xpThreshold <= totalXP
+    │ - isCurrent = rank.id === currentRank.id
+    │
+    ↓
+RankCard Components (map over RANKS array)
+```
+
+### Integration with Existing Context
+
+**AchievementContext:** No changes needed. RankShowcase is XP-driven, not achievement-driven.
+
+**XP Hook:** Already available in App.tsx, needs to be passed down via props.
+
+**Data Source:** `RANKS` array from `src/lib/ranks.ts` (static data, no Firestore queries).
+
+## Modified Files
+
+### File 1: src/pages/Achievements.tsx (MODIFIED)
+
+**Changes:**
+1. Import `RankShowcase` component
+2. Import XP-related props from parent (if passed via route context or props)
+3. Add `RankShowcase` component between header and achievement sections
+4. Pass `currentRank`, `totalXP`, `loading` props
+
+**Current Structure:**
+```typescript
+export default function Achievements() {
+  const { achievements, unlockedCount, loading } = useAchievements();
+  // ...
+  return (
+    <div className="space-y-3">
+      {/* Header */}
+      {/* Achievement Categories */}
+    </div>
+  );
+}
+```
+
+**New Structure:**
+```typescript
+export default function Achievements() {
+  const { achievements, unlockedCount, loading: achievementsLoading } = useAchievements();
+
+  // TODO: Get XP data from parent route context or props
+  // const { totalXP, currentRank, loading: xpLoading } = useXPContext() || getFromRoute();
 
   return (
-    <XPContext.Provider value={{ xpData, loading, addXP, calculateXPGain }}>
-      {children}
-      <XPToastContainer levelUps={newLevelUps} onDismiss={dismissLevelUp} />
-    </XPContext.Provider>
-  )
+    <div className="space-y-3">
+      {/* Header */}
+
+      {/* NEW: Rank Showcase */}
+      <RankShowcase
+        currentRank={currentRank}
+        totalXP={totalXP}
+        loading={xpLoading}
+      />
+
+      {/* Achievement Categories (existing) */}
+    </div>
+  );
 }
 ```
 
-### Pattern 3: Client-Side Rank Calculation
-**What:** Rank is derived from level using pure function (not stored separately)
-**When:** Always calculate on read, never store in Firestore
-**Example:**
+**Note:** XP data needs to flow from App.tsx → Achievements.tsx. Options:
+1. **React Context** (create XPContext, wrap App, consume in Achievements)
+2. **Route Context** (use React Router's data loaders)
+3. **Props drilling** (pass via route element props)
+
+**Recommendation:** Option 1 (XPContext) for consistency with AchievementContext pattern.
+
+### File 2: src/components/RankShowcase.tsx (NEW)
+
+**Purpose:** Display rank grid with current/earned/unearned states
+
+**Estimated Lines:** ~150 lines (component + inline RankCard)
+
+**Key Imports:**
+- `RANKS` from `../lib/ranks`
+- `abbreviateRank` from `../lib/ranks`
+- `type Rank` from `../types`
+
+**Skeleton Pattern (for loading state):**
 ```typescript
-// src/lib/ranks.ts
-export type Rank =
-  | 'MARINE'           // Levels 1-5
-  | 'CORPORAL'         // Levels 6-10
-  | 'SERGEANT'         // Levels 11-15
-  | 'LIEUTENANT'       // Levels 16-20
-  | 'CAPTAIN'          // Levels 21-25
-  | 'MAJOR'            // Levels 26-30
-  | 'COLONEL'          // Levels 31-35
-  | 'COMMANDER'        // Levels 36-40
-  | 'DOOMGUY'          // Levels 41-45
-  | 'DOOM SLAYER'      // Levels 46-50
-
-export function getLevelForRank(rank: Rank): number {
-  const levels = { MARINE: 1, CORPORAL: 6, SERGEANT: 11, ... }
-  return levels[rank]
-}
-
-export function getRankFromLevel(level: number): Rank {
-  if (level <= 5) return 'MARINE'
-  if (level <= 10) return 'CORPORAL'
-  // ... etc
-  return 'DOOM SLAYER'
-}
-
-export function getXPForLevel(level: number): number {
-  // Exponential curve: level^2 * 100
-  // Level 1 → 100 XP, Level 10 → 10,000 XP, Level 50 → 250,000 XP
-  return Math.pow(level, 2) * 100
-}
-```
-
-### Pattern 4: XP Bar Component Integration
-**What:** XP bar replaces probability section on Tracker page
-**When:** Same location, similar visual style (doom-panel with progress bar)
-**Example:**
-```typescript
-// src/components/XPBar.tsx
-export default function XPBar() {
-  const { xpData } = useXPContext()
-
-  const progressPercent = (xpData.currentXP / getXPForLevel(xpData.level + 1)) * 100
-
+if (loading) {
   return (
     <div className="doom-panel p-3">
-      <div className="flex justify-between items-center mb-2">
-        <div className="flex items-center gap-2">
-          <RankIcon rank={xpData.rank} />
-          <span className="text-doom-gold text-[10px] font-bold">{xpData.rank}</span>
-        </div>
-        <span className="text-gray-500 text-[8px]">
-          LEVEL {xpData.level}
-        </span>
-      </div>
-
-      <div className="xp-bar h-3 rounded overflow-hidden bg-gray-800">
-        <div
-          className="h-full bg-gradient-to-r from-doom-gold to-yellow-600 transition-all duration-500"
-          style={{ width: `${progressPercent}%` }}
-        />
-      </div>
-
-      <div className="flex justify-between mt-1 text-[8px] text-gray-500">
-        <span>{xpData.currentXP.toLocaleString()} XP</span>
-        <span>{getXPForLevel(xpData.level + 1).toLocaleString()} XP</span>
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2">
+        {Array.from({ length: 15 }).map((_, i) => (
+          <div key={i} className="rank-card-skeleton animate-pulse">
+            <div className="h-4 bg-gray-700 rounded w-3/4 mb-1"></div>
+            <div className="h-3 bg-gray-700 rounded w-1/2"></div>
+          </div>
+        ))}
       </div>
     </div>
-  )
+  );
 }
 ```
 
-### Pattern 5: Level-Up Toast (Reuse Achievement Pattern)
-**What:** Toast appears at top center, auto-dismisses, confetti animation
-**When:** Identical to achievement unlocks (proven pattern)
+### File 3: src/index.css (MODIFIED)
+
+**New CSS Classes:**
+
+```css
+/* Rank Showcase Styles */
+.rank-card {
+  background: linear-gradient(180deg, #2a2a2a 0%, #1a1a1a 100%);
+  border: 2px solid #3a3a3a;
+  transition: all 0.2s ease;
+  padding: 0.5rem;
+  border-radius: 0.25rem;
+  text-align: center;
+}
+
+.rank-card.rank-current {
+  border-color: #d4af37;
+  box-shadow: 0 0 15px rgba(212, 175, 55, 0.5);
+  animation: pulse-rank-glow 2s ease-in-out infinite;
+}
+
+.rank-card.rank-earned {
+  opacity: 1;
+  filter: none;
+}
+
+.rank-card.rank-locked {
+  opacity: 0.4;
+  filter: grayscale(0.5);
+}
+
+@keyframes pulse-rank-glow {
+  0%, 100% {
+    box-shadow: 0 0 15px rgba(212, 175, 55, 0.5);
+  }
+  50% {
+    box-shadow: 0 0 25px rgba(212, 175, 55, 0.8);
+  }
+}
+```
+
+**Estimated Lines:** ~30 lines added to existing `index.css`
+
+### File 4: src/contexts/XPContext.tsx (NEW, OPTIONAL)
+
+**Purpose:** Provide XP data to all pages without prop drilling
+
+**Estimated Lines:** ~50 lines
+
+**Pattern:**
+```typescript
+import { createContext, useContext, type ReactNode } from 'react';
+import type { Rank } from '../types';
+
+interface XPContextType {
+  totalXP: number;
+  currentRank: Rank;
+  nextRank: Rank | null;
+  xpToNextRank: number;
+  loading: boolean;
+}
+
+const XPContext = createContext<XPContextType | null>(null);
+
+interface XPProviderProps {
+  children: ReactNode;
+  value: XPContextType;
+}
+
+export function XPProvider({ children, value }: XPProviderProps) {
+  return <XPContext.Provider value={value}>{children}</XPContext.Provider>;
+}
+
+export function useXPContext() {
+  const context = useContext(XPContext);
+  if (!context) {
+    throw new Error('useXPContext must be used within an XPProvider');
+  }
+  return context;
+}
+```
+
+**App.tsx Changes:**
+```typescript
+// Wrap entire app with XPProvider
+const xpData = useXP(weeks, currentStreak, unlockedAchievementCount, weeksLoading);
+
+return (
+  <XPProvider value={xpData}>
+    {/* existing routes */}
+  </XPProvider>
+);
+```
+
+**Alternative (Simpler):** Pass XP data directly to Achievements.tsx via route element props. Use this if XP data is ONLY needed in Achievements page.
+
+## Architectural Patterns
+
+### Pattern 1: Composition Over Prop Drilling
+
+**What:** Instead of passing XP props through multiple levels, use React Context to provide XP data globally.
+
+**When to use:** When data is needed in multiple pages/components (XP data is likely needed in Tracker, Achievements, Squad).
+
+**Trade-offs:**
+- **Pro:** Cleaner component signatures, no prop drilling
+- **Pro:** Easier to add XP features to other pages later
+- **Con:** More abstraction (harder to trace data flow for new devs)
+- **Con:** Adds one more Context provider (already have Auth, Achievement, Boost)
+
 **Example:**
 ```typescript
-// src/components/XPToast.tsx
-export default function XPToast({ levelUp, onDismiss }: XPToastProps) {
-  const [isVisible, setIsVisible] = useState(false)
-  const [showConfetti, setShowConfetti] = useState(false)
+// App.tsx
+<XPProvider value={xpData}>
+  <AchievementProvider onXPGrant={xpData.addXP}>
+    <Routes>
+      <Route path="/glory" element={<Achievements />} />
+    </Routes>
+  </AchievementProvider>
+</XPProvider>
 
-  useEffect(() => {
-    setTimeout(() => {
-      setIsVisible(true)
-      setShowConfetti(true)
-    }, 100)
-
-    const dismissTimer = setTimeout(() => {
-      onDismiss(levelUp.level)
-    }, 4000)
-
-    return () => clearTimeout(dismissTimer)
-  }, [levelUp, onDismiss])
-
-  return (
-    <>
-      <Confetti trigger={showConfetti} />
-      <div className="fixed top-4 left-1/2 -translate-x-1/2 z-50 doom-panel p-4 border-2 border-doom-gold">
-        <div className="flex items-center gap-3">
-          <RankIcon rank={levelUp.rank} className="animate-bounce" />
-          <div>
-            <p className="text-doom-gold text-[10px] tracking-widest">RANK UP!</p>
-            <p className="text-white text-sm font-bold">LEVEL {levelUp.level}</p>
-            <p className="text-gray-400 text-[8px]">{levelUp.rank}</p>
-          </div>
-        </div>
-      </div>
-    </>
-  )
-}
+// Achievements.tsx
+const { totalXP, currentRank, loading } = useXPContext();
 ```
 
-## Anti-Patterns to Avoid
+### Pattern 2: Static Data Iteration
 
-### Anti-Pattern 1: Storing Computed Values
-**What:** Storing rank separately from level in Firestore
-**Why bad:** Creates data inconsistency risk, wastes storage
-**Instead:** Always compute rank from level on read
+**What:** `RANKS` array is static (never changes at runtime), so iterate over it directly in component.
 
+**When to use:** When displaying predefined lists with dynamic state (earned/current status).
+
+**Trade-offs:**
+- **Pro:** No Firestore queries, instant rendering
+- **Pro:** Deterministic order (ID 1-15)
+- **Con:** Can't be customized per-user (acceptable for this use case)
+
+**Example:**
 ```typescript
-// BAD
-interface XPData {
-  level: number
-  rank: Rank  // ❌ Duplicates derived data
-}
+{RANKS.map(rank => {
+  const isEarned = totalXP >= rank.xpThreshold;
+  const isCurrent = rank.id === currentRank.id;
 
-// GOOD
-interface XPData {
-  level: number
-  // rank computed via getRankFromLevel(level)
-}
+  return <RankCard key={rank.id} rank={rank} isEarned={isEarned} isCurrent={isCurrent} />;
+})}
 ```
 
-### Anti-Pattern 2: Complex XP Formulas
-**What:** XP calculation depends on too many variables (time of day, day of week, etc.)
-**Why bad:** Confuses users, hard to understand progression
-**Instead:** Simple formula: workouts + streaks + achievements
+### Pattern 3: Derived State from Props
 
+**What:** RankShowcase calculates earned/current status in render logic (no useState needed).
+
+**When to use:** When all component state can be calculated from props.
+
+**Trade-offs:**
+- **Pro:** No state management bugs, pure function of props
+- **Pro:** Easier to test (no internal state to mock)
+- **Con:** Recalculates on every render (acceptable for simple boolean checks)
+
+**Example:**
 ```typescript
-// BAD
-const xp = workoutCount * (isDayOfWeek('Monday') ? 15 : 10) +
-           (hourOfDay < 12 ? 5 : 0) +
-           (weatherIsRainy ? 20 : 0)  // ❌ Too complex
-
-// GOOD
-const xp = workoutCount * 10 +        // ✓ Clear base rate
-           stats.currentStreak * 5 +   // ✓ Rewards consistency
-           unlockedCount * 25          // ✓ Bonus for achievements
+// Inside RankShowcase component (no useState)
+const ranksWithStatus = RANKS.map(rank => ({
+  ...rank,
+  isEarned: totalXP >= rank.xpThreshold,
+  isCurrent: rank.id === currentRank.id,
+}));
 ```
 
-### Anti-Pattern 3: Separate Stats Document
-**What:** Creating `users/{uid}/stats/xp` instead of `users/{uid}/xp/current`
-**Why bad:** Conflicts with existing `stats/current` document (workout stats)
-**Instead:** Use dedicated `xp` subcollection
+## Responsive Design Strategy
 
+### Mobile-First Grid Layout
+
+**Mobile (default):** 2 columns (compact, fits 15 ranks in ~8 rows)
+```css
+grid-cols-2
+gap-2
+```
+
+**Tablet (640px+):** 3 columns (better visual balance)
+```css
+sm:grid-cols-3
+sm:gap-3
+```
+
+**Desktop (1024px+):** 5 columns (all ranks fit in 3 rows)
+```css
+lg:grid-cols-5
+lg:gap-4
+```
+
+### Text Responsiveness
+
+**Rank Name:**
+- Mobile: Abbreviated (`abbreviateRank(rank.name)`) → "PVT", "CPL", "SGT"
+- Desktop: Full name → "Private", "Corporal", "Sergeant"
+
+**XP Threshold:**
+- Mobile: Compact formatting (`1.2K`, `50K`) via `toLocaleString()`
+- Desktop: Full numbers (`1,200`, `50,000`)
+
+**Implementation:**
 ```typescript
-// BAD
-users/{uid}/stats/current  // ❌ Existing workout stats
-users/{uid}/stats/xp       // ❌ Confusing namespace collision
+{/* Mobile: abbreviated */}
+<span className="sm:hidden">{abbreviateRank(rank.name)}</span>
 
-// GOOD
-users/{uid}/stats/current  // ✓ Workout stats
-users/{uid}/xp/current     // ✓ XP stats (separate concern)
+{/* Desktop: full name */}
+<span className="hidden sm:inline">{rank.name}</span>
 ```
 
-### Anti-Pattern 4: XP Recalculation on Every Render
-**What:** Calling `calculateXPGain()` in component render
-**Why bad:** Performance issue, unnecessary Firestore writes
-**Instead:** Calculate only when workoutCount changes
+## Anti-Patterns
 
-```typescript
-// BAD
-function XPBar() {
-  const xp = calculateXPGain()  // ❌ Runs on every render
-  return <div>{xp}</div>
-}
+### Anti-Pattern 1: Fetching Rank Data from Firestore
 
-// GOOD
-useEffect(() => {
-  const xp = calculateXPGain()  // ✓ Runs only when deps change
-  addXP(xp)
-}, [workoutCount, currentStreak])
-```
+**What people might do:** Store RANKS array in Firestore and query it per-user.
 
-### Anti-Pattern 5: Level-Down on Workout Removal
-**What:** Subtracting XP when user removes workout
-**Why bad:** Frustrating UX, punishes honest tracking
-**Instead:** XP is cumulative, never decreases
+**Why it's wrong:**
+- Ranks are universal (same for all users), not user-specific
+- Wastes Firestore quota on static data
+- Adds unnecessary loading time
 
-```typescript
-// BAD
-const handleToggleDay = async (dayIndex: number) => {
-  const wasCompleted = weekData.workouts[dayIndex]
-  if (wasCompleted) {
-    subtractXP(10)  // ❌ Penalizes user
-  }
-}
+**Do this instead:** Import `RANKS` from `lib/ranks.ts` directly (static import, bundled with code).
 
-// GOOD
-const handleToggleDay = async (dayIndex: number) => {
-  // XP never decreases, only increases
-  // Removing workout just means future XP is lower
-}
-```
+### Anti-Pattern 2: Storing "Earned Ranks" in Firestore
 
-## Scalability Considerations
+**What people might do:** Save array of earned rank IDs to Firestore.
 
-| Concern | At 100 users | At 10K users | At 1M users |
-|---------|--------------|--------------|-------------|
-| **Firestore reads** | 1 read per login (xp/current) | Same (1 doc per user) | Same (efficient) |
-| **Firestore writes** | 1 write per workout toggle | Same (batched updates) | Same (no N+1 queries) |
-| **XP calculation** | Client-side (instant) | Client-side (no backend) | Client-side (scales) |
-| **Rank lookup** | O(1) lookup table | O(1) lookup table | O(1) lookup table |
-| **Level-up detection** | Simple comparison | Simple comparison | Simple comparison |
+**Why it's wrong:**
+- Earned status is derivable from `totalXP >= rank.xpThreshold`
+- Storing derived data creates sync issues (what if XP changes but earned ranks aren't updated?)
+- Wastes Firestore writes
 
-**Optimization Strategy:**
-- Client-side rank calculation (no Firestore query)
-- Single document write per workout session (batch XP updates)
-- Memoized XP calculations (useMemo in useXP hook)
-- No real-time listeners (load on mount, update on write)
+**Do this instead:** Calculate earned status in component: `const isEarned = totalXP >= rank.xpThreshold`.
 
-## Integration Points
+### Anti-Pattern 3: Separate "Rank Page" Instead of Integrating into Achievements
 
-### New Files to Create
+**What people might do:** Create new route `/ranks` with separate page.
 
-| File | Purpose | Depends On |
-|------|---------|------------|
-| `src/contexts/XPContext.tsx` | Global XP state provider | useXP hook |
-| `src/hooks/useXP.ts` | XP data management, Firestore sync | AuthContext, useWeek, useStats |
-| `src/lib/ranks.ts` | Rank definitions, XP formulas | None (pure functions) |
-| `src/components/XPBar.tsx` | XP progress bar UI | XPContext |
-| `src/components/RankIcon.tsx` | Rank badge/icon display | None |
-| `src/components/XPToast.tsx` | Level-up celebration toast | Confetti (existing) |
-| `src/components/XPToastContainer.tsx` | Manage level-up toast queue | XPToast |
+**Why it's wrong:**
+- Fragments "glory" achievements (ranks and badges feel disconnected)
+- Adds unnecessary navigation complexity
+- Achievements page is underutilized (only shows badges, not progression)
 
-### Files to Modify
+**Do this instead:** Integrate RankShowcase into existing Achievements page (rename to "Glory" if needed).
 
-| File | Changes | Reason |
-|------|---------|--------|
-| `src/App.tsx` | Wrap app in `<XPProvider>` | Provide XP context globally |
-| `src/pages/Tracker.tsx` | Add `<XPBar />`, remove probability section | Display XP progression |
-| `firestore.rules` | Add `xp/{docId}` rules | Secure XP data |
-| `src/types/index.ts` | Export XP types | Type definitions |
+## Scaling Considerations
 
-### Files NOT to Modify
+| Scale | Impact | Mitigation |
+|-------|--------|------------|
+| 15 ranks (current) | Trivial (renders instantly) | None needed |
+| 50+ ranks (future expansion) | Grid becomes long on mobile | Add pagination or "Show All" toggle |
+| Real-time rank updates | Re-render on every XP change | Already optimized (React batches updates) |
+| Loading skeleton | Good UX for slow XP calc | Implemented in RankShowcase |
 
-| File | Why Leave Unchanged |
-|------|---------------------|
-| `src/hooks/useWeek.ts` | XP calculation happens in useXP, not useWeek |
-| `src/hooks/useStats.ts` | Stats calculation is separate from XP |
-| `src/hooks/useAchievements.ts` | Achievements trigger XP bonus, but don't store XP |
-| `src/components/StatsPanel.tsx` | Stats panel shows streaks/workouts, not XP |
-| `src/lib/achievements.ts` | Achievement definitions unchanged |
+**Performance Notes:**
+- RANKS array is tiny (15 objects × ~100 bytes = 1.5KB)
+- Derived calculations (`isEarned`, `isCurrent`) are O(n) with n=15 (negligible)
+- No Firestore queries = no network latency
+- Component re-renders only when `currentRank` or `totalXP` change (React memo not needed)
 
-### Firestore Schema Changes
+## Integration Checklist
 
-**New Subcollection:**
-```
-users/{uid}/xp/current
-  {
-    currentXP: number,       // XP in current level (resets on level-up)
-    totalXP: number,         // Lifetime XP (never resets)
-    level: number,           // Current level (1-50)
-    updatedAt: Timestamp     // Last update timestamp
-  }
-```
+### Phase 1: Create RankShowcase Component
+- [ ] Create `src/components/RankShowcase.tsx`
+- [ ] Implement props interface (`currentRank`, `totalXP`, `loading`)
+- [ ] Implement grid layout (responsive cols)
+- [ ] Implement RankCard rendering logic (map over RANKS)
+- [ ] Implement earned/current state derivation
+- [ ] Implement loading skeleton
 
-**Security Rules:**
-```javascript
-// firestore.rules (ADD THIS)
-match /users/{userId} {
-  match /xp/{docId} {
-    allow read, write: if request.auth != null && request.auth.uid == userId;
-  }
-}
-```
+### Phase 2: Add CSS Styles
+- [ ] Add `.rank-card` base style to `index.css`
+- [ ] Add `.rank-current` glow animation
+- [ ] Add `.rank-earned` and `.rank-locked` states
+- [ ] Test responsive breakpoints (mobile, tablet, desktop)
 
-**LocalStorage (Guest Mode):**
-```typescript
-localStorage.setItem('doom-tracker-xp', JSON.stringify({
-  currentXP: 450,
-  totalXP: 12450,
-  level: 12,
-  updatedAt: '2026-02-26T...'
-}))
-```
+### Phase 3: Create XPContext (Optional)
+- [ ] Create `src/contexts/XPContext.tsx`
+- [ ] Implement provider and hook
+- [ ] Wrap App.tsx with XPProvider
+- [ ] Test context propagation
 
-## Build Order (Suggested Dependency-Aware Sequence)
+### Phase 4: Integrate into Achievements Page
+- [ ] Import RankShowcase in `Achievements.tsx`
+- [ ] Get XP data (via context or props)
+- [ ] Insert RankShowcase between header and categories
+- [ ] Handle loading states
+- [ ] Test layout and spacing
 
-### Phase 1: Foundation (No Dependencies)
-1. **Create `src/lib/ranks.ts`** - Pure functions (rank lookup, XP formulas)
-2. **Create `src/types/index.ts`** exports - XPData, Rank, LevelUp types
-3. **Add Firestore rules** - Security for xp subcollection
+### Phase 5: Testing & Polish
+- [ ] Test all 15 rank states (current, earned, locked)
+- [ ] Test responsive layout on mobile/tablet/desktop
+- [ ] Test loading skeleton
+- [ ] Test with guest users (XP disabled)
+- [ ] Verify DOOM aesthetic consistency
 
-### Phase 2: Data Layer (Depends on Phase 1)
-4. **Create `src/hooks/useXP.ts`** - XP management hook
-5. **Create `src/contexts/XPContext.tsx`** - Context provider (uses useXP)
-6. **Modify `src/App.tsx`** - Wrap in XPProvider
+## Build Order (Recommended Sequence)
 
-### Phase 3: UI Components (Depends on Phase 2)
-7. **Create `src/components/RankIcon.tsx`** - Icon display component
-8. **Create `src/components/XPBar.tsx`** - Progress bar (uses XPContext)
-9. **Create `src/components/XPToast.tsx`** - Level-up celebration
-10. **Create `src/components/XPToastContainer.tsx`** - Toast queue management
+1. **RankShowcase Component** → Build in isolation, import RANKS directly
+2. **CSS Styles** → Add rank-card classes, test locally
+3. **XPContext (if needed)** → Create context, wire up App.tsx
+4. **Achievements Integration** → Import and place component
+5. **Testing & Refinement** → Responsive checks, edge cases, polish
 
-### Phase 4: Integration (Depends on Phase 3)
-11. **Modify `src/pages/Tracker.tsx`** - Add XPBar, remove probability
-12. **Update `src/contexts/XPContext.tsx`** - Wire toast container
-13. **Test XP flow end-to-end** - Workout → XP gain → Level-up → Toast
-
-**Rationale:**
-- Phase 1: No dependencies, can be done in parallel
-- Phase 2: Needs Phase 1 types/functions
-- Phase 3: Needs Phase 2 context/hooks
-- Phase 4: Final integration after all components exist
+**Rationale:** Bottom-up approach allows testing each piece in isolation before integration. RankShowcase can be developed/tested independently using mock props.
 
 ## Sources
 
-**Fitness App Gamification Patterns:**
-- [Top Gamified Fitness Apps of 2025](https://www.workoutquestapp.com/top-gamified-fitness-apps-of-2025)
-- [Fitocracy Alternatives (2025)](https://the-titan-life.com/2025/09/04/fitocracy-alternatives-in-2025-the-best-apps-for-gamified-fitness/)
-- [Strava App Engagement Strategies](https://www.strivecloud.io/blog/app-engagement-strava)
-- [Top 10 Fitness Gamification Examples (2026)](https://yukaichou.com/gamification-examples/fitness-gamification-examples/)
+- Existing codebase architecture (`src/pages/Achievements.tsx`, `src/hooks/useXP.ts`)
+- DOOM UI patterns (`src/index.css` achievement-card styles)
+- React Context patterns (`src/contexts/AchievementContext.tsx`)
+- XP data structures (`src/lib/ranks.ts`, `src/types/index.ts`)
 
-**DOOM Lore & Ranks:**
-- [DOOM Marine Wiki](https://doom.fandom.com/wiki/Marine)
-- [Doomguy Rank Discussion](https://www.doomworld.com/forum/topic/60758-doomguys-rank/)
-- [DOOM Slayer Wiki](https://doom.fandom.com/wiki/Doom_Slayer)
-
-**UI/UX Design Patterns:**
-- [Fitness App Design Best Practices](https://www.zfort.com/blog/How-to-Design-a-Fitness-App-UX-UI-Best-Practices-for-Engagement-and-Retention)
-- [Custom Progress Bar in React (2026)](https://thelinuxcode.com/how-i-build-a-custom-progress-bar-component-in-react-2026-edition/)
-- [Material UI React Progress Components](https://mui.com/material-ui/react-progress/)
+---
+*Architecture research for: Rank Showcase Integration*
+*Researched: 2026-03-26*
+*Confidence: HIGH (based on existing codebase patterns)*
