@@ -1,5 +1,23 @@
 # Milestones
 
+## v1.2 Rank Showcase (Shipped: 2026-03-26)
+
+**Phases completed:** 1 phase (8), 2 plans, 3 tasks
+**Timeline:** Mar 26, 2026 (<1 day execution sprint)
+**Code changes:** 4 files modified (+207 lines, -3 lines)
+**Total codebase:** 7,323 lines TypeScript
+**Git range:** 849d725 → 31a4edb
+
+**Key accomplishments:**
+- Rank Progression Ladder — Vertical display of all 15 DOOM military ranks on Achievements page with gold-glowing current rank, dimmed locked ranks, and progress indicator
+- E2E Test Infrastructure — 7 test stubs covering all RANK requirements with 3 helper functions for automated verification
+- CSS Reuse Pattern — Zero new CSS classes by reusing .achievement-card and .god-mode-glow for instant visual consistency
+- Guest User Handling — "SIGN IN TO UNLOCK RANK PROGRESSION" message instead of empty state for better conversion funnel
+
+**Requirements coverage:** 7/7 satisfied (100%)
+
+---
+
 ## v1.0 Enhanced Analytics (Shipped: 2026-02-25)
 
 **Phases completed:** 3 phases (1-3), 8 plans, 39 tasks

@@ -2,7 +2,7 @@
 
 ## What This Is
 
-Rep & Tear is a DOOM-themed workout tracker with enhanced analytics and XP progression. The app gamifies fitness through visual feedback (DoomGuy face states), achievements, streak tracking, XP earning, and military rank progression. Version 1.1 added a complete XP and leveling system with 15 DOOM military ranks, animated celebrations, and friend rank visibility.
+Rep & Tear is a DOOM-themed workout tracker with enhanced analytics, XP progression, and rank visualization. The app gamifies fitness through visual feedback (DoomGuy face states), achievements, streak tracking, XP earning, military rank progression, and a rank showcase ladder on the Achievements page.
 
 ## Core Value
 
@@ -49,9 +49,18 @@ Users can visualize and understand their complete workout history with clear, me
 - ✓ XP breakdown modal (base + streak + achievement) — v1.1
 - ✓ Probability section removed from Tracker — v1.1
 
+**Rank Showcase (v1.2 - Shipped 2026-03-26):**
+- ✓ All 15 DOOM military ranks visible on Achievements page — v1.2
+- ✓ Rank details (name, tagline, XP threshold) per card — v1.2
+- ✓ Current rank highlighted with gold border and pulsing glow — v1.2
+- ✓ Earned ranks full opacity, unearned dimmed with grayscale — v1.2
+- ✓ Rank showcase placed above achievements section — v1.2
+- ✓ Progress indicator ("+XXX XP to next rank") — v1.2
+- ✓ Guest users see "SIGN IN TO UNLOCK" message — v1.2
+
 ### Active
 
-(No active milestone — run `/gsd:new-milestone` to define next)
+(No active milestone — run `/gsd:new-milestone` to start next)
 
 ### Out of Scope
 
@@ -73,12 +82,13 @@ Users can visualize and understand their complete workout history with clear, me
 
 ## Context
 
-**Shipped v1.1 (2026-02-26):**
-- 4 phases complete (8 plans, 16 tasks)
-- 17 files modified (+1,577 lines, -86 lines)
-- 7,303 total lines of TypeScript
-- Same-day execution sprint
-- 13/13 requirements satisfied (100%)
+**Shipped v1.2 (2026-03-26):**
+- 1 phase complete (2 plans, 3 tasks)
+- 4 files modified (+207 lines, -3 lines)
+- 7,323 total lines of TypeScript
+- Sub-hour execution sprint
+- 7/7 requirements satisfied (100%)
+- 3 milestones shipped total (v1.0, v1.1, v1.2)
 
 **Tech Stack:**
 - React 19.2 + TypeScript
@@ -129,6 +139,10 @@ Users can visualize and understand their complete workout history with clear, me
 | Bottom sheet modal for XP breakdown | Better mobile UX than full-screen, familiar gesture pattern | ✓ Good |
 | 750ms debounce for Firestore XP writes | Balances UI responsiveness vs quota usage | ✓ Good |
 | Batch rank denormalization on rank change only | Avoids unnecessary writes on every XP update | ✓ Good |
+| Single phase for 7 requirements | All requirements cluster into one coherent feature | ✓ Good |
+| CSS reuse (.achievement-card + .god-mode-glow) | Zero new CSS, instant visual consistency | ✓ Good |
+| Presentational RankShowcase component | Props drilling keeps it simple and testable, no Firebase deps | ✓ Good |
+| Guest sign-in message over empty state | Better conversion funnel, actionable CTA | ✓ Good |
 
 ---
-*Last updated: 2026-02-26 after v1.1 milestone*
+*Last updated: 2026-03-26 after v1.2 milestone completion*

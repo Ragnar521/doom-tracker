@@ -1,45 +1,40 @@
-# Feature Landscape: XP & Level Systems
+# Feature Landscape: Rank Showcase
 
-**Domain:** Gamified fitness progression with military rank themes
-**Researched:** February 26, 2026
-**Context:** Adding XP and military rank progression to existing DOOM-themed workout tracker
+**Domain:** Rank/Level Showcase Display in Gamification Apps
+**Researched:** 2026-03-26
+**Context:** Adding rank showcase display to Achievements page for existing XP system (v1.1)
 
 ---
 
 ## Table Stakes
 
-Features users expect from XP & Level systems. Missing = system feels incomplete.
+Features users expect. Missing = product feels incomplete.
 
-| Feature | Why Expected | Complexity | Notes |
-|---------|--------------|------------|-------|
-| **Visual XP bar** | Standard in all gamified apps - users need to see progress toward next level | Low | Must be persistent/visible on main screen |
-| **Current level/rank display** | Users need to know their status at a glance | Low | Prominent placement (avatar area, header) |
-| **XP awarded for workouts** | Core loop - actions must yield tangible rewards | Low | Base mechanic: workouts → XP |
-| **Level-up celebration** | Universal pattern - success must be celebrated | Medium | Toast + confetti (already exists) |
-| **Clear XP-to-level formula** | Users need to understand "how much more" to next level | Low | Show current/required XP numerically |
-| **Persistent progression** | Levels never reset - permanent achievement | Low | Store in Firestore like achievements |
-| **Animated XP bar fill** | Standard feedback - users expect to see bar move | Medium | Animation on XP gain (not just static) |
-| **Multiple rank tiers** | Single progression feels shallow - need depth | Medium | 10-15 ranks minimum for longevity |
-| **Retroactive XP** | Existing workouts should count - respect user history | Medium | Calculate from existing workout data |
+| Feature | Why Expected | Complexity | Notes | Dependencies |
+|---------|--------------|------------|-------|--------------|
+| **All ranks visible in vertical list** | Standard in competitive games (VALORANT, Overwatch, Mobile Legends) - users expect to see the full progression ladder | Low | Data already exists in RANKS array (15 ranks) | None (RANKS array exists) |
+| **XP threshold displayed per rank** | Core gamification pattern - users need to know what they're working toward (GamiPress, Level Up XP, brainCloud all show thresholds) | Low | Already defined in RANKS array as xpThreshold | None (data exists) |
+| **Current rank highlighted/emphasized** | Universal pattern across all ranking systems - users must quickly identify "you are here" | Medium | Needs visual treatment (glow, border, different background) | useXP hook for current rank data |
+| **Earned ranks fully visible** | Badge systems show completed achievements fully visible (BadgeOS, Steam) | Low | Ranks where totalXP >= xpThreshold | useXP hook for totalXP |
+| **Unearned ranks dimmed/grayed** | Standard locked state pattern - reduces opacity or saturation to show "not yet achieved" (BadgeOS uses reduced opacity for unearned badges) | Low | CSS opacity/grayscale for locked ranks | None (CSS only) |
+| **Rank name + tagline** | Already exists in RANKS array - users expect to see both title and flavor text | Low | Both fields already defined in data | None (data exists) |
+| **Placement above achievements** | Users expect rank/level systems to be prominent - should be first thing they see on glory/achievements page | Low | Component ordering in Achievements.tsx | None (layout change) |
 
 ---
 
 ## Differentiators
 
-Features that set this XP system apart. Not expected, but valuable.
+Features that set product apart. Not expected, but valued.
 
-| Feature | Value Proposition | Complexity | Notes |
-|---------|-------------------|------------|-------|
-| **DOOM military ranks** | Authentic DOOM theme (Marine → Doomguy progression) instead of generic levels | Low | Unique branding, stronger narrative |
-| **Streak XP multipliers** | Rewards consistency - amplifies existing streak system | Medium | 1.5x XP for 4+ week streaks, 2x for 12+ |
-| **Achievement XP bonuses** | Integrates with existing 18-achievement system | Low | Each achievement unlock grants bonus XP |
-| **Week status bonuses** | Sick/vacation weeks still earn "survival XP" to stay engaged | Medium | Prevents punishment for life events |
-| **Comeback XP boost** | Extra XP for returning after missed weeks | Medium | Encourages re-engagement after lapses |
-| **Face state XP scaling** | God Mode weeks (5-7 workouts) earn more XP than minimum | Medium | Rewards exceeding targets |
-| **Friend rank visibility** | Squad members see each other's ranks on leaderboard | Low | Leverages existing friend system |
-| **Historical rank timeline** | Show rank-ups in Dashboard timeline view | Medium | Integrates with v1.0 analytics timeline |
-| **Secret rank unlocks** | Hidden ranks beyond visible progression (like hidden achievements) | High | Legendary/Elite ranks for super users |
-| **XP breakdown on hover/tap** | Tooltip shows "50 XP from workouts, 25 XP bonus from streak" | Medium | Transparency builds trust |
+| Feature | Value Proposition | Complexity | Notes | Dependencies |
+|---------|-------------------|------------|-------|--------------|
+| **Color-coded rank tiers with progression theme** | DOOM aesthetic + visual hierarchy - gray (starting ranks) → green (learning) → blue (veteran) → purple (elite) → yellow (sentinel) → orange (crusader) → red (slayer) → gold (max rank) | Low | Colors already defined in RANKS array, matches DOOM lore progression (UAC marines → Night Sentinels → Argent warriors) | None (data exists in RANKS array) |
+| **Rank abbreviations (PVT, CPL, SGT, etc.)** | Space-saving for compact displays, military authenticity | Low | Already implemented in abbreviateRank() function | None (function exists) |
+| **"Progress to next rank" indicator** | Shows XP needed to advance from current rank - motivates grinding | Medium | Calculate next rank threshold minus current XP, display as "+XXX XP to [Next Rank]" | getXPToNextRank() function exists |
+| **Golden glow effect on max rank (Doom Slayer)** | Special treatment for ultimate achievement - already used for god mode face, reinforces prestige | Low | CSS glow animation (similar to .god-mode-glow class) | None (CSS pattern exists) |
+| **Scrollable rank ladder with "scroll to current rank"** | For mobile optimization - immediately jump to user's position in long list | Medium | Auto-scroll on mount to current rank, smooth scroll behavior | None (JS scrollIntoView) |
+| **Rank number display (1-15)** | Shows position in hierarchy - "10. SENTINEL" makes progression tangible | Low | Iterate with index, display rank.id | None (data exists) |
+| **Compact mobile-optimized cards** | 3-line cards (name, tagline, XP) fit 5-6 ranks on screen without scrolling | Low | Responsive design, small text (10-12px name, 8px details) | None (CSS only) |
 
 ---
 
@@ -49,372 +44,524 @@ Features to explicitly NOT build.
 
 | Anti-Feature | Why Avoid | What to Do Instead |
 |--------------|-----------|-------------------|
-| **XP decay/loss** | Punishment mechanics reduce motivation, contradict fitness philosophy | Keep XP and levels permanent - only move forward |
-| **Pay-to-level** | Cheapens achievement, breaks core workout → XP loop | Earn XP only through actual fitness actions |
-| **Competitive XP leaderboards** | Favors high-volume users, discourages beginners | Use rank tiers for status, not raw XP comparison |
-| **Daily XP requirements** | Creates anxiety, punishes inconsistency we already track via streaks | Let users progress at their own pace |
-| **Level-gated features** | Core app must be fully functional for all users | Use ranks for status/bragging only, not access control |
-| **Complex XP sources** | Don't add workout types, reps, sets, duration tracking | Keep simple: workouts + streaks + achievements only |
-| **XP gifting/trading** | Opens abuse vectors, complicates solo-focused app | XP is personal, non-transferable |
-| **Weekly XP caps** | Limits engaged users, contradicts "more is better" fitness ethos | Let power users earn unlimited XP |
-| **Prestige/reset system** | DOOM 2016 had this, but confusing for fitness context | Single continuous progression (1-50+ ranks) |
-| **Separate mobile/web XP pools** | Same user, same progression across all devices | Firebase ensures single source of truth |
+| **Rank icons/badges for each tier** | Would require 15 new icon assets (not in doom-assets/ folder), significant design work, project uses text-based ranks everywhere else (Tracker XP bar, Squad leaderboard) | Use color-coded text with taglines - already established pattern, consistent with existing UI |
+| **Interactive rank cards (click to expand details)** | Over-engineering a simple display - users just want to see the ladder, not dig into each rank's backstory | Static list with all info visible at once - faster scanning, simpler implementation |
+| **Individual rank animations on scroll** | Performance cost, visual noise, distracts from current rank highlight | Single animation on current rank (glow effect) - focuses attention where it matters |
+| **"Days until next rank" prediction** | Requires complex calculation based on recent XP rate, misleading if user changes workout frequency | Show XP needed in absolute terms - clearer, no false promises |
+| **Rank unlock dates/timestamps** | Firestore doesn't store historical rank changes, would need new collection + migration, adds complexity for minimal value | Show only current rank - focus on present status, not historical audit trail |
+| **Collapsible rank sections (earned vs unearned)** | Hides information user came to see, extra clicks, breaks "see full ladder" expectation | Always show all 15 ranks in one scrollable list - simple, complete view |
+| **Rank comparison with friends** | Feature creep - Squad page already shows friend ranks in leaderboard, would duplicate existing functionality | Link to Squad page if user wants to compare ranks - avoid redundancy |
+| **XP progress bars per rank** | Clutters UI, adds visual noise - current rank progress already shown on Tracker page XP bar | Show XP threshold as static text (e.g., "11,000 XP") - cleaner, simpler |
 
 ---
 
 ## Feature Dependencies
 
 ```
-XP System Foundation
-├── XP calculation engine → stores XP in Firestore
-├── Rank calculation → derives rank from total XP
-└── XP bar component → displays progress
-
-Level-Up Celebration
-├── XP System Foundation (prerequisite)
-├── Existing confetti animation (reuse)
-└── Toast notification system (reuse)
-
-Streak XP Multipliers
-├── XP System Foundation (prerequisite)
-└── Existing streak calculation (useStats.ts)
-
-Achievement XP Bonuses
-├── XP System Foundation (prerequisite)
-└── Existing achievement system (AchievementContext.tsx)
-
-Retroactive XP Grant
-├── XP calculation engine (prerequisite)
-├── useAllWeeks.ts (reads all historical workouts)
-└── One-time migration function
-
-Friend Rank Visibility
-├── Rank calculation (prerequisite)
-└── Existing Squad system (useFriends.ts)
-
-Dashboard Rank Timeline
-├── Rank calculation (prerequisite)
-└── Existing Dashboard timeline (v1.0 analytics)
+Rank Showcase Component
+  ├─ RANKS array (lib/ranks.ts) ✓ EXISTS
+  ├─ getRankForXP(totalXP) ✓ EXISTS
+  ├─ getNextRank(currentRankId) ✓ EXISTS
+  ├─ getXPToNextRank(totalXP, currentRank) ✓ EXISTS
+  ├─ useXP hook (totalXP, currentRank) ✓ EXISTS
+  ├─ Current rank highlighting → NEW CSS (glow/border)
+  ├─ Locked rank styling → NEW CSS (opacity/grayscale)
+  └─ Placement on Achievements page → MODIFY Achievements.tsx
 ```
 
 ---
 
 ## MVP Recommendation
 
-### Phase 1: Core XP Loop (Must Have)
-1. **XP calculation engine** - Workouts earn XP, store in Firestore
-2. **Rank derivation** - Map total XP → military rank (10 ranks: Private → Doomguy)
-3. **XP bar UI** - Persistent bar on Tracker page showing progress to next rank
-4. **Level-up celebration** - Reuse existing toast + confetti for rank-ups
-5. **Retroactive XP** - Calculate and grant XP for all historical workouts on first load
+### Phase 1: Core Showcase (Minimum Viable)
 
-**Rationale:** Establishes base loop (workout → XP → rank → celebration). Users see immediate value.
+**Prioritize (Table Stakes):**
+1. Vertical list of all 15 ranks (name, tagline, XP threshold)
+2. Current rank highlighted with visual treatment (border + subtle glow)
+3. Earned ranks normal opacity, unearned ranks dimmed (50% opacity + grayscale)
+4. Placement above achievement categories on Achievements page
+5. Use existing rank colors from RANKS array for text
 
-### Phase 2: Depth & Integration (Should Have)
-6. **Face state XP scaling** - 3 workouts = 30 XP, 4 = 50 XP, 5+ = 100 XP (non-linear rewards)
-7. **Achievement XP bonuses** - Unlock achievement → instant +100 XP boost
-8. **XP breakdown display** - Show "this week earned: X base + Y bonus"
-9. **Friend rank visibility** - Add rank badges to Squad leaderboard
-10. **Animated XP bar** - Smooth fill animation when XP increases
+**Rationale:** Establishes complete rank visibility. Users see where they are and what's ahead.
 
-**Rationale:** Integrates with existing systems (achievements, friends, face states). Makes XP feel connected.
+### Phase 2: Polish (Add Differentiators)
 
-### Phase 3: Advanced Rewards (Nice to Have)
-11. **Streak XP multipliers** - 4+ week streak = 1.5x XP, 12+ = 2x XP
-12. **Comeback XP boost** - First week back after 3+ missed weeks earns 2x XP
-13. **Week status bonuses** - Sick/vacation weeks earn small "survival XP"
-14. **Historical rank timeline** - Show rank-up events in Dashboard timeline
-15. **Secret elite ranks** - Hidden ranks 11-15 for ultra-dedicated users (1000+ workouts)
+**Add after core works:**
+1. "Progress to next rank" indicator (+XXX XP to [Next Rank])
+2. Auto-scroll to current rank on page load (mobile optimization)
+3. Special golden glow for Doom Slayer (max rank) when earned
+4. Rank number display (1-15) for clear hierarchy
 
-**Rationale:** Adds long-term engagement hooks. Not essential for v1 launch.
+**Rationale:** Enhances UX without adding complexity. Uses existing utilities.
 
 ### Defer to Future
-- Detailed XP breakdown tooltips (Phase 3 polish)
-- Custom rank icons beyond basic tier system (art/design heavy)
-- Rank-based profile customization (scope creep)
-- Seasonal rank challenges (requires new systems)
+- Rank icons/badges → Requires asset creation, not critical for MVP
+- Rank unlock timestamps → Requires data migration, low value
+- Any interactive features → Keep it simple, static display
+- Detailed rank lore/descriptions → Out of scope, tagline is sufficient
 
 ---
 
-## Progression Design Recommendations
+## Visual Design Patterns (From Research)
 
-### XP Curve Analysis
+### Current Rank Highlighting
 
-**Research findings:**
-- **Linear progression** (10, 20, 30, 40 XP per level) is too simplistic - early levels feel slow, late levels too fast
-- **Exponential progression** (each level requires X × 1.4 more XP) is industry standard - creates achievable early ranks, aspirational late ranks
-- **Hybrid approach** balances early accessibility with long-term goals
+**Common Patterns:**
+- **Border + Background:** League of Legends uses thick border + different background color
+- **Glow Effect:** Many mobile games use subtle glow/shadow to emphasize current tier
+- **Size Difference:** Some systems make current rank slightly larger (avoid - breaks grid alignment)
+- **Animation:** Pulsing glow or subtle scale animation (subtle if used)
 
-**Recommended formula:** `XP_required = base × (level ^ exponent)`
-- Base: 100 XP
-- Exponent: 1.3
-- Results: Level 1→2 = 100 XP, Level 5→6 = 420 XP, Level 10→11 = 1,357 XP
+**Recommendation for Rep & Tear:**
+- Thick gold border (2px) matching doom-gold theme
+- Subtle golden glow (box-shadow with doom-gold color, less intense than god-mode-glow)
+- Slightly brighter background (bg-gray-800 vs bg-gray-900 for locked)
+- Small indicator text "CURRENT RANK" in tiny font (8px) above rank name
 
-**Alternative (simpler):** Stepped linear increases
-- Ranks 1-5: +100 XP per rank (100, 200, 300, 400, 500)
-- Ranks 6-10: +200 XP per rank (700, 900, 1100, 1300, 1500)
-- Ranks 11-15: +500 XP per rank (2000, 2500, 3000, 3500, 4000)
+### Locked vs Unlocked States
 
-### XP Earning Rates
+**Common Patterns:**
+- **Opacity Reduction:** BadgeOS uses reduced opacity (50-60%) for unearned badges
+- **Grayscale Filter:** Steam/gaming badges often show locked badges in grayscale + low opacity
+- **Lock Icon Overlay:** Some systems add padlock icon (avoid - clutters minimal DOOM aesthetic)
+- **Dashed Border:** Indicates "not yet earned" (alternative to opacity)
 
-**Base workout XP (per week):**
-- 1 workout = 5 XP (below target, minimal reward)
-- 2 workouts = 15 XP (below target, slight increase)
-- 3 workouts = 30 XP (target met, good reward)
-- 4 workouts = 50 XP (ideal target, bonus)
-- 5 workouts = 80 XP (god mode, significant bonus)
-- 6-7 workouts = 100 XP (ultra god mode, max weekly)
+**Recommendation for Rep & Tear:**
+- **Locked ranks:** `opacity-50 grayscale` (50% opacity + CSS grayscale filter)
+- **Earned ranks:** Full color, normal opacity, solid border
+- **Current rank:** Full color, doom-gold border + glow
+- **No lock icons** (keep minimal DOOM retro aesthetic)
 
-**Rationale:** Non-linear scaling encourages exceeding minimum. Matches existing face state system.
+### Layout Structure
 
-**Bonus XP sources:**
-- Achievement unlock: +100 XP (18 achievements = 1,800 total possible)
-- 4-week streak: 1.5x multiplier on weekly XP
-- 12-week streak: 2.0x multiplier on weekly XP
-- Comeback week (after 3+ missed): 2.0x multiplier (one-time)
-- Sick/vacation week: +10 XP (participation trophy)
+**Vertical Ladder Pattern (Industry Standard):**
+```
+[RANK SHOWCASE HEADER]
+┌─────────────────────────┐
+│ 15. Doom Slayer (locked)│ ← Top rank first (ascending order feels more aspirational)
+│     100,000 XP          │
+├─────────────────────────┤
+│ 14. Slayer (locked)     │
+│     50,000 XP           │
+├─────────────────────────┤
+│ ...                     │
+├═════════════════════════┤
+│ 3. Sergeant (CURRENT) ✓ │ ← Highlighted with glow
+│    300 XP               │
+├═════════════════════════┤
+│ 2. Corporal (earned)    │
+│    100 XP               │
+├─────────────────────────┤
+│ 1. Private (earned)     │
+│    0 XP                 │
+└─────────────────────────┘
+```
 
-### Rank Tier Structure
+**Design Decision: Highest Rank First (Doom Slayer → Private)**
+- **Pros:** Users see aspirational tiers immediately, mobile users see "goal" without scrolling
+- **Cons:** Feels "backwards" compared to ascending XP
+- **Alternative:** Private → Doom Slayer (ascending order matches XP growth)
+- **Recommendation:** **Descending order (15→1)** - Most competitive games (VALORANT, Overwatch) show highest rank first
 
-**Recommended military ranks (DOOM-themed):**
+### Information Density
 
-| Rank # | Title | Total XP Needed | Weeks to Reach* | Theme |
-|--------|-------|-----------------|-----------------|-------|
-| 1 | **Private** | 0 | 0 (starting) | New recruit |
-| 2 | **Corporal** | 100 | 3-4 weeks | Basic training complete |
-| 3 | **Sergeant** | 300 | 7-10 weeks | Squad leader |
-| 4 | **Lieutenant** | 600 | 15-20 weeks | Officer rank |
-| 5 | **Captain** | 1,000 | 25-30 weeks | Experienced marine |
-| 6 | **Major** | 1,500 | 35-45 weeks | Elite soldier |
-| 7 | **Colonel** | 2,200 | 50-65 weeks | Veteran commander |
-| 8 | **General** | 3,000 | 70-90 weeks | High command |
-| 9 | **Doomguy** | 4,000 | 95-120 weeks | Legendary hero |
-| 10 | **Doom Slayer** | 5,500 | 130-160 weeks | Transcendent (hidden) |
+**Per Rank Card (Mobile-First):**
+```
+┌──────────────────────────┐
+│ 10. SENTINEL             │ ← Rank number + name (color-coded)
+│ Argent warrior           │ ← Tagline (gray text, smaller)
+│ 11,000 XP                │ ← Threshold (doom-gold if earned, gray if locked)
+└──────────────────────────┘
+```
 
-*Assuming consistent 3-4 workout weeks without bonuses
+**Compact card (3 lines), scannable, uses existing data, no new assets needed.**
 
-**Rank naming rationale:**
-- Starts with realistic military ranks (Private → General)
-- Culminates in DOOM-specific titles (Doomguy, Doom Slayer)
-- "Doom Slayer" as aspirational final rank creates long-term goal (2-3 years of consistency)
-
-### Time-to-Rank Estimates
-
-**For a user with 3-4 workouts/week (30-50 XP/week):**
-- Rank 2 (Corporal): 2-3 weeks
-- Rank 5 (Captain): 6 months
-- Rank 9 (Doomguy): 2 years
-- Rank 10 (Doom Slayer): 3+ years
-
-**For a power user with 5-7 workouts/week + streaks (100-150 XP/week):**
-- Rank 2 (Corporal): 1 week
-- Rank 5 (Captain): 2-3 months
-- Rank 9 (Doomguy): 8-10 months
-- Rank 10 (Doom Slayer): 1.5 years
-
-**Design insight:** System rewards both consistency (achievable ranks for average users) and dedication (faster progression for power users).
-
----
-
-## UX Pattern Recommendations
-
-### XP Bar Display Patterns
-
-**Industry standards:**
-- **Persistent visibility** - XP bar always visible on main screen (not hidden in menu)
-- **Numerical feedback** - Show both "current/required" (e.g., "450 / 1000 XP") and percentage
-- **Animated fill** - Bar fills smoothly when XP earned, not instant jump
-- **Color coding** - Empty portion subtle gray, filled portion vibrant (use doom-gold)
-- **Sound feedback** - Subtle "ding" when XP earned (respect user settings)
-
-**Mobile-specific considerations:**
-- **Thumb-friendly zone** - Place XP bar in upper third of screen (out of tap zone)
-- **Compact layout** - Horizontal bar, not circular (fits mobile better)
-- **Progress segments** - Show notches/segments for visual milestones
-
-**Recommended placement for Rep & Tear:**
-- Below DoomGuy face, above week tracker
-- Replaces "Probability to hit target" stat (requirement to remove)
-- Format: `[RANK: SERGEANT] [████████░░] 780/1000 XP`
-
-### Level-Up Celebration Patterns
-
-**UX best practices:**
-- **Frequency check (FEAT framework)** - Celebrate milestones only, not common actions
-  - Early ranks (1-3): Celebrate every rank (user needs encouragement)
-  - Mid ranks (4-7): Celebrate every rank (still exciting)
-  - Late ranks (8-10): Celebrate with extra intensity (rare achievement)
-- **Emotion match** - Big celebration for big achievement (confetti already implemented)
-- **Motion sensitivity** - Check `prefers-reduced-motion` before triggering confetti
-- **Multi-modal feedback** - Toast message + confetti + optional sound
-
-**Recommended implementation:**
-- Reuse existing `AchievementToast` component with rank icon
-- Reuse existing `Confetti` component
-- Message format: "RANK UP! You are now a [SERGEANT]!"
-- Trigger on next app load after rank-up (not mid-workout)
-
-### XP Transparency Patterns
-
-**User trust requires clarity:**
-- **XP breakdown** - Show where XP came from ("50 base + 25 streak bonus")
-- **Next level preview** - Show XP required for next rank
-- **Progress indicators** - Use trend arrows (↑ faster than average, ↓ slower)
-- **Historical view** - Show rank-up events in timeline (integrates with v1.0 Dashboard)
-
-**Recommended UI additions:**
-- Tooltip/modal on XP bar tap: "This week: +50 XP (4 workouts + streak bonus)"
-- Settings page stats: "Total XP earned: 1,245 | Rank-ups: 5 | Next rank in: 155 XP"
+**Optional 4th line for current rank only:**
+```
+┌──────────────────────────┐
+│ CURRENT RANK             │ ← Small label (8px, doom-gold)
+│ 3. SERGEANT              │ ← Rank number + name (color-coded)
+│ Getting stronger         │ ← Tagline (gray text)
+│ 300 XP                   │ ← Threshold (doom-gold)
+└──────────────────────────┘
+```
 
 ---
 
-## Integration with Existing Features
+## User Scenarios
 
-### Face State System Integration
-**Current system:** 7 face states (critical → godmode) based on workouts/week
-**XP integration:** Face state determines XP multiplier
-- Critical (0): 0 XP
-- Hurt (1): 5 XP
-- Damaged (2): 15 XP
-- Healthy (3): 30 XP (target)
-- Strong (4): 50 XP (ideal)
-- Godmode (5): 80 XP
-- Ultra Godmode (6-7): 100 XP
+### Scenario 1: New User (Private, 50 XP)
+**Expectation:** See where they are, what's next
+- All ranks visible (Doom Slayer → Private)
+- Private highlighted as current rank
+- Corporal (100 XP) is next visible target ("+50 XP to Corporal" indicator)
+- Only Private is in full color, rest are dimmed
+- Auto-scrolls to bottom (Private) on page load
 
-**Benefit:** Reinforces existing gameplay loop - users already chase god mode faces
+### Scenario 2: Mid-Tier User (Captain, 1,500 XP)
+**Expectation:** See progress within military ranks, what's ahead
+- All ranks visible
+- Captain highlighted as current rank
+- Ranks 1-5 (Private → Captain) in full color (earned)
+- Ranks 6-15 (Major → Doom Slayer) dimmed (locked)
+- Auto-scrolls to Captain (middle of list) on page load
+- Can see "next up" is Major (2,000 XP) with "+500 XP to Major" indicator
 
-### Achievement System Integration
-**Current system:** 18 achievements (streak, performance, special, hidden)
-**XP integration:** Each achievement unlock grants +100 XP bonus
-- Total possible from achievements: 1,800 XP
-- Equivalent to ~12-18 weeks of workouts (significant boost)
+### Scenario 3: End-Game User (Doom Slayer, 100K+ XP)
+**Expectation:** Show off max rank achievement
+- All ranks in full color (all earned)
+- Doom Slayer at top highlighted with special golden glow (ultra-god-glow intensity)
+- No "next rank" indicator (already at max)
+- Message: "MAX RANK ACHIEVED - RIP & TEAR!"
+- Pride in seeing full ladder completed
 
-**Benefit:** Gives achievements tangible progression value beyond badges
+### Scenario 4: Mobile User (Any Rank)
+**Expectation:** Quick scan, no excessive scrolling
+- Compact cards (3 lines each, ~40px height)
+- Auto-scroll to current rank (lands in view immediately)
+- Smooth scroll to top/bottom (highest/lowest ranks)
+- Touch-friendly spacing (no accidental taps)
+- 5-6 ranks visible on screen (iPhone 12 viewport: ~667px height)
 
-### Streak System Integration
-**Current system:** Tracks current streak and longest streak (3+ workouts/week)
-**XP integration:** Active streaks multiply weekly XP
-- 1-3 week streak: 1.0x (base)
-- 4-11 week streak: 1.5x
-- 12+ week streak: 2.0x
+---
 
-**Example:** 4 workouts (50 base XP) × 1.5 streak bonus = 75 XP total
+## Integration Points
 
-**Benefit:** Rewards existing behavior we already track, no new data needed
+### Existing Components to Modify
 
-### Squad System Integration
-**Current system:** Friend codes, weekly leaderboard, workout visibility
-**XP integration:** Show rank badges next to usernames
-- Leaderboard sorting option: "By Rank" vs "By Workouts"
-- Profile displays: "Captain (Rank 5)"
+**1. Achievements.tsx** (src/pages/Achievements.tsx)
+- Add `<RankShowcase />` component before achievement categories section
+- Update page header to "GLORY & RANKS" or keep separate "RANK PROGRESSION" section
+- Maintain existing doom-panel styling for consistency
 
-**Benefit:** Social comparison motivates progression
+**Current structure:**
+```tsx
+<div className="space-y-3">
+  {/* Header */}
+  <div className="doom-panel p-3 text-center">...</div>
 
-### Dashboard Timeline Integration
-**Current system:** Expandable year/month view with workout history
-**XP integration:** Mark rank-up events in timeline
-- Timeline entry: "Week 24, 2026 - Ranked up to Sergeant! 🎖️"
-- Monthly summary: "2 rank-ups this month"
+  {/* Achievement Categories */}
+  {CATEGORY_ORDER.map(category => ...)}
+</div>
+```
 
-**Benefit:** Celebrates milestones in historical view
+**New structure:**
+```tsx
+<div className="space-y-3">
+  {/* Header */}
+  <div className="doom-panel p-3 text-center">...</div>
+
+  {/* NEW: Rank Showcase */}
+  <RankShowcase currentRank={currentRank} totalXP={totalXP} />
+
+  {/* Achievement Categories */}
+  {CATEGORY_ORDER.map(category => ...)}
+</div>
+```
+
+### Existing Hooks to Use
+
+**useXP Hook** (src/hooks/useXP.ts) - Already provides:
+- `totalXP: number` - Total XP earned
+- `currentRank: Rank` - Current rank object
+- `xpToNextRank: number` - XP needed to next rank
+- **No changes needed** - just consume in new component
+
+### Existing Utilities to Use
+
+**ranks.ts** (src/lib/ranks.ts) - Already provides:
+- `RANKS: Rank[]` - All 15 ranks with xpThreshold, color, tagline
+- `getRankForXP(totalXP)` - Get rank for given XP
+- `getNextRank(currentRankId)` - Get next rank in progression
+- `getXPToNextRank(totalXP, currentRank)` - Calculate XP to next rank
+- **No changes needed**
+
+---
+
+## New Component Structure
+
+### RankShowcase Component
+
+**File:** `src/components/RankShowcase.tsx`
+
+```typescript
+import { useRef, useEffect } from 'react';
+import { RANKS } from '../lib/ranks';
+import type { Rank } from '../types';
+
+interface RankShowcaseProps {
+  currentRank: Rank;
+  totalXP: number;
+  xpToNextRank: number;
+}
+
+export default function RankShowcase({ currentRank, totalXP, xpToNextRank }: RankShowcaseProps) {
+  const currentRankRef = useRef<HTMLDivElement>(null);
+
+  // Auto-scroll to current rank on mount
+  useEffect(() => {
+    if (currentRankRef.current) {
+      currentRankRef.current.scrollIntoView({
+        behavior: 'smooth',
+        block: 'center',
+      });
+    }
+  }, []);
+
+  // Render ranks in descending order (Doom Slayer → Private)
+  const ranksDescending = [...RANKS].reverse();
+
+  return (
+    <div className="doom-panel p-3">
+      {/* Header */}
+      <h2 className="text-doom-gold text-[12px] font-bold text-center mb-3">
+        RANK PROGRESSION
+      </h2>
+
+      {/* Rank List */}
+      <div className="space-y-2 max-h-[400px] overflow-y-auto">
+        {ranksDescending.map(rank => {
+          const isEarned = totalXP >= rank.xpThreshold;
+          const isCurrent = rank.id === currentRank.id;
+          const isMaxRank = rank.id === 15;
+
+          return (
+            <div
+              key={rank.id}
+              ref={isCurrent ? currentRankRef : null}
+              className={`
+                rank-card p-2 rounded border
+                ${isCurrent ? 'current-rank' : ''}
+                ${isEarned ? 'earned' : 'locked'}
+                ${isMaxRank && isEarned ? 'max-rank' : ''}
+              `}
+            >
+              {isCurrent && (
+                <p className="text-doom-gold text-[8px] mb-1">CURRENT RANK</p>
+              )}
+              <p className={`text-[10px] font-bold ${rank.color}`}>
+                {rank.id}. {rank.name.toUpperCase()}
+              </p>
+              <p className="text-gray-400 text-[8px]">{rank.tagline}</p>
+              <p className={`text-[8px] ${isEarned ? 'text-doom-gold' : 'text-gray-500'}`}>
+                {rank.xpThreshold.toLocaleString()} XP
+              </p>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Progress to Next Rank */}
+      {currentRank.id < 15 && (
+        <div className="mt-3 text-center">
+          <p className="text-gray-400 text-[8px]">
+            +{xpToNextRank.toLocaleString()} XP to{' '}
+            <span className="text-doom-gold">{RANKS[currentRank.id].name}</span>
+          </p>
+        </div>
+      )}
+
+      {currentRank.id === 15 && (
+        <div className="mt-3 text-center">
+          <p className="text-doom-gold text-[10px] font-bold">
+            MAX RANK ACHIEVED - RIP & TEAR!
+          </p>
+        </div>
+      )}
+    </div>
+  );
+}
+```
+
+**CSS additions to `src/index.css`:**
+
+```css
+/* Rank Showcase Styles */
+.rank-card {
+  transition: all 0.3s ease;
+}
+
+.rank-card.locked {
+  opacity: 0.5;
+  filter: grayscale(100%);
+  border-color: rgba(156, 163, 175, 0.3); /* gray-400 with opacity */
+}
+
+.rank-card.earned {
+  opacity: 1;
+  filter: none;
+  border-color: rgba(156, 163, 175, 0.5); /* gray-400 */
+}
+
+.rank-card.current-rank {
+  opacity: 1;
+  filter: none;
+  border-color: #d4af37; /* doom-gold */
+  background: rgba(31, 41, 55, 0.8); /* bg-gray-800 with opacity */
+  box-shadow: 0 0 10px rgba(212, 175, 55, 0.3); /* Subtle gold glow */
+}
+
+.rank-card.max-rank.earned {
+  box-shadow: 0 0 20px rgba(212, 175, 55, 0.6); /* Intense gold glow (like ultra-god-glow) */
+}
+
+/* Scrollbar styling for rank list */
+.rank-card::-webkit-scrollbar {
+  width: 4px;
+}
+
+.rank-card::-webkit-scrollbar-track {
+  background: rgba(17, 24, 39, 0.5); /* bg-gray-900 */
+}
+
+.rank-card::-webkit-scrollbar-thumb {
+  background: rgba(156, 163, 175, 0.5); /* gray-400 */
+  border-radius: 2px;
+}
+
+.rank-card::-webkit-scrollbar-thumb:hover {
+  background: rgba(212, 175, 55, 0.7); /* doom-gold */
+}
+```
 
 ---
 
 ## Technical Complexity Estimates
 
-### Low Complexity (1-2 days)
-- Store XP value in Firestore (`users/{uid}/profile/xp`)
-- Calculate rank from XP (simple lookup table)
-- Display static XP bar component
-- Display current rank badge
-- Reuse existing celebration components
+| Component | Complexity | Effort | Reason |
+|-----------|------------|--------|--------|
+| Rank list rendering | **LOW** | 1 hour | Map over RANKS array, basic conditional styling |
+| Current rank highlighting | **LOW** | 30 min | CSS border + box-shadow, conditional class |
+| Locked rank styling | **LOW** | 30 min | CSS opacity + filter: grayscale() |
+| Progress to next rank | **LOW** | 30 min | getXPToNextRank() already exists, simple string formatting |
+| Auto-scroll to current rank | **MEDIUM** | 1 hour | useEffect + useRef + scrollIntoView, test on mobile |
+| Golden glow for max rank | **LOW** | 15 min | Copy existing glow CSS, apply conditionally |
+| Integration into Achievements page | **LOW** | 30 min | Import component, pass props from useXP |
 
-### Medium Complexity (3-5 days)
-- Animated XP bar with smooth fill transitions
-- Retroactive XP calculation from historical workouts
-- Streak multiplier integration with existing streak logic
-- Achievement bonus integration with existing unlock system
-- Face state XP scaling based on workout count
-- Friend rank visibility in Squad page
+**Total Estimated Effort: 4-5 hours**
 
-### High Complexity (5-7+ days)
-- XP breakdown tooltip with source attribution
-- Dashboard timeline rank-up markers
-- Secret rank unlock logic
-- Comeback boost detection (requires analyzing gaps in workout history)
-- Week status bonus (sick/vacation) XP awards
-- Performance optimization for XP recalculation on data changes
+**Overall: LOW complexity** - Primarily a presentation layer feature using existing data/hooks. No new Firestore collections, no complex calculations, minimal new CSS.
 
 ---
 
-## Confidence Assessment
+## Edge Cases
 
-| Area | Confidence | Source Quality |
-|------|------------|----------------|
-| **XP curve formulas** | HIGH | Official game design resources, mathematical models |
-| **UX patterns** | HIGH | 2026 fitness app examples, gamification research |
-| **Military rank themes** | MEDIUM | DOOM 2016 echelon system found, but not canonical storyline ranks |
-| **Progression timelines** | MEDIUM | Calculated from formulas, but user behavior may vary |
-| **Integration complexity** | HIGH | Direct access to existing codebase confirms feasibility |
-| **User expectations** | MEDIUM | Based on competitor analysis, not user research |
+### No Authenticated User (Guest Mode)
+- **Issue:** useXP hook only works for authenticated users (guest users excluded from XP system per PROJECT.md)
+- **Solution:** Don't render RankShowcase component if user is guest (check `user` in Achievements.tsx before rendering)
+
+### Retroactive XP Calculation in Progress
+- **Issue:** User might see "Private" briefly while retroactive XP calculates (first load)
+- **Solution:** useXP hook already handles this (calculates on first load), show loading state if needed
+
+### Max Rank Achieved
+- **Issue:** No "next rank" to display
+- **Solution:** Show "MAX RANK ACHIEVED - RIP & TEAR!" message instead of "+XXX XP to [Next Rank]"
+
+### Very Low XP (0 XP, never worked out)
+- **Issue:** Still at Private, no progress to show
+- **Solution:** Perfectly valid state - highlight Private, show "100 XP to Corporal"
+
+### Mobile Scrolling Performance
+- **Issue:** 15 rank cards might cause scroll jank on older devices
+- **Solution:** Use `max-h-[400px]` container with overflow-y-auto, CSS will-change: transform for smooth scrolling
 
 ---
 
-## Open Questions for Roadmap
+## Performance Considerations
 
-1. **Rank granularity:** 10 ranks, 15 ranks, or 20 ranks? (Affects long-term engagement)
-2. **XP visibility:** Always show numerical XP, or just progress bar? (Simplicity vs transparency)
-3. **Retroactive strategy:** Grant all XP at once (big celebration) or gradually (avoid overwhelming)?
-4. **Sound design:** Add level-up sound effect? (Requires new audio asset)
-5. **Rank icons:** Use text-based ranks or design custom icons? (Design effort vs visual appeal)
-6. **Performance:** Recalculate XP on every workout toggle, or batch updates? (UX vs efficiency)
+### Render Performance
+- **List Size:** 15 ranks (small, no virtualization needed)
+- **Render Cost:** Minimal (static data, no API calls)
+- **Re-render Triggers:** Only when totalXP changes (workout added/removed)
+- **Optimization:** React.memo on RankShowcase if needed (likely not necessary)
+
+### Mobile Optimization
+- **Auto-scroll:** Uses native `scrollIntoView` (hardware accelerated)
+- **Compact Layout:** 3-line cards (~40px height), max 400px container
+- **Touch Targets:** No interactive elements (static display only), no accidental tap issues
+
+### Browser Compatibility
+- **CSS Grayscale:** Supported in all modern browsers (Chrome 18+, Firefox 35+, Safari 9.1+)
+- **scrollIntoView with smooth behavior:** Supported in modern browsers, fallback to instant scroll gracefully
+- **Box Shadow (glow):** Supported everywhere
+
+---
+
+## Accessibility Considerations
+
+### Color Alone
+- **Issue:** Don't rely only on color for locked/unlocked distinction
+- **Solution:** Use opacity + grayscale filter (multi-sensory encoding)
+
+### Text Contrast
+- **Locked Ranks:** 50% opacity may fail WCAG AA contrast ratio
+- **Acceptable:** Non-essential content (aspirational ranks), current/earned ranks meet standards
+
+### Semantic HTML
+- **Use:** `<ol>` (ordered list) with proper `<li>` items for rank cards
+- **Benefits:** Screen readers announce "List of 15 items" and position within list
+
+### Keyboard Navigation
+- **Out of Scope:** Static display, no interactive elements
+- **Future:** If adding rank detail modals, ensure keyboard accessible
 
 ---
 
 ## Sources
 
-### Fitness App XP Systems
-- [LEVELING: Fitness - Gamified Sports App](https://appleveling.com/en/)
-- [SYSTEM: Fitness Leveling on Google Play](https://play.google.com/store/apps/details?id=com.avillalva.systemfitnessleveling&hl=en)
-- [RepXP - Gamified Workout Tracker](https://repxp.app/)
-- [Level Up - Gamified Fitness App](https://apps.apple.com/us/app/level-up-gamified-fitness/id6754510739)
-- [Gamification For Fitness Apps](https://www.nudgenow.com/blogs/gamify-your-fitness-apps)
-- [Innovative Gamification in Fitness: Top 10 Apps (2025)](https://yukaichou.com/gamification-analysis/top-10-gamification-in-fitness/)
-- [Gamification in Health and Fitness Apps: Top 5 examples](https://www.plotline.so/blog/gamification-in-health-and-fitness-apps)
+### Gamification Rank Display Patterns
+- [Gamification UI Design Meets Game Design (Medium)](https://medium.com/@incharaprasad/game-on-ui-design-meets-gamification-a27d3a6de6b1) - Overview of gamification elements including level systems
+- [Mockplus Gamification UI/UX Guide](https://www.mockplus.com/blog/post/gamification-ui-ux-design-guide) - Level systems and progress tracking patterns
+- [GamiPress Progress Add-on](https://gamipress.com/add-ons/gamipress-progress/) - Progress bars and level display features
+- [Beam.gg - Gamifying with XP, Levels, and Ranks](https://medium.com/beam-community-blog/gamifying-the-online-community-experience-xp-levels-and-ranks-23e2e7cbf7f3) - Community gamification with rank systems (10 levels, 1 rank per 10 levels)
 
-### XP Progression Curves
-- [GameDesign Math: RPG Level-based Progression](https://www.davideaversa.it/blog/gamedesign-math-rpg-level-based-progression/)
-- [Mathematics of XP - Only a Game](https://onlyagame.typepad.com/only_a_game/2006/08/mathematics_of_.html)
-- [Example Level Curve Formulas for Game Progression](https://www.designthegame.com/learning/courses/course/fundamentals-level-curve-design/example-level-curve-formulas-game-progression)
-- [Quantitative design - How to define XP thresholds](https://www.gamedeveloper.com/design/quantitative-design---how-to-define-xp-thresholds-)
-- [How to Implement a Leveling System in RPG](https://howtomakeanrpg.com/r/a/how-to-make-an-rpg-levels.html)
+### XP Thresholds and Display
+- [Skillsoft Percipio XP System](https://documentation.skillsoft.com/en_us/percipio/Content/A_Administrator/admn_engagement_xp.htm) - XP levels and point thresholds configuration
+- [brainCloud Gamification XP Levels](https://help.getbraincloud.com/en/articles/9105678-app-design-gamification-xp-levels) - Minimum points and level requirements
+- [Moodle Level Up XP Plugin](https://moodle.org/plugins/block_xp) - Display current level, progress to next, leaderboards
+- [Growth Engineering - Experience Points Guide](https://www.growthengineering.co.uk/gamification-experience-points/) - Leveling up and XP collection mechanics
 
-### UX Patterns & Celebration Design
-- [From RPGs to UX: How progress indicators affect user engagement](https://uxdesign.cc/from-rpgs-to-ux-how-progress-indicators-affect-user-engagement-8748f02d766a)
-- [Fill the progress. How to design the perfect game progress bar?](https://medium.com/@MaxKosyakoff/fill-the-progress-fc0fa99cabac)
-- [The over-confetti-ing of digital experiences](https://uxdesign.cc/the-over-confetti-ing-of-digital-experiences-af523745db19)
-- [10 Apps That Use The Progress Bars Feature for Gamification (2025)](https://trophy.so/blog/progress-bars-feature-gamification-examples)
-- [Gamification in UX: How to Boost User Engagement](https://excited.agency/blog/gamification-ux)
+### Locked vs Unlocked Badge States
+- [BadgeOS - Grey Out Unearned Badges](https://badgeoslive.qa.wooninjas.com/support/forums/topic/grey-out-unearned-badges/) - Unearned badges displayed as "grayed out (less opacity)"
+- [Meta Quest Platform Achievements](https://developers.meta.com/horizon/documentation/unreal/ps-achievements/) - Locked icon for unearned, unlocked icon for earned achievements
+- [Steam Achievement Showcase Guide](https://steamcommunity.com/sharedfiles/filedetails/?id=2031430267) - Achievement display patterns
+- [Cogmind Achievement UI Implementation](https://www.gridsagegames.com/blog/2018/05/achievements-ui-design-implementation/) - Achievement grid layout and visual states
 
-### Military Rank Systems in Games
-- [Military Rank System - Enlisted](https://enlisted.net/en/news/show/320-military-rank-system-en/)
-- [Career Rank Overview - Halo Infinite](https://www.halowaypoint.com/news/career-rank-overview-season-4)
-- [Ranking Systems in Action Games](https://stinger-magazine.com/article/ranking-systems/)
-- [DOOM – Player Progression and Customization](https://bethesda.net/en/article/MlNrbO4cSquoUgAEM4Kkg/doom-player-progression-and-customization)
+### Vertical Rank Ladder Displays
+- [VALORANT Ranks 2026](https://www.gamsgo.com/blog/valorant-ranks) - 9-tier system (Iron → Radiant), 3 divisions per rank
+- [Overwatch Ranks 2026](https://www.dexerto.com/wikis/overwatch/overwatch-ranks-explained/) - 5 divisions per rank (Bronze → Grandmaster)
+- [Mobile Legends Rank List 2026](https://www.lapakgaming.com/blog/en-my/mobile-legends-rank-list/) - 8 core ranks + 3 advanced tiers
+- [Fortnite Ranks 2026](https://gametree.me/blog/fortnite-ranks/) - Bronze → Unreal tier progression
+- [Schedule 1 All Ranks & Unlocks](https://www.thegamer.com/schedule-1-all-ranks-upgrades-new-regions-unlock-ingredients-stations-how-to-guide/) - 74 levels across 11 tiered ranks, locked/unlocked progression
 
-### Workout Tracking & XP Calculation
-- [How Zwift Calculates XP for Cycling Workouts](https://zwiftinsider.com/xp-for-cycling-workouts/)
-- [Earn Heart Points to stay healthy - Google Fit](https://support.google.com/fit/answer/7619539?hl=en&co=GENIE.Platform%3DAndroid)
-- [20+ Exercise Rewards to Grow Member Retention in 2025](https://wod.guru/blog/exercise-rewards/)
-- [Paceline: Rewards for Exercise App](https://apps.apple.com/us/app/paceline-rewards-for-exercise/id1491824216)
-
-### Mobile UI Design Best Practices
-- [Fitness App UI Design: Key Principles for Engaging Workout Apps](https://stormotion.io/blog/fitness-app-ux/)
-- [How to Design a Fitness App: UX/UI Best Practices](https://www.zfort.com/blog/How-to-Design-a-Fitness-App-UX-UI-Best-Practices-for-Engagement-and-Retention)
-- [UX Design Principles From Top Health and Fitness Apps](https://www.superside.com/blog/ux-design-principles-fitness-apps)
-- [Mobile App UI Design: Best Practices and Trends for 2025](https://www.thedroidsonroids.com/blog/mobile-app-ui-design-guide)
+### Visual Design and UI Patterns
+- [Video Game Level Design Color Gradients](https://www.nuclino.com/articles/level-design) - Color indicates progression (cool blues/greens → warm oranges/reds)
+- [Synty Military Combat HUD](https://syntystore.com/products/interface-military-combat-hud) - Customizable badge system for rank up/level up
+- [TierMaker - Tier List Creation](https://tiermaker.com/) - Ranking system UI patterns (A/B/C tiers, color coding)
+- [League of Legends Rank System](https://leagueoflegends.fandom.com/wiki/Rank_(League_of_Legends)) - Tiers with divisions (roman numerals), crest transforms with division
 
 ---
 
-*Last updated: February 26, 2026*
-*Research confidence: MEDIUM-HIGH (verified UX patterns, competitor analysis, game design principles)*
+## Confidence Assessment
+
+| Area | Confidence | Source Quality | Notes |
+|------|------------|----------------|-------|
+| **Table stakes features** | **HIGH** | Verified across 5+ competitive games (VALORANT, Overwatch, Mobile Legends) | All major ranking systems show full ladder, highlight current rank, dim locked ranks |
+| **Visual design patterns** | **HIGH** | Direct examples from BadgeOS, Steam, League of Legends | Opacity + grayscale for locked states is industry standard |
+| **Layout structure** | **MEDIUM-HIGH** | Competitive games use descending order, but ascending also valid | Recommendation: descending (15→1) matches aspirational psychology |
+| **Integration complexity** | **HIGH** | Direct access to codebase confirms all needed data/hooks exist | No new dependencies, minimal CSS, uses existing patterns |
+| **Mobile optimization** | **MEDIUM** | Standard scrollIntoView API, but need real device testing | Auto-scroll may need adjustment for different screen sizes |
+| **Accessibility** | **MEDIUM** | WCAG guidelines applied, but locked rank contrast may fail AA | Acceptable - non-essential content (aspirational future ranks) |
+
+**Overall Research Confidence: HIGH**
+- Clear industry patterns for rank showcases
+- All required data/utilities already exist in codebase
+- Low technical risk, straightforward implementation
+- Mobile optimization main uncertainty (need testing)
+
+---
+
+*Last updated: March 26, 2026*
+*Research mode: Ecosystem (feature patterns for rank showcase)*
+*Downstream: Roadmap creation (milestone v1.2)*

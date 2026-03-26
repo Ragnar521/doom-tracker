@@ -153,3 +153,25 @@ export async function isXPBarVisible(page: Page): Promise<boolean> {
   const xpBar = page.locator('.doom-panel').filter({ hasText: /XP/ });
   return await xpBar.isVisible().catch(() => false);
 }
+
+/**
+ * Get all rank cards on the Achievements page.
+ * Each rank card is an .achievement-card inside the RANK PROGRESSION panel.
+ */
+export async function getRankCards(page: Page) {
+  return page.locator('[data-testid="rank-card"]');
+}
+
+/**
+ * Get the current rank card (the one with gold glow).
+ */
+export async function getCurrentRankCard(page: Page) {
+  return page.locator('[data-testid="rank-card"][data-current="true"]');
+}
+
+/**
+ * Get the guest sign-in message shown when not authenticated.
+ */
+export async function getGuestRankMessage(page: Page) {
+  return page.locator('text=SIGN IN TO UNLOCK RANK PROGRESSION');
+}
