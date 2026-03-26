@@ -57,7 +57,7 @@ Added XP and military rank progression system that rewards workouts, streaks, an
 
 Display all 15 DOOM military ranks on the Achievements (Glory) page with current rank highlighted, creating a scannable progression ladder from Private to Doom Slayer.
 
-- [ ] **Phase 8: Rank Showcase** - Display all 15 ranks with visual progression on Achievements page
+- [x] **Phase 8: Rank Showcase** - Display all 15 ranks with visual progression on Achievements page (completed 2026-03-26)
 
 **Plans:** 2 plans
 
@@ -85,7 +85,7 @@ Plans:
 | 5. Data Layer | v1.1 | 2/2 | Complete | 2026-02-26 |
 | 6. UI & Celebrations | v1.1 | 2/2 | Complete | 2026-02-26 |
 | 7. Integration & Polish | v1.1 | 2/2 | Complete | 2026-02-26 |
-| 8. Rank Showcase | v1.2 | 0/2 | Not started | - |
+| 8. Rank Showcase | 2/2 | Complete   | 2026-03-26 | - |
 
 ---
 

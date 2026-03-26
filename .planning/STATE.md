@@ -26,27 +26,28 @@ See: .planning/PROJECT.md (updated 2026-03-26)
 ## Current Position
 
 **Phase:** 8 - Rank Showcase
-**Plan:** 00 (Wave 0 - Test Infrastructure) - Complete
-**Task:** All tasks complete (1/1)
-**Status:** 🟢 In progress
+**Plan:** 01 (Rank Showcase Display) - Complete
+**Task:** All tasks complete (2/2)
+**Status:** 🟢 Complete
 
-**Progress:** [█████░░░░░] 50% (1/2 plans complete)
+**Progress:** [██████████] 100% (2/2 plans complete)
 
-**Last activity:** 2026-03-26 — Completed 08-00-PLAN.md (test infrastructure)
+**Last activity:** 2026-03-26 — Completed 08-01-PLAN.md (rank showcase display)
 
 ## Performance Metrics
 
 ### Velocity
 
-| Metric | v1.0 | v1.1 | v1.2 (Target) |
+| Metric | v1.0 | v1.1 | v1.2 (Actual) |
 |--------|------|------|---------------|
 | Phases | 3 | 4 | 1 |
-| Plans | 8 | 8 | TBD |
-| Tasks | 39 | 16 | TBD |
-| Duration | 52 days | 1 day | 1 day |
-| Files Modified | 30 | 17 | ~3-5 |
-| Lines Added | +5,362 | +1,577 | ~200-300 |
-| Phase 08 P00 | 2m 16s | 1 tasks | 2 files |
+| Plans | 8 | 8 | 2 |
+| Tasks | 39 | 16 | 3 |
+| Duration | 52 days | 1 day | <1 day |
+| Files Modified | 30 | 17 | 2 |
+| Lines Added | +5,362 | +1,577 | +105 |
+| Phase 08 P00 | 2m 16s | 1 task | 2 files |
+| Phase 08 P01 | 2m | 2 tasks | 2 files |
 
 ### Quality
 
@@ -64,7 +65,9 @@ See: .planning/PROJECT.md (updated 2026-03-26)
 - **Single phase approach**: 7 requirements cluster into one coherent feature, no artificial splitting needed
 - **Zero dependencies**: Reuse all v1.1 XP system capabilities (useXP hook, RANKS array, CSS animations)
 - **Guest user strategy**: Show dimmed ranks with "SIGN IN TO UNLOCK" message for better conversion funnel
-- **Mobile-first**: Auto-scroll to current rank on page load ensures immediate context on small screens
+- **CSS reuse pattern**: Reused .achievement-card and .god-mode-glow for instant visual consistency (08-01)
+- **Presentational component**: Props drilling kept RankShowcase simple and testable, no Firebase dependencies (08-01)
+- **Removed unused totalXP prop**: Component only needs currentRank, xpToNextRank, nextRank for display (08-01)
 
 **Carried forward from v1.1:**
 - XP stored in stats/current document (reuses existing collection)
