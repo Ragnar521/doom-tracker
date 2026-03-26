@@ -42,19 +42,20 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| RANK-01 | Pending | Pending |
-| RANK-02 | Pending | Pending |
-| RANK-03 | Pending | Pending |
-| RANK-04 | Pending | Pending |
-| RANK-05 | Pending | Pending |
-| RANK-06 | Pending | Pending |
-| RANK-07 | Pending | Pending |
+| RANK-01 | Phase 8 | Pending |
+| RANK-02 | Phase 8 | Pending |
+| RANK-03 | Phase 8 | Pending |
+| RANK-04 | Phase 8 | Pending |
+| RANK-05 | Phase 8 | Pending |
+| RANK-06 | Phase 8 | Pending |
+| RANK-07 | Phase 8 | Pending |
 
 **Coverage:**
 - v1.2 requirements: 7 total
-- Mapped to phases: 0
-- Unmapped: 7
+- Mapped to phases: 7
+- Unmapped: 0
+- Coverage: 100%
 
 ---
 *Requirements defined: 2026-03-26*
-*Last updated: 2026-03-26 after initial definition*
+*Last updated: 2026-03-26 after roadmap creation*
