@@ -103,6 +103,48 @@
 
 ---
 
+## Milestone: v1.2 — Rank Showcase
+
+**Shipped:** 2026-03-26
+**Phases:** 1 | **Plans:** 2 | **Timeline:** <1 day sprint
+
+### What Was Built
+- Vertical rank progression ladder displaying all 15 DOOM military ranks on Achievements page
+- Current rank highlighted with gold border and pulsing god-mode-glow animation
+- Earned/locked rank visual states (opacity + grayscale for locked)
+- Progress indicator showing "+XXX XP to [Next Rank]" on current rank card
+- Guest user handling with "SIGN IN TO UNLOCK RANK PROGRESSION" message
+- 7 E2E test stubs with 3 helper functions for automated verification
+
+### What Worked
+- CSS reuse strategy: zero new CSS classes by reusing .achievement-card and .god-mode-glow
+- Presentational component pattern: props drilling kept RankShowcase simple, testable, Firebase-free
+- Wave 0 test-first approach: test stubs written before implementation, data-testid contract established
+- Single-phase approach: 7 requirements fit naturally into one coherent feature, no artificial splitting
+- Sub-hour execution: smallest milestone yet, clean and focused
+
+### What Was Inefficient
+- Auto-scroll to current rank (RANK-08) deferred to future — could have been included
+- STATE.md accumulated stale todos from planning phase that were never cleaned up during execution
+
+### Patterns Established
+- Presentational component + props drilling for display-only features (no hooks inside)
+- data-testid contract between test stubs (Wave 0) and implementation (Wave 1)
+- Guest user CTA message pattern over empty states
+
+### Key Lessons
+1. **Small milestones execute fastest** — 1 phase, 2 plans, done in minutes
+2. **CSS reuse eliminates integration risk** — Existing animations guarantee visual consistency
+3. **Wave 0 test contracts clarify implementation** — data-testid attributes defined before coding
+4. **Props drilling > context for presentational components** — Simpler, more testable, no provider needed
+
+### Cost Observations
+- Model mix: Balanced profile
+- Sessions: 1 (sub-hour sprint)
+- Notable: Smallest milestone — demonstrates scalable workflow for micro-features
+
+---
+
 ## Cross-Milestone Trends
 
 ### Process Evolution
@@ -111,6 +153,7 @@
 |-----------|----------|--------|------------|
 | v1.0 | 52 days | 3 | First GSD milestone, established patterns |
 | v1.1 | 1 day | 4 | Same-day sprint, 100% requirement coverage |
+| v1.2 | <1 day | 1 | Sub-hour micro-milestone, CSS reuse pattern |
 
 ### Cumulative Quality
 
@@ -118,10 +161,12 @@
 |-----------|--------------|----------|-----------|
 | v1.0 | 44/48 | 91.7% | Phase 4 deferred |
 | v1.1 | 13/13 | 100% | None new |
+| v1.2 | 7/7 | 100% | None new |
 
 ### Top Lessons (Verified Across Milestones)
 
-1. Zero/minimal dependency additions lead to fastest execution (v1.0, v1.1)
+1. Zero/minimal dependency additions lead to fastest execution (v1.0, v1.1, v1.2)
 2. Mobile-first design decisions (collapsible, bottom sheet) consistently outperform alternatives (v1.0, v1.1)
 3. Strategic denormalization and lazy loading are essential for Firebase cost control (v1.0, v1.1)
-4. Summary one-liners not being populated is a recurring template issue (v1.0, v1.1)
+4. CSS reuse pattern eliminates integration risk and guarantees visual consistency (v1.1, v1.2)
+5. Presentational components with props drilling are simplest for display-only features (v1.2)
