@@ -1,6 +1,11 @@
 import { useAchievements } from '../hooks/useAchievements';
 import type { AchievementCategory } from '../lib/achievements';
 import LoadingSpinner from '../components/LoadingSpinner';
+import { useAuth } from '../contexts/AuthContext';
+import { useXP } from '../hooks/useXP';
+import { useAllWeeks } from '../hooks/useAllWeeks';
+import { useAchievementContext } from '../contexts/AchievementContext';
+import RankShowcase from '../components/RankShowcase';
 
 const CATEGORY_LABELS: Record<AchievementCategory, string> = {
   streak: 'STREAK',
@@ -84,9 +89,18 @@ function AchievementCard({
 }
 
 export default function Achievements() {
+  const { user } = useAuth();
+  const { weeks, stats: allWeeksStats, loading: allWeeksLoading } = useAllWeeks();
+  const { unlockedCount: achCount } = useAchievementContext();
+  const {
+    currentRank,
+    xpToNextRank,
+    nextRank,
+    loading: xpLoading,
+  } = useXP(weeks, allWeeksStats.currentStreak, achCount, allWeeksLoading);
   const { achievements, unlockedCount, loading } = useAchievements();
 
-  if (loading) {
+  if (loading || (user && (allWeeksLoading || xpLoading))) {
     return <LoadingSpinner size="lg" text="LOADING GLORY..." />;
   }
 
@@ -101,6 +115,19 @@ export default function Achievements() {
 
   return (
     <div className="space-y-3">
+      {/* Rank Showcase or Guest Message */}
+      {user ? (
+        <RankShowcase
+          currentRank={currentRank}
+          xpToNextRank={xpToNextRank}
+          nextRank={nextRank}
+        />
+      ) : (
+        <div className="doom-panel p-3 text-center">
+          <p className="text-gray-400 text-sm">SIGN IN TO UNLOCK RANK PROGRESSION</p>
+        </div>
+      )}
+
       {/* Header */}
       <div className="doom-panel p-3 text-center">
         <h2 className="text-doom-gold text-lg font-bold">ACHIEVEMENTS</h2>

@@ -3,14 +3,12 @@ import type { Rank } from '../types';
 
 interface RankShowcaseProps {
   currentRank: Rank;
-  totalXP: number;
   xpToNextRank: number;
   nextRank: Rank | null;
 }
 
 export default function RankShowcase({
   currentRank,
-  totalXP,
   xpToNextRank,
   nextRank,
 }: RankShowcaseProps) {
